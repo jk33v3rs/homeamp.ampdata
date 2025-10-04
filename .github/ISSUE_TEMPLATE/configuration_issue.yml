@@ -1,0 +1,218 @@
+name: Configuration Issue
+description: Report problems with server or AMP configurations
+title: "[Config]: "
+labels: ["configuration", "support"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for issues related to server configurations, AMP settings, or deployment problems.
+
+  - type: input
+    id: contact
+    attributes:
+      label: Contact Details
+      description: How can we get in touch with you if we need more info?
+      placeholder: ex. email@example.com
+    validations:
+      required: false
+
+  - type: dropdown
+    id: server-provider
+    attributes:
+      label: Server Provider
+      description: Which server configuration are you using?
+      options:
+        - Hetzner (135.181.212.169)
+        - OVH (37.187.143.41)
+        - Custom/Local Setup
+        - Multiple Servers
+        - Other Provider
+    validations:
+      required: true
+
+  - type: dropdown
+    id: configuration-type
+    attributes:
+      label: Configuration Type
+      description: What type of configuration is having issues?
+      options:
+        - AMP Instance Configuration
+        - Application Deployment Template
+        - Plugin Configuration
+        - Server Runtime Settings
+        - Network/Security Settings
+        - Backup/Restore Configuration
+        - Multi-language Settings
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: affected-service
+    attributes:
+      label: Affected Service/Application
+      description: Which specific service or application is affected?
+      placeholder: ex. NodeJS App Runner, BentoBox Plugin, TeamSpeak 6 Server
+    validations:
+      required: true
+
+  - type: dropdown
+    id: amp-version
+    attributes:
+      label: AMP Version
+      description: What version of AMP are you running?
+      options:
+        - 2.5.x (Latest)
+        - 2.4.x
+        - 2.3.x
+        - 2.2.x or older
+        - Unknown/Not Sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue-description
+    attributes:
+      label: Issue Description
+      description: Describe the configuration issue you're experiencing
+      placeholder: |
+        Describe what's not working with the configuration...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What should the configuration be doing?
+      placeholder: The configuration should...
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current Behavior
+      description: What is actually happening with the current configuration?
+      placeholder: Currently the configuration...
+    validations:
+      required: true
+
+  - type: textarea
+    id: configuration-details
+    attributes:
+      label: Configuration Details
+      description: Please provide relevant configuration snippets (remove sensitive information!)
+      render: yaml
+      placeholder: |
+        # Paste your configuration here (remember to remove passwords, API keys, etc.)
+        example:
+          setting: value
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps-taken
+    attributes:
+      label: Steps Already Taken
+      description: What troubleshooting steps have you already tried?
+      placeholder: |
+        1. I tried...
+        2. I checked...
+        3. I modified...
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-messages
+    attributes:
+      label: Error Messages/Logs
+      description: Include any error messages or relevant log entries
+      render: shell
+      placeholder: Paste error messages and log entries here...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Issue Severity
+      description: How severely is this affecting your setup?
+      options:
+        - Low - Minor inconvenience
+        - Medium - Affecting some functionality
+        - High - Major functionality broken
+        - Critical - Complete service failure
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment-info
+    attributes:
+      label: Environment Information
+      description: |
+        Provide information about your environment:
+        - Operating System
+        - Hardware specifications (if relevant)
+        - Network configuration (if relevant)
+        - Other installed software that might interact
+      placeholder: |
+        OS: Windows Server 2019
+        RAM: 16GB
+        CPU: Intel Xeon
+        Network: Behind corporate firewall
+        Other: Running Docker containers
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: attempted-fixes
+    attributes:
+      label: Troubleshooting Attempted
+      description: Check all troubleshooting steps you have already tried
+      options:
+        - label: Restarted the AMP service
+        - label: Checked AMP logs for errors
+        - label: Verified file permissions
+        - label: Tested with minimal configuration
+        - label: Compared with working configuration
+        - label: Checked network connectivity
+        - label: Updated AMP to latest version
+        - label: Reviewed AMP documentation
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: |
+        Add any other context that might be helpful for diagnosing this issue.
+        
+        Tip: You can attach configuration files or screenshots by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our Code of Conduct
+      options:
+        - label: I agree to follow this project's Code of Conduct
+          required: true
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      description: Please verify you have completed these steps
+      options:
+        - label: I have removed all sensitive information (passwords, API keys, etc.) from my configuration examples
+          required: true
+        - label: I have searched for existing issues that might be related to this configuration problem
+          required: true
+        - label: I have tried basic troubleshooting steps appropriate to my issue
+          required: true
+        - label: I have provided enough detail for others to understand and potentially reproduce the issue
+          required: true

@@ -1,0 +1,15 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: AMP Documentation
+    url: https://github.com/CubeCoders/AMP/wiki
+    about: Official AMP documentation and guides
+  - name: AMP Community Discord
+    url: https://discord.gg/cubecoders
+    about: Get help from the AMP community
+  - name: Minecraft Wiki
+    url: https://minecraft.wiki/
+    about: Official Minecraft documentation
+  - name: Security Issues
+    url: mailto:security@yourproject.com
+    about: Please report security vulnerabilities via email, not GitHub issues
