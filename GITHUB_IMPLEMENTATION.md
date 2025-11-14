@@ -1,5 +1,39 @@
 # Archive SMP Automation System - GitHub Implementation Guide
 
+## CRITICAL: Development Environment Context
+
+**YOU ARE WORKING IN THE DEVELOPER'S HOME WINDOWS PC - THIS IS THE DEVELOPMENT ENVIRONMENT**
+
+### Environment Setup:
+- **Location**: Developer's Windows PC (local development machine)
+- **Purpose**: Software development and testing environment
+- **Data**: Contains replicated server config state in `utildata/` folder
+  - Snapshots from both bare metal servers (Hetzner and OVH)
+  - All instances reflected as they were at time of snapshot
+- **Software**: Building the system in `software/homeamp-config-manager/`
+- **Access**: You (the AI) do NOT have direct access to production servers
+
+### Production Servers:
+- **Hetzner Xeon** (archivesmp.site): First deployment target - 11 instances
+- **OVH Ryzen** (archivesmp.online): Second deployment target - pending
+- **Access**: Developer has SSH and SFTP with sudo privileges
+- **Your Role**: Provide commands for the developer to run on production via SSH
+
+### Critical Notes:
+- **DO NOT** attempt to modify files on production directly
+- **DO NOT** assume you're on the production server
+- **DO** fix all code in the local development environment first
+- **DO** provide clear bash/shell commands for the developer to copy-paste on production
+- **DO** commit all fixes to the local repo before deployment to second server (OVH)
+
+### Workflow:
+1. Fix code in local development environment (`e:\homeamp.ampdata\software\homeamp-config-manager\`)
+2. Test locally if possible
+3. Provide deployment commands for developer to run on production server
+4. Developer executes commands via SSH
+5. Verify via logs that developer provides
+6. Commit working fixes to repo for next server deployment
+
 ## Repository Structure
 
 ```

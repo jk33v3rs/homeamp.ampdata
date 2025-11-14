@@ -1,0 +1,90 @@
+# ArchiveSMP Plugin Registry
+# Defines plugin update sources and current versions
+
+# GitHub releases
+LuckPerms:
+  repository_type: github
+  github_repo: LuckPerms/LuckPerms
+  current_version: 5.4.102
+  requires_restart: true
+  compatibility_notes: "Compatible with Paper 1.21+"
+
+Pl3xMap:
+  repository_type: github
+  github_repo: pl3xgaming/Pl3xMap
+  current_version: 1.2.0
+  requires_restart: true
+  compatibility_notes: "Requires Paper 1.20.6+"
+
+Geyser-Spigot:
+  repository_type: github
+  github_repo: GeyserMC/Geyser
+  current_version: 2.2.0
+  requires_restart: true
+  compatibility_notes: "Bedrock crossplay support"
+
+HuskSync:
+  repository_type: github
+  github_repo: WiIIiam278/HuskSync
+  current_version: 3.6.0
+  requires_restart: true
+  compatibility_notes: "Cross-server inventory sync"
+
+# SpigotMC resources (using Spiget API)
+CoreProtect:
+  repository_type: spigot
+  spigot_id: "8631"
+  current_version: 22.2
+  requires_restart: false
+  compatibility_notes: "Block logging and rollback"
+
+PlaceholderAPI:
+  repository_type: spigot
+  spigot_id: "6245"
+  current_version: 2.11.5
+  requires_restart: false
+  compatibility_notes: "Required by many plugins"
+
+Citizens:
+  repository_type: spigot
+  spigot_id: "13811"
+  current_version: 2.0.33
+  requires_restart: true
+  compatibility_notes: "NPC framework"
+
+ProtocolLib:
+  repository_type: spigot
+  spigot_id: "1997"
+  current_version: 5.1.0
+  requires_restart: true
+  compatibility_notes: "Packet manipulation library"
+
+Vault:
+  repository_type: spigot
+  spigot_id: "34315"
+  current_version: 1.7.3
+  requires_restart: true
+  compatibility_notes: "Economy/permissions API"
+
+# Jenkins CI builds
+WorldEdit:
+  repository_type: jenkins
+  jenkins_url: https://ci.enginehub.org/job/worldedit/job/master
+  current_version: build-6497
+  requires_restart: false
+  compatibility_notes: "World editing tool"
+
+WorldGuard:
+  repository_type: jenkins
+  jenkins_url: https://ci.enginehub.org/job/worldguard/job/master
+  current_version: build-2154
+  requires_restart: true
+  compatibility_notes: "Region protection"
+
+# CurseForge/Bukkit (requires API key - implement when available)
+# EssentialsX:
+#   repository_type: bukkit
+#   bukkit_id: essentialsx
+#   current_version: 2.20.1
+#   requires_restart: true
+#   compatibility_notes: "Server essentials suite"

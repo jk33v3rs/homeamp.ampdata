@@ -1,0 +1,148 @@
+{
+  "autoviaupdater": {
+    "versions": {
+      "ViaBackwards": 650,
+      "ViaBackwards-Dev": -1,
+      "ViaBackwards-Java8": -1,
+      "ViaRewind": 176,
+      "ViaRewind-Dev": -1,
+      "ViaRewind-Java8": -1,
+      "ViaVersion": 1252,
+      "ViaVersion-Dev": -1,
+      "ViaVersion-Java8": -1
+    }
+  },
+  "vcustombrand": {
+    "config": {
+      "custom-brand": "\"<rainbow>MyServer <green><player_name>\"",
+      "time-unit": "SECONDS",
+      "value": "2"
+    }
+  },
+  "velocitab": {
+    "config": {
+      "check_for_updates": true,
+      "disable_header_footer_if_empty": true,
+      "enable_mini_placeholders_hook": true,
+      "enable_papi_hook": true,
+      "enable_plugin_message_api": true,
+      "enable_relational_placeholders": true,
+      "fallback_enabled": true,
+      "fallback_group": "default",
+      "fallback_to_papi_if_placeholder_blank": true,
+      "force_sending_tab_list_packets": true,
+      "formatter": "MINIMESSAGE",
+      "papi_cache_time": 30000,
+      "remove_nametags": false,
+      "remove_spectator_effect": true,
+      "send_scoreboard_packets": true,
+      "server_links": [
+        {
+          "groups": [
+            "default"
+          ],
+          "label": "<#00fb9a>Gameplay and Server Stats, Resources, and Good Times </#00fb9a>",
+          "url": "https://discord.archivesmp.com"
+        }
+      ],
+      "show_all_players_from_all_groups": true,
+      "sort_players": true
+    },
+    "tab_groups": {
+      "groups": [
+        {
+          "collisions": true,
+          "footers": [
+            "<gray>There are currently %players_online%/%max_players_online% players online</gray>"
+          ],
+          "format": "<gray>[%server%] %prefix%%username%</gray>",
+          "format_update_rate": 1000,
+          "header_footer_update_rate": 1000,
+          "headers": [
+            "<rainbow:!2> Online Players </rainbow>"
+          ],
+          "name": "default",
+          "nametag": {
+            "prefix": "",
+            "suffix": ""
+          },
+          "nametag_update_rate": 1000,
+          "only_list_players_in_same_server": false,
+          "placeholder_replacements": {},
+          "placeholder_update_rate": 1000,
+          "servers": [
+            "template",
+            "privateworlds",
+            "royale",
+            "neocreate",
+            "hardcore",
+            "csmc",
+            "emadventure",
+            "biggergames",
+            "clippycore",
+            "creative",
+            "hub",
+            "dev",
+            "minetorio",
+            "smp",
+            "carpet",
+            "skyblock",
+            "minigames",
+            "evo",
+            "tower"
+          ],
+          "sorting_placeholders": [
+            "%role_weight%",
+            "%username_lower%"
+          ]
+        }
+      ]
+    }
+  },
+  "viarewind": {
+    "config": {
+      "always-show-original-mob-name": true,
+      "cooldown-indicator": "TITLE",
+      "emulate-levitation-effect": true,
+      "emulate-world-border": true,
+      "enable-offhand": true,
+      "handle-player-combat-packet": true,
+      "max-book-page-length": 5000,
+      "max-book-pages": 100,
+      "offhand-command": "/offhand",
+      "replace-adventure": false,
+      "replace-particles": false,
+      "world-border-particle": "fireworksSpark"
+    }
+  },
+  "vserverinfo": {
+    "config": {
+      "format": "\"<gray>Online Server: <gradient:#4ecdc4:#55670><server></gradient>\"",
+      "hover": "[",
+      "none-found": "\"<gray>NONE\"",
+      "server-not-found": "\"<gradient:#DBE6F6:#C5796D>This server does not exists</gradient>\""
+    }
+  },
+  "vwhitelist": {
+    "config": {
+      "database.host": "135.181.212.169",
+      "database.name": "asmp_SQL",
+      "database.password": "SQLdb2024!",
+      "database.port": 3369,
+      "database.username": "sqlworkerSMP",
+      "discord.allowed_channels": [
+        "1283860074699423897",
+        "1283456419298803742"
+      ],
+      "discord.bot_token": "MTMwNjEzMzAzMzQ1OTM4NDM1MA.GHarPi.ZrX2hBnSp2YDREt60zkAlidA4utBoa6_6VcY9M",
+      "discord.guild_id": "1280672118857662618",
+      "discord.required_roles": [
+        "1286775757573460001",
+        "1381052066109325342"
+      ],
+      "max_players_per_user": 3,
+      "validation.cleanup_interval_minutes": 5,
+      "validation.timeout_minutes": 10
+    }
+  }
+}

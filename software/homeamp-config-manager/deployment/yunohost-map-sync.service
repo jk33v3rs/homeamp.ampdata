@@ -1,0 +1,40 @@
+[Unit]
+Description=Archive SMP YunoHost Map Sync Service
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/home/yunohost.app/archivesmp
+
+# MinIO connection settings (adjust to your setup)
+Environment="MINIO_ENDPOINT=minio.archivesmp.internal:9000"
+Environment="MINIO_ACCESS_KEY=archivesmp"
+Environment="MINIO_SECRET_KEY=CHANGEME"
+
+# Sync settings
+Environment="SYNC_INTERVAL=300"
+
+# Map directories
+Environment="PUBLIC_DIR=/var/www/maps.archivesmp.com/data"
+Environment="PRIVATE_DIR=/var/www/admaps.archivesmp.com/data"
+
+# Python environment
+ExecStart=/home/yunohost.app/archivesmp/.venv/bin/python -m src.yunohost.map_sync
+
+# Restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=yunohost-map-sync
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

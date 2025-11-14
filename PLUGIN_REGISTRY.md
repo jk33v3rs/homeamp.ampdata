@@ -8,7 +8,7 @@
 
 - **M (Minimal)** = Essential foundation plugins - basically everyone gets these
 - **S (Standard)** = Full build plugins - average server deployment, lowest common denominator especially for world generation
-- **Bespoke** = One-off specialized plugins for specific server needs (e.g., ArmoryCrate)
+- **Bespoke** = One-off specialized plugins for specific server needs
 - **Version Format**: `current_version [supported_mc_versions]`
 
 ---
@@ -130,10 +130,10 @@
 ### **Server-Specific Custom Solutions**
 | Plugin | Version | MC Support | Server(s) | Notes | API Endpoint |
 |--------|---------|------------|-----------|-------|--------------|
-| **Eternal Tower Defense** | 1.4.0 | [1.21.x] | TOWER01 | Custom minigame implementation | *Custom Development* |
 | **BentoBox** | 3.3.5 | [1.21.4-1.21.5] | BENT01 | Skyblock ecosystem suite | `https://ci.codemc.org/job/BentoBoxWorld/job/BentoBox/lastSuccessfulBuild/` |
 | **Axiom** | Latest | [1.21.x] | Creative Servers | Advanced building tool | `https://api.modrinth.com/v2/project/bcOXOlm2/version` |
-| **ArmoryCrate** | Custom | [1.21.x] | Specific Server | Weapon/armor management | *Custom Development* |
+
+**Note**: Eternal Tower Defense and ArmoryCrate removed - not in use
 
 ---
 

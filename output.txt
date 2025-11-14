@@ -1,0 +1,227 @@
+# Plugin Configuration Status Report
+
+**Generated**: November 13, 2025
+
+## Summary
+
+- **Total plugins with universal configs (JSON)**: 82
+- **Total plugins with variable configs (JSON)**: 18
+- **Total plugins with markdown baseline files**: 57
+- **Plugins with BOTH universal AND variable**: 18
+- **Total unique plugins tracked**: 82
+
+---
+
+## Plugins with Universal Configs (82 total)
+
+These plugins have baseline configs in `utildata/universal_configs_analysis.json`
+
+- AxiomPaper [MD: ✓]
+- BattleRoyale [MD: ✗]
+- BentoBox [MD: ✗]
+- BetterStructures [MD: ✓]
+- BoxedEyes [MD: ✗]
+- CMI [MD: ✓] + Variables
+- CMILib [MD: ✓]
+- CSMC [MD: ✗]
+- Chunky [MD: ✓]
+- ChunkyBorder [MD: ✓]
+- Citizens [MD: ✓]
+- CombatPets [MD: ✓] + Variables
+- CommunityQuests [MD: ✓] + Variables
+- CoreProtect [MD: ✓] + Variables
+- CraftBook5 [MD: ✓] + Variables
+- CreativeSuite [MD: ✗]
+- DamageIndicator [MD: ✓]
+- Duels [MD: ✗]
+- EconomyBridge [MD: ✓]
+- EliteMobs [MD: ✓]
+- EternalTD [MD: ✗]
+- ExcellentChallenges [MD: ✓] + Variables
+- ExcellentEnchants [MD: ✓]
+- ExcellentJobs [MD: ✓]
+- ExcellentQuests [MD: ✗]
+- FreeMinecraftModels [MD: ✓]
+- Geyser-Recipe-Fix [MD: ✓]
+- GlowingItems [MD: ✓]
+- GregoRail [MD: ✗]
+- Hurricane [MD: ✗]
+- HuskSync [MD: ✓] + Variables
+- HuskTowns [MD: ✗]
+- ImageFrame [MD: ✓] + Variables
+- JobListings [MD: ✓] + Variables
+- Jobs [MD: ✗]
+- LevelledMobs [MD: ✗]
+- LibsDisguises [MD: ✗]
+- LightAPI [MD: ✓]
+- Lootin [MD: ✓]
+- LuckPerms [MD: ✓] + Variables
+- Minetorio [MD: ✗]
+- PAPIProxyBridge [MD: ✗]
+- PaperTweaks [MD: ✓]
+- PhantomWorlds [MD: ✗]
+- Pl3xMap [MD: ✓] + Variables
+- Pl3xMapExtras [MD: ✓]
+- PlaceholderAPI [MD: ✓]
+- Plan [MD: ✓] + Variables
+- ProtocolLib [MD: ✓]
+- QSFindItemAddOn [MD: ✓]
+- QualityArmory [MD: ✓]
+- Quests [MD: ✓] + Variables
+- QuickShop-Hikari [MD: ✓] + Variables
+- ResourcePackManager [MD: ✓]
+- ResurrectionChest [MD: ✓]
+- TheNewEconomy [MD: ✓] + Variables
+- TreeFeller [MD: ✓]
+- Vault [MD: ✓]
+- ViaBackwards [MD: ✓]
+- ViaVersion [MD: ✓]
+- VillagerOptimizer [MD: ✓] + Variables
+- VoidSpawn [MD: ✗]
+- WorldBorder [MD: ✓]
+- WorldEdit [MD: ✓]
+- WorldGuard [MD: ✓]
+- autoviaupdater [MD: ✗]
+- bStats [MD: ✓] + Variables
+- floodgate [MD: ✗]
+- mcMMO [MD: ✓] + Variables
+- nightcore [MD: ✓]
+- qsaddon-discount [MD: ✓]
+- qsaddon-displaycontrol [MD: ✓]
+- qsaddon-list [MD: ✓]
+- qsaddon-plan [MD: ✓]
+- qsaddon-shopitemonly [MD: ✓]
+- qscompat-worldguard [MD: ✓]
+- qssuite-limited [MD: ✓]
+- vcustombrand [MD: ✗]
+- velocitab [MD: ✗]
+- viarewind [MD: ✗]
+- vserverinfo [MD: ✗]
+- vwhitelist [MD: ✗]
+
+---
+
+## Plugins with Variable Configs (23 total)
+
+These plugins have per-server config variations in `utildata/variable_configs_analysis_UPDATED.json`
+**Master server needs to be designated for each plugin**
+
+- CMI
+- CombatPets
+- CommunityQuests
+- CoreProtect
+- CraftBook5
+- ExcellentChallenges
+- ExcellentQuests
+- HuskSync
+- ImageFrame
+- JobListings
+- LevelledMobs
+- LibsDisguises
+- LuckPerms
+- PAPIProxyBridge
+- Pl3xMap
+- Plan
+- Quests
+- QuickShop-Hikari
+- TheNewEconomy
+- VillagerOptimizer
+- bStats
+- floodgate
+- mcMMO
+
+---
+
+## Plugins with Markdown Baseline Files (57 total)
+
+These plugins have `_universal_config.md` files in `utildata/plugin_universal_configs/`
+
+- AxiomPaper
+- BetterStructures
+- CMI + Variables
+- CMILib
+- Chunky
+- ChunkyBorder
+- Citizens
+- CombatPets + Variables
+- CommunityQuests + Variables
+- CoreProtect + Variables
+- CraftBook5 + Variables
+- DamageIndicator
+- EconomyBridge
+- EliteMobs
+- ExcellentChallenges + Variables
+- ExcellentEnchants
+- ExcellentJobs
+- FreeMinecraftModels
+- Geyser-Recipe-Fix
+- GlowingItems
+- HuskSync + Variables
+- ImageFrame + Variables
+- JobListings + Variables
+- LightAPI
+- Lootin
+- LuckPerms + Variables
+- PaperTweaks
+- Pl3xMap + Variables
+- Pl3xMapExtras
+- PlaceholderAPI
+- Plan + Variables
+- ProtocolLib
+- QSFindItemAddOn
+- QualityArmory
+- Quests + Variables
+- QuickShop-Hikari + Variables
+- ResourcePackManager
+- ResurrectionChest
+- TheNewEconomy + Variables
+- TreeFeller
+- Vault
+- ViaBackwards
+- ViaVersion
+- VillagerOptimizer + Variables
+- WorldBorder
+- WorldEdit
+- WorldGuard
+- bStats + Variables
+- mcMMO + Variables
+- nightcore
+- qsaddon-discount
+- qsaddon-displaycontrol
+- qsaddon-list
+- qsaddon-plan
+- qsaddon-shopitemonly
+- qscompat-worldguard
+- qssuite-limited
+
+---
+
+## Missing Markdown Files (25 plugins)
+
+These plugins have configs in JSON but no markdown baseline file:
+
+- BattleRoyale
+- BentoBox
+- BoxedEyes
+- CSMC
+- CreativeSuite
+- Duels
+- EternalTD
+- ExcellentQuests
+- GregoRail
+- Hurricane
+- HuskTowns
+- Jobs
+- LevelledMobs
+- LibsDisguises
+- Minetorio
+- PAPIProxyBridge
+- PhantomWorlds
+- VoidSpawn
+- autoviaupdater
+- floodgate
+- vcustombrand
+- velocitab
+- viarewind
+- vserverinfo
+- vwhitelist

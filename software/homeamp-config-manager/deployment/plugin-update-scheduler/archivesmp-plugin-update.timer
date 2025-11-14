@@ -1,0 +1,11 @@
+[Unit]
+Description=Hourly ArchiveSMP Plugin Update Check
+Requires=archivesmp-plugin-update.service
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+Unit=archivesmp-plugin-update.service
+
+[Install]
+WantedBy=timers.target

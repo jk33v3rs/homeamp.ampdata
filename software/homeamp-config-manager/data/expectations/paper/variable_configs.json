@@ -1,0 +1,3545 @@
+{
+  "CMI": {
+    "ReSpawn.Enabled": {
+      "BENT01": false,
+      "BIG01": false,
+      "CLIP01": true,
+      "CREA01": true,
+      "CSMC01": false,
+      "DEV01": true,
+      "EMAD01": true,
+      "EVO01": true,
+      "HARD01": false,
+      "HUB01": true,
+      "MIN01": false,
+      "MINE01": true,
+      "PRI01": true,
+      "ROY01": false,
+      "SMP101": true,
+      "SMP201": true,
+      "TOW01": false
+    },
+    "Spawn.FirstSpawn.Use": {
+      "BENT01": false,
+      "BIG01": false,
+      "CLIP01": true,
+      "CREA01": true,
+      "CSMC01": true,
+      "DEV01": true,
+      "EMAD01": true,
+      "EVO01": true,
+      "HARD01": false,
+      "HUB01": false,
+      "MIN01": false,
+      "MINE01": true,
+      "PRI01": true,
+      "ROY01": false,
+      "SMP101": true,
+      "SMP201": true,
+      "TOW01": false
+    },
+    "Spawn.SpawnOnJoin": {
+      "BENT01": true,
+      "BIG01": true,
+      "CLIP01": false,
+      "CREA01": false,
+      "CSMC01": true,
+      "DEV01": false,
+      "EMAD01": false,
+      "EVO01": false,
+      "HARD01": true,
+      "HUB01": false,
+      "MIN01": true,
+      "MINE01": false,
+      "PRI01": false,
+      "ROY01": true,
+      "SMP101": false,
+      "SMP201": false,
+      "TOW01": true
+    },
+    "inv.SavedInventories": {
+      "BENT01": 20,
+      "BIG01": 20,
+      "CLIP01": 10,
+      "CREA01": 10,
+      "CSMC01": 20,
+      "DEV01": 10,
+      "EMAD01": 10,
+      "EVO01": 10,
+      "HARD01": 20,
+      "HUB01": 10,
+      "MIN01": 20,
+      "MINE01": 10,
+      "PRI01": 10,
+      "ROY01": 20,
+      "SMP101": 10,
+      "SMP201": 10,
+      "TOW01": 20
+    }
+  },
+  "CombatPets": {
+    "General.Collection_As_Default_Command": {
+      "CLIP01": true,
+      "CREA01": true,
+      "DEV01": false,
+      "EMAD01": true,
+      "EVO01": true,
+      "HUB01": true,
+      "MINE01": true,
+      "PRI01": true,
+      "SMP101": true,
+      "SMP201": true
+    },
+    "General.PlaceholderAPI_In_GUI": {
+      "CLIP01": true,
+      "CREA01": true,
+      "DEV01": false,
+      "EMAD01": true,
+      "EVO01": true,
+      "HUB01": true,
+      "MINE01": true,
+      "PRI01": true,
+      "SMP101": true,
+      "SMP201": true
+    },
+    "Pets.AutoFoodUsage.Enabled": {
+      "CLIP01": true,
+      "CREA01": true,
+      "DEV01": false,
+      "EMAD01": true,
+      "EVO01": true,
+      "HUB01": true,
+      "MINE01": true,
+      "PRI01": true,
+      "SMP101": true,
+      "SMP201": true
+    },
+    "Pets.Sneak_To_Open_Menu": {
+      "CLIP01": true,
+      "CREA01": true,
+      "DEV01": false,
+      "EMAD01": true,
+      "EVO01": true,
+      "HUB01": true,
+      "MINE01": true,
+      "PRI01": true,
+      "SMP101": true,
+      "SMP201": true
+    }
+  },
+  "CommunityQuests": {
+    "Quests.TestQuest.worlds": {
+      "CLIP01": [
+        "Albeqlippy"
+      ],
+      "CREA01": [
+        "Mammory Falls"
+      ],
+      "DEV01": [
+        "Lethargion"
+      ],
+      "EMAD01": [
+        "Radlantis"
+      ],
+      "EVO01": [
+        "world"
+      ],
+      "HUB01": [
+        "aSMPhub"
+      ],
+      "MINE01": [
+        "Minetoria"
+      ],
+      "PRI01": [
+        "haxxolotl"
+      ],
+      "SMP101": [
+        "TSMPS1"
+      ],
+      "SMP201": [
+        "world"
+      ]
+    },
+    "hologram.location.world": {
+      "CLIP01": "Albeqlippy",
+      "CREA01": "Mammory Falls",
+      "DEV01": "Lethargion",
+      "EMAD01": "Radlantis",
+      "EVO01": "Devonia",
+      "HUB01": "aSMPhub",
+      "MINE01": "Minetoria",
+      "PRI01": "haxxolotl",
+      "SMP101": "TSMPS1",
+      "SMP201": "Leurvaingea"
+    },
+    "hologram.location.x": {
+      "CLIP01": -78,
+      "CREA01": -78,
+      "DEV01": -78,
+      "EMAD01": -78,
+      "EVO01": -78,
+      "HUB01": -78,
+      "MINE01": -78,
+      "PRI01": -78,
+      "SMP101": -78,
+      "SMP201": -100
+    },
+    "hologram.location.y": {
+      "CLIP01": 67,
+      "CREA01": 67,
+      "DEV01": 67,
+      "EMAD01": 67,
+      "EVO01": 67,
+      "HUB01": 67,
+      "MINE01": 67,
+      "PRI01": 67,
+      "SMP101": 67,
+      "SMP201": 90
+    },
+    "hologram.location.z": {
+      "CLIP01": 51,
+      "CREA01": 51,
+      "DEV01": 51,
+      "EMAD01": 51,
+      "EVO01": 51,
+      "HUB01": 51,
+      "MINE01": 51,
+      "PRI01": 51,
+      "SMP101": 51,
+      "SMP201": -100
+    }
+  },
+  "CoreProtect": {
+    "table-prefix": {
+      "BENT01": "co_BENT01_",
+      "BIG01": "co_BIGG01_",
+      "CLIP01": "co_CLIP01_",
+      "CREA01": "co_CREA01_",
+      "CSMC01": "co_CSMC01_",
+      "DEV01": "co_DEV01_",
+      "EMAD01": "co_EMAD01_",
+      "EVO01": "co_EV01_",
+      "HARD01": "co_HCRE01_",
+      "HUB01": "co_HUB01_",
+      "MIN01": "co_MINI01_",
+      "MINE01": "co_MINT01_",
+      "PRI01": "co_PRIV01_",
+      "ROY01": "co_FORT01_",
+      "SMP101": "co_SMPS101_",
+      "SMP201": "co_SMP201_",
+      "TOW01": "co_TOWER01_"
+    }
+  },
+  "ExcellentQuests": {
+    "lang/lang_en.BattlePass.Level.Downgrade": {
+      "CLIP01": [
+        "[sound=\"minecraft:entity.iron_golem.death;0.8;1.0\",type=\"title\",title_times=\"20:60:20\"]",
+        "<red>\u2193 <b><u>LEVEL DOWNGRADE</u></b> \u2193</red>",
+        "<gray>Your Battle Pass level decreased to <red>%battle_pass_level%</red>!</gray>"
+      ],
+      "CREA01": [
+        "[type=\"title\",sound=\"minecraft:entity.iron_golem.death;0.8;1.0\",title_times=\"20:60:20\"]",
+        "<red>\u2193 <b><u>LEVEL DOWNGRADE</u></b> \u2193</red>",
+        "<gray>Your Battle Pass level decreased to <red>%battle_pass_level%</red>!</gray>"
+      ],
+      "EMAD01": [
+        "[sound=\"minecraft:entity.iron_golem.death;0.8;1.0\",type=\"title\",title_times=\"20:60:20\"]",
+        "<red>\u2193 <b><u>LEVEL DOWNGRADE</u></b> \u2193</red>",
+        "<gray>Your Battle Pass level decreased to <red>%battle_pass_level%</red>!</gray>"
+      ],
+      "HUB01": [
+        "[type=\"title\",sound=\"minecraft:entity.iron_golem.death;0.8;1.0\",title_times=\"20:60:20\"]",
+        "<red>\u2193 <b><u>LEVEL DOWNGRADE</u></b> \u2193</red>",
+        "<gray>Your Battle Pass level decreased to <red>%battle_pass_level%</red>!</gray>"
+      ],
+      "MINE01": [
+        "[type=\"title\",sound=\"minecraft:entity.iron_golem.death;0.8;1.0\",title_times=\"20:60:20\"]",
+        "<red>\u2193 <b><u>LEVEL DOWNGRADE</u></b> \u2193</red>",
+        "<gray>Your Battle Pass level decreased to <red>%battle_pass_level%</red>!</gray>"
+      ],
+      "SMP201": [
+        "[sound=\"minecraft:entity.iron_golem.death;0.8;1.0\",title_times=\"20:60:20\",type=\"title\"]",
+        "<red>\u2193 <b><u>LEVEL DOWNGRADE</u></b> \u2193</red>",
+        "<gray>Your Battle Pass level decreased to <red>%battle_pass_level%</red>!</gray>"
+      ]
+    },
+    "lang/lang_en.BattlePass.Level.Up": {
+      "CLIP01": [
+        "[sound=\"minecraft:entity.player.levelup;0.8;1.0\",type=\"title\",title_times=\"20:60:20\"]",
+        "<green>\u2191 <b><u>LEVEL UP</u></b> \u2191</green>",
+        "<gray>Your Battle Pass level raised to <green>%battle_pass_level%</green>!</gray>"
+      ],
+      "CREA01": [
+        "[type=\"title\",sound=\"minecraft:entity.player.levelup;0.8;1.0\",title_times=\"20:60:20\"]",
+        "<green>\u2191 <b><u>LEVEL UP</u></b> \u2191</green>",
+        "<gray>Your Battle Pass level raised to <green>%battle_pass_level%</green>!</gray>"
+      ],
+      "EMAD01": [
+        "[sound=\"minecraft:entity.player.levelup;0.8;1.0\",type=\"title\",title_times=\"20:60:20\"]",
+        "<green>\u2191 <b><u>LEVEL UP</u></b> \u2191</green>",
+        "<gray>Your Battle Pass level raised to <green>%battle_pass_level%</green>!</gray>"
+      ],
+      "HUB01": [
+        "[type=\"title\",sound=\"minecraft:entity.player.levelup;0.8;1.0\",title_times=\"20:60:20\"]",
+        "<green>\u2191 <b><u>LEVEL UP</u></b> \u2191</green>",
+        "<gray>Your Battle Pass level raised to <green>%battle_pass_level%</green>!</gray>"
+      ],
+      "MINE01": [
+        "[type=\"title\",sound=\"minecraft:entity.player.levelup;0.8;1.0\",title_times=\"20:60:20\"]",
+        "<green>\u2191 <b><u>LEVEL UP</u></b> \u2191</green>",
+        "<gray>Your Battle Pass level raised to <green>%battle_pass_level%</green>!</gray>"
+      ],
+      "SMP201": [
+        "[sound=\"minecraft:entity.player.levelup;0.8;1.0\",title_times=\"20:60:20\",type=\"title\"]",
+        "<green>\u2191 <b><u>LEVEL UP</u></b> \u2191</green>",
+        "<gray>Your Battle Pass level raised to <green>%battle_pass_level%</green>!</gray>"
+      ]
+    }
+  },
+  "HuskSync": {
+    "cluster_id": {
+      "BENT01": "",
+      "BIG01": "",
+      "CLIP01": "",
+      "CREA01": "DEVnet",
+      "CSMC01": "",
+      "DEV01": "DEVnet",
+      "EMAD01": "SMPNET",
+      "EVO01": "SMPNET",
+      "HARD01": "",
+      "HUB01": "SMPNET",
+      "MIN01": "",
+      "MINE01": "",
+      "PRI01": "",
+      "ROY01": "",
+      "SMP101": "SMPNET",
+      "SMP201": "SMPNET",
+      "TOW01": ""
+    },
+    "database.table_names.map_data": {
+      "BENT01": "BENT01_husksync_map_data",
+      "BIG01": "BIGG01_husksync_map_data",
+      "CLIP01": "CLIP01_husksync_map_data",
+      "CREA01": "DEV_husksync_map_data",
+      "CSMC01": "CSMC01_husksync_map_data",
+      "DEV01": "DEV_husksync_map_data",
+      "EMAD01": "husksync_map_data",
+      "EVO01": "husksync_map_data",
+      "HARD01": "HCRE01_husksync_map_data",
+      "HUB01": "husksync_map_data",
+      "MIN01": "MINI01_husksync_map_data",
+      "MINE01": "MINT01_husksync_map_data",
+      "PRI01": "PRIV01_husksync_map_data",
+      "ROY01": "FORT01_husksync_map_data",
+      "SMP101": "SMPS101_husksync_map_data",
+      "SMP201": "husksync_map_data",
+      "TOW01": "TOWER01_husksync_map_data"
+    },
+    "database.table_names.map_ids": {
+      "BENT01": "BENT01_husksync_map_ids",
+      "BIG01": "BIGG01_husksync_map_ids",
+      "CLIP01": "CLIP01_husksync_map_ids",
+      "CREA01": "DEV_husksync_map_ids",
+      "CSMC01": "CSMC01_husksync_map_ids",
+      "DEV01": "DEV_husksync_map_ids",
+      "EMAD01": "husksync_map_ids",
+      "EVO01": "husksync_map_ids",
+      "HARD01": "HCRE01_husksync_map_ids",
+      "HUB01": "husksync_map_ids",
+      "MIN01": "MINI01_husksync_map_ids",
+      "MINE01": "MINT01_husksync_map_ids",
+      "PRI01": "PRIV01_husksync_map_ids",
+      "ROY01": "FORT01_husksync_map_ids",
+      "SMP101": "SMPS101_husksync_map_ids",
+      "SMP201": "husksync_map_ids",
+      "TOW01": "TOWER01_husksync_map_ids"
+    },
+    "database.table_names.user_data": {
+      "BENT01": "BENT01_husksync_user_data",
+      "BIG01": "BIGG01_husksync_user_data",
+      "CLIP01": "CLIP01_husksync_user_data",
+      "CREA01": "DEV_husksync_user_data",
+      "CSMC01": "CSMC01_husksync_user_data",
+      "DEV01": "DEV_husksync_user_data",
+      "EMAD01": "husksync_user_data",
+      "EVO01": "husksync_user_data",
+      "HARD01": "HCRE01_husksync_user_data",
+      "HUB01": "husksync_user_data",
+      "MIN01": "MINI01_husksync_user_data",
+      "MINE01": "MINT01_husksync_user_data",
+      "PRI01": "PRIV01_husksync_user_data",
+      "ROY01": "FORT01_husksync_user_data",
+      "SMP101": "SMPS101_husksync_user_data",
+      "SMP201": "husksync_user_data",
+      "TOW01": "TOWER01_husksync_user_data"
+    },
+    "database.table_names.users": {
+      "BENT01": "BENT01_husksync_users",
+      "BIG01": "BIGG01_husksync_users",
+      "CLIP01": "CLIP01_husksync_users",
+      "CREA01": "DEV_husksync_users",
+      "CSMC01": "CSMC01_husksync_users",
+      "DEV01": "DEV_husksync_users",
+      "EMAD01": "husksync_users",
+      "EVO01": "husksync_users",
+      "HARD01": "HCRE01_husksync_users",
+      "HUB01": "husksync_users",
+      "MIN01": "MINI01_husksync_users",
+      "MINE01": "MINT01_husksync_users",
+      "PRI01": "PRIV01_husksync_users",
+      "ROY01": "FORT01_husksync_users",
+      "SMP101": "SMPS101_husksync_users",
+      "SMP201": "husksync_users",
+      "TOW01": "TOWER01_husksync_users"
+    },
+    "database.type": {
+      "BENT01": "MARIADB",
+      "BIG01": "MARIADB",
+      "CLIP01": "MYSQL",
+      "CREA01": "MARIADB",
+      "CSMC01": "MARIADB",
+      "DEV01": "MARIADB",
+      "EMAD01": "MARIADB",
+      "EVO01": "MARIADB",
+      "HARD01": "MARIADB",
+      "HUB01": "MARIADB",
+      "MIN01": "MARIADB",
+      "MINE01": "MYSQL",
+      "PRI01": "MYSQL",
+      "ROY01": "MARIADB",
+      "SMP101": "MARIADB",
+      "SMP201": "MARIADB",
+      "TOW01": "MARIADB"
+    }
+  },
+  "ImageFrame": {
+    "Settings.PlayerCreationLimit.default": {
+      "BENT01": 100,
+      "BIG01": 100,
+      "CLIP01": 10,
+      "CREA01": 10,
+      "CSMC01": 100,
+      "EMAD01": 10,
+      "EVO01": 10,
+      "HARD01": 100,
+      "HUB01": 10,
+      "MIN01": 100,
+      "MINE01": 10,
+      "PRI01": 10,
+      "ROY01": 100,
+      "SMP101": 10,
+      "SMP201": 10,
+      "TOW01": 100
+    },
+    "Settings.PlayerCreationLimit.moderator": {
+      "BENT01": 200,
+      "BIG01": 200,
+      "CLIP01": 20,
+      "CREA01": 20,
+      "CSMC01": 200,
+      "EMAD01": 20,
+      "EVO01": 20,
+      "HARD01": 200,
+      "HUB01": 20,
+      "MIN01": 200,
+      "MINE01": 20,
+      "PRI01": 20,
+      "ROY01": 200,
+      "SMP101": 20,
+      "SMP201": 20,
+      "TOW01": 200
+    },
+    "Settings.PlayerCreationLimit.vip": {
+      "BENT01": 150,
+      "BIG01": 150,
+      "CLIP01": 15,
+      "CREA01": 15,
+      "CSMC01": 150,
+      "EMAD01": 15,
+      "EVO01": 15,
+      "HARD01": 150,
+      "HUB01": 15,
+      "MIN01": 150,
+      "MINE01": 15,
+      "PRI01": 15,
+      "ROY01": 150,
+      "SMP101": 15,
+      "SMP201": 15,
+      "TOW01": 150
+    },
+    "UploadService.DisplayURL": {
+      "BENT01": "http://imageframe.archivesmp.site",
+      "BIG01": "http://imageframe.archivesmp.site",
+      "CLIP01": "http://change.this.to.your.server.ip.in.the.config",
+      "CREA01": "http://change.this.to.your.server.ip.in.the.config",
+      "CSMC01": "http://imageframe.archivesmp.site",
+      "EMAD01": "http://change.this.to.your.server.ip.in.the.config",
+      "EVO01": "http://change.this.to.your.server.ip.in.the.config",
+      "HARD01": "http://imageframe.archivesmp.site",
+      "HUB01": "http://change.this.to.your.server.ip.in.the.config",
+      "MIN01": "http://imageframe.archivesmp.site",
+      "MINE01": "http://change.this.to.your.server.ip.in.the.config",
+      "PRI01": "http://change.this.to.your.server.ip.in.the.config",
+      "ROY01": "http://imageframe.archivesmp.site",
+      "SMP101": "http://change.this.to.your.server.ip.in.the.config",
+      "SMP201": "http://amp.archivesmp.online:9184",
+      "TOW01": "http://imageframe.archivesmp.site"
+    },
+    "UploadService.WebServer.Port": {
+      "BENT01": 9182,
+      "BIG01": 9175,
+      "CLIP01": 9179,
+      "CREA01": 9187,
+      "CSMC01": 9180,
+      "EMAD01": 9181,
+      "EVO01": 9172,
+      "HARD01": 9183,
+      "HUB01": 9185,
+      "MIN01": 9174,
+      "MINE01": 9186,
+      "PRI01": 9177,
+      "ROY01": 9176,
+      "SMP101": 9178,
+      "SMP201": 9184,
+      "TOW01": 9171
+    }
+  },
+  "JobListings": {
+    "Database.password": {
+      "CLIP01": "SQLdb2024!",
+      "CREA01": "SQLdb2024!",
+      "DEV01": "PASSWORD",
+      "EMAD01": "SQLdb2024!",
+      "EVO01": "SQLdb2024!",
+      "HUB01": "SQLdb2024!",
+      "MINE01": "SQLdb2024!",
+      "PRI01": "SQLdb2024!",
+      "SMP101": "SQLdb2024!",
+      "SMP201": "SQLdb2024!"
+    },
+    "Database.url": {
+      "CLIP01": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "CREA01": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "DEV01": "jdbc:mysql://DATABASE_IP:PORT/DATABASE_NAME",
+      "EMAD01": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "EVO01": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "HUB01": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "MINE01": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "PRI01": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "SMP101": "jdbc:mysql://135.181.212.169:3369/asmp_SQL",
+      "SMP201": "jdbc:mysql://135.181.212.169:3369/asmp_SQL"
+    },
+    "Database.user": {
+      "CLIP01": "sqlworkerSMP",
+      "CREA01": "sqlworkerSMP",
+      "DEV01": "USERNAME",
+      "EMAD01": "sqlworkerSMP",
+      "EVO01": "sqlworkerSMP",
+      "HUB01": "sqlworkerSMP",
+      "MINE01": "sqlworkerSMP",
+      "PRI01": "sqlworkerSMP",
+      "SMP101": "sqlworkerSMP",
+      "SMP201": "sqlworkerSMP"
+    },
+    "Mail.ExpireTime": {
+      "CLIP01": 367,
+      "CREA01": 367,
+      "DEV01": 30,
+      "EMAD01": 367,
+      "EVO01": 367,
+      "HUB01": 367,
+      "MINE01": 367,
+      "PRI01": 367,
+      "SMP101": 367,
+      "SMP201": 367
+    },
+    "Mail.JoinDelay": {
+      "CLIP01": 15,
+      "CREA01": 15,
+      "DEV01": 10,
+      "EMAD01": 15,
+      "EVO01": 15,
+      "HUB01": 15,
+      "MINE01": 15,
+      "PRI01": 15,
+      "SMP101": 15,
+      "SMP201": 15
+    },
+    "Orders.AnnounceOnOrderCreate": {
+      "CLIP01": true,
+      "CREA01": true,
+      "DEV01": false,
+      "EMAD01": true,
+      "EVO01": true,
+      "HUB01": true,
+      "MINE01": true,
+      "PRI01": true,
+      "SMP101": true,
+      "SMP201": true
+    },
+    "Orders.MaximumItems": {
+      "CLIP01": 0,
+      "CREA01": 0,
+      "DEV01": 256,
+      "EMAD01": 0,
+      "EVO01": 0,
+      "HUB01": 0,
+      "MINE01": 0,
+      "PRI01": 0,
+      "SMP101": 0,
+      "SMP201": 0
+    },
+    "Orders.MinOrdersTime": {
+      "CLIP01": 72,
+      "CREA01": 72,
+      "DEV01": 48,
+      "EMAD01": 72,
+      "EVO01": 72,
+      "HUB01": 72,
+      "MINE01": 72,
+      "PRI01": 72,
+      "SMP101": 72,
+      "SMP201": 72
+    },
+    "Orders.OrderDeadline": {
+      "CLIP01": 48,
+      "CREA01": 48,
+      "DEV01": 32,
+      "EMAD01": 48,
+      "EVO01": 48,
+      "HUB01": 48,
+      "MINE01": 48,
+      "PRI01": 48,
+      "SMP101": 48,
+      "SMP201": 48
+    },
+    "Orders.PickupDeadline": {
+      "CLIP01": 2400,
+      "CREA01": 2400,
+      "DEV01": 500,
+      "EMAD01": 2400,
+      "EVO01": 2400,
+      "HUB01": 2400,
+      "MINE01": 2400,
+      "PRI01": 2400,
+      "SMP101": 2400,
+      "SMP201": 2400
+    }
+  },
+  "LevelledMobs": {
+    "rules.custom-rules": {
+      "BENT01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": true,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": true,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "buffer-distance": 1000,
+              "origin-coordinates": {
+                "x": 0,
+                "z": 0
+              },
+              "ringed-tiers": 200
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": true,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": true,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "CLIP01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "CREA01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "DEV01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "EMAD01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "EVO01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "HUB01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "MINE01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "PRI01": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "SMP101": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ],
+      "SMP201": [
+        {
+          "conditions": {
+            "worlds": "world_nether"
+          },
+          "custom-rule": "Nether World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%y-coordinate% + %custom_nether%"
+          },
+          "strategies": {
+            "y-coordinate": {
+              "end-height": 60,
+              "period": 0,
+              "start-height": 100
+            }
+          }
+        },
+        {
+          "conditions": {
+            "worlds": "world_the_end"
+          },
+          "custom-rule": "End World Levelling Strategy",
+          "is-enabled": false,
+          "settings": {
+            "construct-level": "%distance-from-origin% + %custom_end%"
+          },
+          "strategies": {
+            "distance-from-origin": {
+              "increase-level-distance": 200,
+              "spawn-location": {
+                "x": 0,
+                "z": 0
+              },
+              "start-distance": 1000
+            }
+          }
+        },
+        {
+          "custom-rule": "Custom Attributes for Specific Mobs",
+          "is-enabled": false,
+          "settings": {
+            "attribute-modifier": {
+              "custom-attribute-modifier": {
+                "CREEPER": {
+                  "movement-speed": 0.05
+                },
+                "ENDERMAN": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "ENDERMITE": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                },
+                "SILVERFISH": {
+                  "max-health": 0.5,
+                  "movement-speed": 0.0
+                }
+              }
+            }
+          }
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_flying_mobs"
+              ],
+              "included-list": [
+                "ZOMBIFIED_PIGLIN",
+                "SHULKER",
+                "VEX",
+                "RAVAGER",
+                "HOGLIN",
+                "PILLAGER",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "IRON_GOLEM",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN"
+              ]
+            }
+          },
+          "custom-rule": "Bronze Challenge for Specific Mobs",
+          "is-enabled": false,
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_"
+              ]
+            }
+          },
+          "custom-rule": "Vanilla Challenge for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "challenge-vanilla"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BABY_",
+                "WANDERING_TRADER",
+                "VILLAGER",
+                "ZOMBIE_VILLAGER",
+                "BAT",
+                "ENDER_DRAGON",
+                "ELDER_GUARDIAN",
+                "WITHER",
+                "WARDEN",
+                "IRON_GOLEM"
+              ]
+            }
+          },
+          "custom-rule": "Minimized Nametag for Specific Mobs",
+          "is-enabled": true,
+          "use-preset": "nametag-minimized"
+        },
+        {
+          "conditions": {
+            "entities": {
+              "excluded-list": [
+                "IRON_GOLEM"
+              ],
+              "included-groups": [
+                "all_passive_mobs"
+              ],
+              "included-list": [
+                "BAT"
+              ]
+            }
+          },
+          "custom-rule": "Reduced Nametag Visibility",
+          "is-enabled": true,
+          "settings": {
+            "nametag-visibility-method": [
+              "MELEE",
+              "ATTACKED"
+            ]
+          }
+        },
+        {
+          "conditions": {
+            "spawn-reasons": [
+              "SPAWNER"
+            ]
+          },
+          "custom-rule": "Spawner Cube Entities",
+          "is-enabled": false,
+          "settings": {
+            "entity-name-override": {
+              "all_entities": "Spawner %displayname%"
+            }
+          },
+          "use-preset": "challenge-bronze"
+        },
+        {
+          "conditions": {
+            "entities": [
+              "ZOMBIE",
+              "HUSK",
+              "PIGLIN",
+              "ZOMBIFIED_PIGLIN"
+            ]
+          },
+          "custom-rule": "Armor and Weapons CustomDrop Table",
+          "is-enabled": true,
+          "settings": {
+            "use-droptable-id": "armor_and_weapons"
+          }
+        },
+        {
+          "conditions": {
+            "external-plugins": {
+              "included-list": [
+                "eco-bosses",
+                "mythic-mobs",
+                "elite-mobs",
+                "infernal-mobs",
+                "citizens",
+                "shop-keepers",
+                "simple-pets",
+                "elite-bosses",
+                "blood-night",
+                "combat-pets",
+                "deadly-disasters",
+                "gadgets-menu",
+                "my-pet"
+              ]
+            }
+          },
+          "custom-rule": "External Plugins with Vanilla Stats and Minimized Nametags",
+          "is-enabled": false,
+          "use-preset": "challenge-vanilla, nametag-minimized"
+        },
+        {
+          "custom-rule": "Player Farm Item and XP Limiter",
+          "is-enabled": true,
+          "settings": {
+            "chunk-max-cooldown-seconds": "10m",
+            "disable-item-boost-on-chunk-max": true,
+            "disable-vanilla-drops-on-chunk-max": false,
+            "disable-xp-boost-on-chunk-max": true,
+            "max-adjacent-chunks": 5,
+            "maximum-death-in-chunk-threshold": 15
+          }
+        }
+      ]
+    },
+    "rules.default-rule.settings.maxLevel": {
+      "BENT01": 50,
+      "CLIP01": 10,
+      "CREA01": 10,
+      "DEV01": 10,
+      "EMAD01": 10,
+      "EVO01": 10,
+      "HUB01": 10,
+      "MINE01": 10,
+      "PRI01": 10,
+      "SMP101": 10,
+      "SMP201": 10
+    },
+    "rules.default-rule.use-preset": {
+      "BENT01": [
+        "challenge-silver",
+        "lvlstrategy-weighted-random",
+        "lvlstrategy-distance-from-origin",
+        "lvlmodifier-player-variable",
+        "lvlmodifier-custom-formula",
+        "nametag-using-numbers"
+      ],
+      "CLIP01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "CREA01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "DEV01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "EMAD01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "EVO01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "HUB01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "MINE01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "PRI01": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "SMP101": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ],
+      "SMP201": [
+        "challenge-vanilla",
+        "nametag-using-numbers",
+        "custom-death-messages"
+      ]
+    },
+    "rules.presets.lvlmodifier-player-variable.modifiers.player-variable-mod.decrease-output": {
+      "BENT01": true,
+      "CLIP01": false,
+      "CREA01": false,
+      "DEV01": false,
+      "EMAD01": false,
+      "EVO01": false,
+      "HUB01": false,
+      "MINE01": false,
+      "PRI01": false,
+      "SMP101": false,
+      "SMP201": false
+    },
+    "rules.presets.lvlmodifier-player-variable.modifiers.player-variable-mod.recheck-players": {
+      "BENT01": true,
+      "CLIP01": false,
+      "CREA01": false,
+      "DEV01": false,
+      "EMAD01": false,
+      "EVO01": false,
+      "HUB01": false,
+      "MINE01": false,
+      "PRI01": false,
+      "SMP101": false,
+      "SMP201": false
+    },
+    "rules.presets.lvlstrategy-distance-from-origin.strategies.distance-from-origin.enable-height-modifier": {
+      "BENT01": true,
+      "CLIP01": false,
+      "CREA01": false,
+      "DEV01": false,
+      "EMAD01": false,
+      "EVO01": false,
+      "HUB01": false,
+      "MINE01": false,
+      "PRI01": false,
+      "SMP101": false,
+      "SMP201": false
+    },
+    "rules.presets.lvlstrategy-distance-from-origin.strategies.distance-from-origin.scale-increase-downward": {
+      "BENT01": true,
+      "CLIP01": false,
+      "CREA01": false,
+      "DEV01": false,
+      "EMAD01": false,
+      "EVO01": false,
+      "HUB01": false,
+      "MINE01": false,
+      "PRI01": false,
+      "SMP101": false,
+      "SMP201": false
+    },
+    "rules.presets.lvlstrategy-random.strategies.random": {
+      "BENT01": true,
+      "CLIP01": false,
+      "CREA01": false,
+      "DEV01": false,
+      "EMAD01": false,
+      "EVO01": false,
+      "HUB01": false,
+      "MINE01": false,
+      "PRI01": false,
+      "SMP101": false,
+      "SMP201": false
+    }
+  },
+  "LibsDisguises": {
+    "internal/internal.LastConfigVersion": {
+      "BENT01": 4,
+      "BIG01": 3,
+      "CLIP01": 4,
+      "CREA01": 4,
+      "CSMC01": 4,
+      "DEV01": 3,
+      "EMAD01": 4,
+      "EVO01": 3,
+      "HARD01": 4,
+      "HUB01": 4,
+      "MIN01": 3,
+      "MINE01": 4,
+      "PRI01": 3,
+      "ROY01": 3,
+      "SMP101": 3,
+      "SMP201": 4,
+      "TOW01": 3
+    }
+  },
+  "LuckPerms": {
+    "data.table-prefix": {
+      "BENT01": "lp_",
+      "BIG01": "lp_",
+      "CLIP01": "lp_",
+      "CREA01": "lp_",
+      "CSMC01": "lp_",
+      "DEV01": "lp_",
+      "EMAD01": "lp_",
+      "EVO01": "lp_EV01_",
+      "HARD01": "lp_",
+      "HUB01": "lp_",
+      "MIN01": "lp_",
+      "MINE01": "lp_",
+      "PRI01": "lp_",
+      "ROY01": "lp_",
+      "SMP101": "lp_",
+      "SMP201": "lp_",
+      "TOW01": "lp_"
+    },
+    "vault-server": {
+      "BENT01": "BENT01",
+      "BIG01": "TOWER01",
+      "CLIP01": "CLIP01",
+      "CREA01": "Generic01",
+      "CSMC01": "CSMC01",
+      "DEV01": "DEV01",
+      "EMAD01": "EMAD01",
+      "EVO01": "EV01",
+      "HARD01": "HCRE01",
+      "HUB01": "HUB01",
+      "MIN01": "MINI01",
+      "MINE01": "MINT01",
+      "PRI01": "PRIV01",
+      "ROY01": "FORT01",
+      "SMP101": "SMPS101",
+      "SMP201": "SMPs2",
+      "TOW01": "TOWER01"
+    }
+  },
+  "Plan": {
+    "Server.ServerName": {
+      "BENT01": "BENT01",
+      "BIG01": "BiggerGAMES",
+      "CLIP01": "SMPS101",
+      "CREA01": "MINT01",
+      "CSMC01": "CSMC01",
+      "DEV01": "SMPS101",
+      "EMAD01": "SMPS101",
+      "EVO01": "SMPS101",
+      "HARD01": "HCRE01",
+      "HUB01": "MINT01",
+      "MIN01": "Minigames",
+      "MINE01": "MINT01",
+      "PRI01": "SMPS101",
+      "ROY01": "Royale",
+      "SMP101": "SMPS101",
+      "SMP201": "SMPs2",
+      "TOW01": "Tower01 (Eternal Tower Defense)"
+    },
+    "Webserver.Port": {
+      "BENT01": 8182,
+      "BIG01": 8175,
+      "CLIP01": 8178,
+      "CREA01": 8186,
+      "CSMC01": 8180,
+      "DEV01": 8178,
+      "EMAD01": 8178,
+      "EVO01": 8178,
+      "HARD01": 8183,
+      "HUB01": 8186,
+      "MIN01": 8174,
+      "MINE01": 8186,
+      "PRI01": 8178,
+      "ROY01": 8176,
+      "SMP101": 8178,
+      "SMP201": 8184,
+      "TOW01": 8171
+    },
+    "World_aliases.List.world": {
+      "BENT01": "Mini World Home",
+      "BIG01": "GamesOverWorld",
+      "CLIP01": "Leurvaingea",
+      "CREA01": "Minetoria",
+      "CSMC01": "CSMC",
+      "DEV01": "Leurvaingea",
+      "EMAD01": "Leurvaingea",
+      "EVO01": "Leurvaingea",
+      "HARD01": "Corpus Clippy",
+      "HUB01": "Minetoria",
+      "MIN01": "world",
+      "MINE01": "Minetoria",
+      "PRI01": "Leurvaingea",
+      "ROY01": "Fortnite",
+      "SMP101": "Leurvaingea",
+      "SMP201": "Leurvaingea",
+      "TOW01": "world"
+    }
+  },
+  "Quests": {
+    "options.storage.database-settings.table-prefix": {
+      "CLIP01": "quests_CLIP01_",
+      "CREA01": "quests_CREA01_",
+      "DEV01": "quests_DEV01",
+      "EMAD01": "quests_EMAD01_",
+      "EVO01": "quests_EV01",
+      "HUB01": "quests_HUB01_",
+      "MINE01": "quests_MINT01_",
+      "PRI01": "quests_PRIV01",
+      "SMP101": "quests_SMPS101",
+      "SMP201": "quests_SMP201_"
+    }
+  },
+  "QuickShop-Hikari": {
+    "database.prefix": {
+      "BENT01": "qs_",
+      "BIG01": "qs_",
+      "CLIP01": "qs_",
+      "CREA01": "qs_DEV_",
+      "CSMC01": "qs_",
+      "DEV01": "qs_DEV_",
+      "EMAD01": "qs_",
+      "EVO01": "qs_",
+      "HARD01": "qs_",
+      "HUB01": "qs_",
+      "MIN01": "qs_",
+      "MINE01": "qs_",
+      "PRI01": "qs_DEV_",
+      "ROY01": "qs_",
+      "SMP101": "qs_",
+      "SMP201": "qs_",
+      "TOW01": "qs_"
+    },
+    "server-uuid": {
+      "BENT01": "5202419f-15bb-40f7-b848-857329867740",
+      "BIG01": "919b2a0d-37af-41e0-8ef4-0550f894b664",
+      "CLIP01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "CREA01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "CSMC01": "6b1e3f92-63e4-4909-b520-5bdbbc5daf8f",
+      "DEV01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "EMAD01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "EVO01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "HARD01": "b511aa7a-9034-40d8-b5a1-04ae20806c3a",
+      "HUB01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "MIN01": "8422ca69-6e84-4211-97b5-1fc0733f8bec",
+      "MINE01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "PRI01": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "ROY01": "5d5ea3fc-fe95-4f74-99a8-9c0c4fc9a6a8",
+      "SMP101": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "SMP201": "666bbaff-e871-4224-b1dc-89250954ed1e",
+      "TOW01": "48e44de2-9505-4efb-86f6-1c866755f596"
+    },
+    "shop.fee-for-price-change": {
+      "BENT01": 250,
+      "BIG01": 250,
+      "CLIP01": "250quests_",
+      "CREA01": 250,
+      "CSMC01": 250,
+      "DEV01": 250,
+      "EMAD01": 250,
+      "EVO01": 250,
+      "HARD01": 250,
+      "HUB01": 250,
+      "MIN01": 250,
+      "MINE01": 250,
+      "PRI01": 250,
+      "ROY01": 250,
+      "SMP101": 250,
+      "SMP201": 250,
+      "TOW01": 250
+    },
+    "tax-account": {
+      "BENT01": "tax",
+      "BIG01": "ASMP",
+      "CLIP01": "CLIP01-tax",
+      "CREA01": "DEV",
+      "CSMC01": "tax",
+      "DEV01": "ASMP",
+      "EMAD01": "ASMP",
+      "EVO01": "ASMP",
+      "HARD01": "ASMP",
+      "HUB01": "ASMP",
+      "MIN01": "ASMP",
+      "MINE01": "ASMP",
+      "PRI01": "ASMP",
+      "ROY01": "ASMP",
+      "SMP101": "ASMP",
+      "SMP201": "ASMP",
+      "TOW01": "ASMP"
+    },
+    "unlimited-shop-owner-change-account": {
+      "BENT01": "ASMP",
+      "BIG01": "ASMP",
+      "CLIP01": "ASMP",
+      "CREA01": "DEV",
+      "CSMC01": "ASMP",
+      "DEV01": "ASMP",
+      "EMAD01": "ASMP",
+      "EVO01": "ASMP",
+      "HARD01": "ASMP",
+      "HUB01": "ASMP",
+      "MIN01": "ASMP",
+      "MINE01": "ASMP",
+      "PRI01": "ASMP",
+      "ROY01": "ASMP",
+      "SMP101": "ASMP",
+      "SMP201": "ASMP",
+      "TOW01": "ASMP"
+    }
+  },
+  "TheNewEconomy": {
+    "Core.Server.Account.Name": {
+      "BENT01": "BENT01_Admin",
+      "BIG01": "BIGG01_Admin",
+      "CLIP01": "CLIP01_Admin",
+      "CREA01": "GEN01_Admin",
+      "CSMC01": "CSMC01_Admin",
+      "DEV01": "DEV01_Admin",
+      "EMAD01": "EMAD01_Admin",
+      "EVO01": "EV01_Admin",
+      "HARD01": "TOWER01_Admin",
+      "HUB01": "GEN01_Admin",
+      "MIN01": "MINI01_Admin",
+      "MINE01": "GEN01_Admin",
+      "PRI01": "PRIV01_Admin",
+      "ROY01": "FORT01_Admin",
+      "SMP101": "SMPS101_Admin",
+      "SMP201": "SMP2_Admin",
+      "TOW01": "TOWER01_Admin"
+    },
+    "Core.Server.Name": {
+      "BENT01": "BENT01",
+      "BIG01": "BIGG01",
+      "CLIP01": "CLIP01",
+      "CREA01": "GEN01",
+      "CSMC01": "CSMC01",
+      "DEV01": "DEV01",
+      "EMAD01": "EMAD01",
+      "EVO01": "EV01",
+      "HARD01": "TOWER01",
+      "HUB01": "GEN01",
+      "MIN01": "MINI01",
+      "MINE01": "GEN01",
+      "PRI01": "PRIV01",
+      "ROY01": "FORT01",
+      "SMP101": "SMPS101",
+      "SMP201": "SMP201",
+      "TOW01": "TOWER01"
+    },
+    "Core.ServerID": {
+      "BENT01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "BIG01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "CLIP01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "CREA01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "CSMC01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "DEV01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "EMAD01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "EVO01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "HARD01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "HUB01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "MIN01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "MINE01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "PRI01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "ROY01": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "SMP101": "a6605781-ac6f-4251-8a80-1285c2f45df4",
+      "SMP201": "4dccb11f-7307-4172-87c2-9ee452a891a5",
+      "TOW01": "a6605781-ac6f-4251-8a80-1285c2f45df4"
+    }
+  },
+  "floodgate": {
+    "config.metrics.uuid": {
+      "BENT01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "CLIP01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "CREA01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "CSMC01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "EMAD01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "HARD01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "HUB01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "MINE01": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "SMP201": "f6ceb401-2a9f-46da-bca5-cc269896772c",
+      "VEL01": "5f17ca51-3c1f-4e29-939f-e3d96aca6801"
+    }
+  },
+  "mcMMO": {
+    "MySQL.Database.TablePrefix": {
+      "BENT01": "mcmmo_",
+      "CLIP01": "mcmmo_",
+      "CREA01": "mcmmo_DEV_",
+      "DEV01": "mcmmo_DEV_",
+      "EMAD01": "mcmmo_",
+      "EVO01": "mcmmo_",
+      "HARD01": "mcmmo_",
+      "HUB01": "mcmmo_",
+      "MINE01": "mcmmo_",
+      "PRI01": "mcmmo_DEV_",
+      "SMP101": "mcmmo_",
+      "SMP201": "mcmmo_",
+      "TOW01": "mcmmo_TOWER01_"
+    }
+  }
+}

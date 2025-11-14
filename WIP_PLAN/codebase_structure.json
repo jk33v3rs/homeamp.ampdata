@@ -1,0 +1,5001 @@
+[
+  {
+    "path": "src\\__init__.py",
+    "lines": 1,
+    "classes": [],
+    "functions": [],
+    "imports": []
+  },
+  {
+    "path": "src\\agent\\service.py",
+    "lines": 398,
+    "classes": [
+      {
+        "name": "AgentService",
+        "line": 35,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 44,
+            "args": [
+              "self",
+              "config_file"
+            ]
+          },
+          {
+            "name": "_discover_instances",
+            "line": 109,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_load_config",
+            "line": 133,
+            "args": [
+              "self",
+              "config_file"
+            ]
+          },
+          {
+            "name": "start",
+            "line": 188,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_run_loop",
+            "line": 203,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_process_pending_changes",
+            "line": 221,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_apply_change_request",
+            "line": 271,
+            "args": [
+              "self",
+              "change_id",
+              "request_data"
+            ]
+          },
+          {
+            "name": "_should_check_drift",
+            "line": 311,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_check_drift",
+            "line": 316,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_upload_drift_report",
+            "line": 357,
+            "args": [
+              "self",
+              "drift_data"
+            ]
+          },
+          {
+            "name": "_handle_shutdown",
+            "line": 376,
+            "args": [
+              "self",
+              "signum",
+              "frame"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "main",
+        "line": 382,
+        "args": []
+      }
+    ],
+    "imports": [
+      {
+        "type": "import",
+        "module": "time",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "sys",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "signal",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "CloudStorage",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "ChangeRequestManager",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.config_updater",
+        "name": "ConfigUpdater",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "analyzers.drift_detector",
+        "name": "DriftDetector",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.safety_validator",
+        "name": "SafetyValidator",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.settings",
+        "name": "get_settings",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "analyzers.drift_detector",
+        "name": "DriftDetector",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\amp_integration\\__init__.py",
+    "lines": 1,
+    "classes": [],
+    "functions": [],
+    "imports": []
+  },
+  {
+    "path": "src\\amp_integration\\amp_client.py",
+    "lines": 456,
+    "classes": [
+      {
+        "name": "AMPClient",
+        "line": 15,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 27,
+            "args": [
+              "self",
+              "base_url",
+              "username",
+              "password"
+            ]
+          },
+          {
+            "name": "_login",
+            "line": 45,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_api_call",
+            "line": 72,
+            "args": [
+              "self",
+              "endpoint",
+              "data"
+            ]
+          },
+          {
+            "name": "get_instances",
+            "line": 114,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "get_instance_status",
+            "line": 132,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "start_instance",
+            "line": 144,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "stop_instance",
+            "line": 149,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "restart_instance",
+            "line": 154,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "send_console_command",
+            "line": 159,
+            "args": [
+              "self",
+              "instance_id",
+              "command"
+            ]
+          },
+          {
+            "name": "get_instance_config",
+            "line": 176,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "update_instance_config",
+            "line": 180,
+            "args": [
+              "self",
+              "instance_id",
+              "config_updates"
+            ]
+          },
+          {
+            "name": "get_file_listing",
+            "line": 197,
+            "args": [
+              "self",
+              "instance_id",
+              "directory"
+            ]
+          },
+          {
+            "name": "upload_file",
+            "line": 216,
+            "args": [
+              "self",
+              "instance_id",
+              "local_path",
+              "remote_path"
+            ]
+          },
+          {
+            "name": "delete_file",
+            "line": 230,
+            "args": [
+              "self",
+              "instance_id",
+              "file_path"
+            ]
+          },
+          {
+            "name": "rename_file",
+            "line": 247,
+            "args": [
+              "self",
+              "instance_id",
+              "old_path",
+              "new_path"
+            ]
+          },
+          {
+            "name": "create_backup",
+            "line": 266,
+            "args": [
+              "self",
+              "instance_id",
+              "title",
+              "description"
+            ]
+          },
+          {
+            "name": "restore_backup",
+            "line": 292,
+            "args": [
+              "self",
+              "instance_id",
+              "backup_id"
+            ]
+          },
+          {
+            "name": "list_backups",
+            "line": 303,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          }
+        ],
+        "bases": []
+      },
+      {
+        "name": "AMPPluginDeployer",
+        "line": 314,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 321,
+            "args": [
+              "self",
+              "amp_client"
+            ]
+          },
+          {
+            "name": "deploy_plugin",
+            "line": 331,
+            "args": [
+              "self",
+              "instance_id",
+              "plugin_jar",
+              "backup_old",
+              "restart_server"
+            ]
+          },
+          {
+            "name": "_get_instance_name",
+            "line": 393,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "rollback_plugin",
+            "line": 400,
+            "args": [
+              "self",
+              "instance_id",
+              "backup_id"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "main",
+        "line": 435,
+        "args": []
+      }
+    ],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "requests",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "time",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "time",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\analyzers\\__init__.py",
+    "lines": 1,
+    "classes": [],
+    "functions": [],
+    "imports": []
+  },
+  {
+    "path": "src\\analyzers\\compliance_checker.py",
+    "lines": 704,
+    "classes": [
+      {
+        "name": "ComplianceChecker",
+        "line": 12,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 15,
+            "args": [
+              "self",
+              "baseline_path",
+              "current_state_path"
+            ]
+          },
+          {
+            "name": "load_baseline",
+            "line": 28,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "load_current_state",
+            "line": 136,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "compare_states",
+            "line": 233,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_count_configs",
+            "line": 363,
+            "args": [
+              "self",
+              "config_dict"
+            ]
+          },
+          {
+            "name": "_compare_single_config",
+            "line": 373,
+            "args": [
+              "self",
+              "server_name",
+              "plugin_name",
+              "config_name",
+              "baseline_config",
+              "current_config",
+              "results"
+            ]
+          },
+          {
+            "name": "check_expected_changes",
+            "line": 418,
+            "args": [
+              "self",
+              "expected_changes_path"
+            ]
+          },
+          {
+            "name": "generate_compliance_report",
+            "line": 573,
+            "args": [
+              "self",
+              "output_path"
+            ]
+          },
+          {
+            "name": "_generate_recommendations",
+            "line": 622,
+            "args": [
+              "self",
+              "comparison_results"
+            ]
+          },
+          {
+            "name": "_generate_next_actions",
+            "line": 660,
+            "args": [
+              "self",
+              "comparison_results"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.safety_validator",
+        "name": "SafetyValidator",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.safety_validator",
+        "name": "SafetyValidator",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\analyzers\\deviation_analyzer.py",
+    "lines": 439,
+    "classes": [
+      {
+        "name": "DeviationAnalyzer",
+        "line": 16,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 19,
+            "args": [
+              "self",
+              "deviations_file"
+            ]
+          },
+          {
+            "name": "parse_deviations",
+            "line": 29,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "is_per_server_setting",
+            "line": 112,
+            "args": [
+              "self",
+              "key",
+              "values"
+            ]
+          },
+          {
+            "name": "is_dev_server_deviation",
+            "line": 171,
+            "args": [
+              "self",
+              "servers"
+            ]
+          },
+          {
+            "name": "analyze_deviation_pattern",
+            "line": 199,
+            "args": [
+              "self",
+              "key",
+              "server_values"
+            ]
+          },
+          {
+            "name": "generate_report",
+            "line": 297,
+            "args": [
+              "self",
+              "output_path"
+            ]
+          },
+          {
+            "name": "get_high_priority_issues",
+            "line": 368,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_calculate_issue_priority",
+            "line": 408,
+            "args": [
+              "self",
+              "analysis",
+              "server_values"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Tuple",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\analyzers\\drift_detector.py",
+    "lines": 568,
+    "classes": [
+      {
+        "name": "DriftDetector",
+        "line": 12,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 15,
+            "args": [
+              "self",
+              "baseline_path"
+            ]
+          },
+          {
+            "name": "load_baseline",
+            "line": 25,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "scan_server_configs",
+            "line": 105,
+            "args": [
+              "self",
+              "server_path"
+            ]
+          },
+          {
+            "name": "detect_drift",
+            "line": 170,
+            "args": [
+              "self",
+              "server_name",
+              "server_path"
+            ]
+          },
+          {
+            "name": "_compare_configs",
+            "line": 247,
+            "args": [
+              "self",
+              "plugin_name",
+              "config_file",
+              "baseline",
+              "current",
+              "server_name",
+              "prefix"
+            ]
+          },
+          {
+            "name": "scan_all_servers",
+            "line": 361,
+            "args": [
+              "self",
+              "utildata_path"
+            ]
+          },
+          {
+            "name": "generate_drift_report",
+            "line": 409,
+            "args": [
+              "self",
+              "output_path",
+              "drift_data"
+            ]
+          },
+          {
+            "name": "prioritize_drift_items",
+            "line": 488,
+            "args": [
+              "self",
+              "drift_data"
+            ]
+          },
+          {
+            "name": "_calculate_priority_score",
+            "line": 521,
+            "args": [
+              "self",
+              "item"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\automation\\__init__.py",
+    "lines": 1,
+    "classes": [],
+    "functions": [],
+    "imports": []
+  },
+  {
+    "path": "src\\automation\\plugin_automation.py",
+    "lines": 289,
+    "classes": [
+      {
+        "name": "AutomatedPluginManager",
+        "line": 28,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 39,
+            "args": [
+              "self",
+              "config"
+            ]
+          },
+          {
+            "name": "_check_auto_deploy",
+            "line": 126,
+            "args": [
+              "self",
+              "updates"
+            ]
+          },
+          {
+            "name": "manual_deploy",
+            "line": 201,
+            "args": [
+              "self",
+              "plugin_name",
+              "version",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "manual_rollback",
+            "line": 232,
+            "args": [
+              "self",
+              "instance_id",
+              "backup_id"
+            ]
+          },
+          {
+            "name": "list_instance_backups",
+            "line": 245,
+            "args": [
+              "self",
+              "instance_id"
+            ]
+          },
+          {
+            "name": "get_all_instances",
+            "line": 249,
+            "args": [
+              "self"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "import",
+        "module": "asyncio",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "sys",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "automation.pulumi_update_monitor",
+        "name": "PluginUpdateMonitor",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "automation.pulumi_update_monitor",
+        "name": "PluginUpdate",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "amp_integration.amp_client",
+        "name": "AMPClient",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "amp_integration.amp_client",
+        "name": "AMPPluginDeployer",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.excel_reader",
+        "name": "ExcelConfigReader",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "csv",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\automation\\pulumi_infrastructure.py",
+    "lines": 299,
+    "classes": [
+      {
+        "name": "PluginUpdateInfrastructure",
+        "line": 19,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 31,
+            "args": [
+              "self",
+              "config"
+            ]
+          },
+          {
+            "name": "_create_staging_bucket",
+            "line": 64,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_create_excel_bucket",
+            "line": 90,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_create_lambda_role",
+            "line": 108,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_create_lambda_function",
+            "line": 160,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_create_schedule_rule",
+            "line": 194,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_create_sns_topic",
+            "line": 212,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_configure_lambda_permissions",
+            "line": 232,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_configure_notifications",
+            "line": 242,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_export_outputs",
+            "line": 260,
+            "args": [
+              "self"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "create_infrastructure",
+        "line": 270,
+        "args": []
+      }
+    ],
+    "imports": [
+      {
+        "type": "import",
+        "module": "pulumi",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "pulumi_aws",
+        "asname": "aws"
+      },
+      {
+        "type": "from",
+        "module": "pulumi",
+        "name": "Output",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\automation\\pulumi_update_monitor.py",
+    "lines": 595,
+    "classes": [
+      {
+        "name": "PluginUpdate",
+        "line": 26,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "StagingEntry",
+        "line": 43,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "PluginUpdateMonitor",
+        "line": 56,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 62,
+            "args": [
+              "self",
+              "staging_path",
+              "plugin_registry_path",
+              "excel_output_path"
+            ]
+          },
+          {
+            "name": "_load_plugin_registry",
+            "line": 90,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_is_newer_version",
+            "line": 331,
+            "args": [
+              "self",
+              "current",
+              "latest"
+            ]
+          },
+          {
+            "name": "_detect_breaking_changes",
+            "line": 366,
+            "args": [
+              "self",
+              "changelog"
+            ]
+          },
+          {
+            "name": "write_to_excel",
+            "line": 443,
+            "args": [
+              "self",
+              "updates",
+              "staged_entries"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Tuple",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "timedelta",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "asyncio",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "aiohttp",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "dataclasses",
+        "name": "dataclass",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "dataclasses",
+        "name": "asdict",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "openpyxl",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "openpyxl.styles",
+        "name": "PatternFill",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "openpyxl.styles",
+        "name": "Font",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\automation\\scheduler_installer.py",
+    "lines": 312,
+    "classes": [
+      {
+        "name": "UpdateSchedulerInstaller",
+        "line": 13,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 19,
+            "args": [
+              "self",
+              "install_path"
+            ]
+          },
+          {
+            "name": "generate_systemd_service",
+            "line": 29,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "generate_systemd_timer",
+            "line": 53,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "generate_crontab_entry",
+            "line": 68,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "generate_install_script",
+            "line": 74,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "generate_plugin_registry_template",
+            "line": 124,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "generate_uninstall_script",
+            "line": 218,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "write_install_files",
+            "line": 243,
+            "args": [
+              "self",
+              "output_dir"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "main",
+        "line": 293,
+        "args": []
+      }
+    ],
+    "imports": [
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\config_engine\\__init__.py",
+    "lines": 1,
+    "classes": [],
+    "functions": [],
+    "imports": []
+  },
+  {
+    "path": "src\\core\\cloud_storage.py",
+    "lines": 392,
+    "classes": [
+      {
+        "name": "CloudStorage",
+        "line": 19,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 22,
+            "args": [
+              "self",
+              "endpoint",
+              "access_key",
+              "secret_key",
+              "secure"
+            ]
+          },
+          {
+            "name": "ensure_bucket_exists",
+            "line": 43,
+            "args": [
+              "self",
+              "bucket_name"
+            ]
+          },
+          {
+            "name": "upload_file",
+            "line": 65,
+            "args": [
+              "self",
+              "bucket_name",
+              "object_name",
+              "file_path",
+              "content_type"
+            ]
+          },
+          {
+            "name": "upload_json",
+            "line": 93,
+            "args": [
+              "self",
+              "bucket_name",
+              "object_name",
+              "data"
+            ]
+          },
+          {
+            "name": "download_file",
+            "line": 122,
+            "args": [
+              "self",
+              "bucket_name",
+              "object_name",
+              "file_path"
+            ]
+          },
+          {
+            "name": "download_json",
+            "line": 149,
+            "args": [
+              "self",
+              "bucket_name",
+              "object_name"
+            ]
+          },
+          {
+            "name": "list_objects",
+            "line": 171,
+            "args": [
+              "self",
+              "bucket_name",
+              "prefix"
+            ]
+          },
+          {
+            "name": "delete_object",
+            "line": 190,
+            "args": [
+              "self",
+              "bucket_name",
+              "object_name"
+            ]
+          },
+          {
+            "name": "object_exists",
+            "line": 209,
+            "args": [
+              "self",
+              "bucket_name",
+              "object_name"
+            ]
+          },
+          {
+            "name": "get_object_metadata",
+            "line": 226,
+            "args": [
+              "self",
+              "bucket_name",
+              "object_name"
+            ]
+          }
+        ],
+        "bases": []
+      },
+      {
+        "name": "ChangeRequestManager",
+        "line": 252,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 255,
+            "args": [
+              "self",
+              "storage",
+              "bucket_name"
+            ]
+          },
+          {
+            "name": "upload_change_request",
+            "line": 267,
+            "args": [
+              "self",
+              "change_request"
+            ]
+          },
+          {
+            "name": "list_pending_changes",
+            "line": 299,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "download_change_request",
+            "line": 320,
+            "args": [
+              "self",
+              "change_id"
+            ]
+          },
+          {
+            "name": "mark_change_completed",
+            "line": 343,
+            "args": [
+              "self",
+              "change_id"
+            ]
+          },
+          {
+            "name": "upload_change_result",
+            "line": 373,
+            "args": [
+              "self",
+              "change_id",
+              "result"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "minio",
+        "name": "Minio",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "minio.error",
+        "name": "S3Error",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "io",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "uuid",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\config_backup.py",
+    "lines": 270,
+    "classes": [
+      {
+        "name": "ConfigBackupManager",
+        "line": 19,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 22,
+            "args": [
+              "self",
+              "backup_root"
+            ]
+          },
+          {
+            "name": "backup_config",
+            "line": 33,
+            "args": [
+              "self",
+              "config_file",
+              "server_name",
+              "plugin_name"
+            ]
+          },
+          {
+            "name": "backup_plugin_configs",
+            "line": 82,
+            "args": [
+              "self",
+              "plugin_dir",
+              "server_name",
+              "plugin_name"
+            ]
+          },
+          {
+            "name": "restore_config",
+            "line": 140,
+            "args": [
+              "self",
+              "backup_path",
+              "restore_to"
+            ]
+          },
+          {
+            "name": "list_backups",
+            "line": 186,
+            "args": [
+              "self",
+              "server_name",
+              "plugin_name"
+            ]
+          },
+          {
+            "name": "cleanup_old_backups",
+            "line": 232,
+            "args": [
+              "self",
+              "days_to_keep"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "import",
+        "module": "shutil",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "timedelta",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\config_parser.py",
+    "lines": 299,
+    "classes": [
+      {
+        "name": "ConfigParser",
+        "line": 14,
+        "methods": [
+          {
+            "name": "load_config",
+            "line": 18,
+            "args": [
+              "file_path"
+            ]
+          },
+          {
+            "name": "save_config",
+            "line": 101,
+            "args": [
+              "file_path",
+              "data"
+            ]
+          },
+          {
+            "name": "get_nested_value",
+            "line": 140,
+            "args": [
+              "data",
+              "key_path"
+            ]
+          },
+          {
+            "name": "set_nested_value",
+            "line": 167,
+            "args": [
+              "data",
+              "key_path",
+              "value"
+            ]
+          },
+          {
+            "name": "flatten_dict",
+            "line": 202,
+            "args": [
+              "data",
+              "parent_key",
+              "sep"
+            ]
+          },
+          {
+            "name": "unflatten_dict",
+            "line": 229,
+            "args": [
+              "data",
+              "sep"
+            ]
+          },
+          {
+            "name": "validate_yaml",
+            "line": 258,
+            "args": [
+              "file_path"
+            ]
+          },
+          {
+            "name": "validate_json",
+            "line": 280,
+            "args": [
+              "file_path"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "file_handler",
+        "name": "FileHandler",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\data_loader.py",
+    "lines": 451,
+    "classes": [
+      {
+        "name": "ServerInfo",
+        "line": 15,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "ProductionDataLoader",
+        "line": 26,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 29,
+            "args": [
+              "self",
+              "base_path"
+            ]
+          },
+          {
+            "name": "_load_server_configurations",
+            "line": 45,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_discover_servers",
+            "line": 60,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_find_amp_config_path",
+            "line": 92,
+            "args": [
+              "self",
+              "server_id",
+              "platform"
+            ]
+          },
+          {
+            "name": "get_all_servers",
+            "line": 101,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "get_server_by_id",
+            "line": 105,
+            "args": [
+              "self",
+              "server_id"
+            ]
+          },
+          {
+            "name": "get_servers_by_platform",
+            "line": 109,
+            "args": [
+              "self",
+              "platform"
+            ]
+          },
+          {
+            "name": "load_universal_plugin_configs",
+            "line": 113,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_parse_universal_config_file",
+            "line": 152,
+            "args": [
+              "self",
+              "file_path"
+            ]
+          },
+          {
+            "name": "_parse_config_value",
+            "line": 202,
+            "args": [
+              "self",
+              "value_str"
+            ]
+          },
+          {
+            "name": "_parse_individual_plugin_config",
+            "line": 237,
+            "args": [
+              "self",
+              "file_path"
+            ]
+          },
+          {
+            "name": "load_plugin_deviations",
+            "line": 292,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_parse_plugin_deviations",
+            "line": 318,
+            "args": [
+              "self",
+              "file_path"
+            ]
+          },
+          {
+            "name": "get_server_deviations",
+            "line": 373,
+            "args": [
+              "self",
+              "server_id"
+            ]
+          },
+          {
+            "name": "get_server_plugin_configs",
+            "line": 396,
+            "args": [
+              "self",
+              "server_id"
+            ]
+          },
+          {
+            "name": "get_server_status_summary",
+            "line": 430,
+            "args": [
+              "self"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "settings",
+        "name": "get_settings",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "dataclasses",
+        "name": "dataclass",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\excel_reader.py",
+    "lines": 277,
+    "classes": [
+      {
+        "name": "ExcelConfigReader",
+        "line": 15,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 18,
+            "args": [
+              "self",
+              "data_dir"
+            ]
+          },
+          {
+            "name": "load_deployment_matrix",
+            "line": 34,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "load_server_variables",
+            "line": 56,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "get_server_variables",
+            "line": 114,
+            "args": [
+              "self",
+              "server_name"
+            ]
+          },
+          {
+            "name": "get_plugin_auto_update_status",
+            "line": 127,
+            "args": [
+              "self",
+              "plugin_name"
+            ]
+          },
+          {
+            "name": "get_plugin_deployment_servers",
+            "line": 162,
+            "args": [
+              "self",
+              "plugin_name"
+            ]
+          },
+          {
+            "name": "write_plugin_update",
+            "line": 206,
+            "args": [
+              "self",
+              "plugin_name",
+              "new_version",
+              "update_date"
+            ]
+          },
+          {
+            "name": "get_all_plugins_for_server",
+            "line": 254,
+            "args": [
+              "self",
+              "server_name"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "import",
+        "module": "pandas",
+        "asname": "pd"
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\file_handler.py",
+    "lines": 315,
+    "classes": [
+      {
+        "name": "FileHandler",
+        "line": 15,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 18,
+            "args": [
+              "self",
+              "backup_root"
+            ]
+          },
+          {
+            "name": "create_backup",
+            "line": 28,
+            "args": [
+              "self",
+              "file_path"
+            ]
+          },
+          {
+            "name": "atomic_write",
+            "line": 57,
+            "args": [
+              "self",
+              "file_path",
+              "content"
+            ]
+          },
+          {
+            "name": "safe_read",
+            "line": 107,
+            "args": [
+              "self",
+              "file_path"
+            ]
+          },
+          {
+            "name": "rollback_from_backup",
+            "line": 153,
+            "args": [
+              "self",
+              "backup_path",
+              "target_path"
+            ]
+          },
+          {
+            "name": "cleanup_old_backups",
+            "line": 192,
+            "args": [
+              "self",
+              "max_age_days",
+              "keep_minimum"
+            ]
+          },
+          {
+            "name": "verify_file_integrity",
+            "line": 248,
+            "args": [
+              "self",
+              "file_path"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "shutil",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "os",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "tempfile",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "os",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "time",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "hashlib",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\safety_validator.py",
+    "lines": 308,
+    "classes": [
+      {
+        "name": "SafetyValidator",
+        "line": 11,
+        "methods": [
+          {
+            "name": "validate_server_exists",
+            "line": 15,
+            "args": [
+              "server_name",
+              "utildata_path"
+            ]
+          },
+          {
+            "name": "validate_plugin_exists",
+            "line": 50,
+            "args": [
+              "server_name",
+              "plugin_name",
+              "utildata_path"
+            ]
+          },
+          {
+            "name": "validate_config_file_exists",
+            "line": 84,
+            "args": [
+              "server_name",
+              "plugin_name",
+              "config_file",
+              "utildata_path"
+            ]
+          },
+          {
+            "name": "validate_expected_value",
+            "line": 120,
+            "args": [
+              "current_value",
+              "expected_value",
+              "strict"
+            ]
+          },
+          {
+            "name": "validate_change_request_format",
+            "line": 171,
+            "args": [
+              "change_request"
+            ]
+          },
+          {
+            "name": "validate_no_file_locks",
+            "line": 232,
+            "args": [
+              "file_path"
+            ]
+          },
+          {
+            "name": "validate_disk_space",
+            "line": 270,
+            "args": [
+              "path",
+              "required_mb"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "os",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "shutil",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\server_aware_config.py",
+    "lines": 262,
+    "classes": [
+      {
+        "name": "ServerAwareConfigEngine",
+        "line": 17,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 20,
+            "args": [
+              "self",
+              "excel_reader",
+              "universal_configs_dir"
+            ]
+          },
+          {
+            "name": "detect_server_from_amp_instance",
+            "line": 35,
+            "args": [
+              "self",
+              "instance_id",
+              "amp_client"
+            ]
+          },
+          {
+            "name": "load_universal_config",
+            "line": 65,
+            "args": [
+              "self",
+              "plugin_name"
+            ]
+          },
+          {
+            "name": "apply_server_variables",
+            "line": 111,
+            "args": [
+              "self",
+              "config",
+              "server_name"
+            ]
+          },
+          {
+            "name": "generate_server_config",
+            "line": 150,
+            "args": [
+              "self",
+              "plugin_name",
+              "server_name"
+            ]
+          },
+          {
+            "name": "write_config_file",
+            "line": 178,
+            "args": [
+              "self",
+              "config",
+              "output_path",
+              "format"
+            ]
+          },
+          {
+            "name": "deploy_config_to_server",
+            "line": 219,
+            "args": [
+              "self",
+              "plugin_name",
+              "server_name",
+              "amp_instance_id",
+              "amp_client",
+              "config_filename"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "re",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.excel_reader",
+        "name": "ExcelConfigReader",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "tempfile",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\core\\settings.py",
+    "lines": 489,
+    "classes": [
+      {
+        "name": "MinIOConfig",
+        "line": 17,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "AgentConfig",
+        "line": 29,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "WebConfig",
+        "line": 41,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "HttpConfig",
+        "line": 54,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "PluginUpdateConfig",
+        "line": 63,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "SettingsHandler",
+        "line": 74,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 77,
+            "args": [
+              "self",
+              "config_file"
+            ]
+          },
+          {
+            "name": "_find_config_file",
+            "line": 92,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_load_settings",
+            "line": 112,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_apply_env_overrides",
+            "line": 133,
+            "args": [
+              "self",
+              "settings"
+            ]
+          },
+          {
+            "name": "get",
+            "line": 169,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "get_required",
+            "line": 188,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "instances_path",
+            "line": 208,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "utildata_path",
+            "line": 213,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "data_dir",
+            "line": 218,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "scripts_dir",
+            "line": 223,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "backup_dir",
+            "line": 228,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "temp_dir",
+            "line": 233,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "get_file_path",
+            "line": 238,
+            "args": [
+              "self",
+              "file_key"
+            ]
+          },
+          {
+            "name": "config_extensions",
+            "line": 243,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "backup_extension",
+            "line": 249,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "physical_servers",
+            "line": 255,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "ovh_ryzen_config",
+            "line": 260,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "hetzner_xeon_config",
+            "line": 265,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "excluded_instances",
+            "line": 271,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "test_instances",
+            "line": 276,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "production_instances",
+            "line": 281,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "all_instances",
+            "line": 286,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "excluded_servers",
+            "line": 292,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "test_servers",
+            "line": 297,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "production_servers",
+            "line": 302,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "all_servers",
+            "line": 307,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "minio_config",
+            "line": 313,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "agent_config",
+            "line": 328,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "web_config",
+            "line": 345,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "http_config",
+            "line": 363,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "plugin_update_config",
+            "line": 375,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "get_plugin_id",
+            "line": 394,
+            "args": [
+              "self",
+              "plugin_name",
+              "source"
+            ]
+          },
+          {
+            "name": "backup_retention_days",
+            "line": 400,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "max_backups_per_file",
+            "line": 405,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "require_backup_before_change",
+            "line": 410,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "dry_run_by_default",
+            "line": 415,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "min_disk_space_mb",
+            "line": 420,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "production_db_host",
+            "line": 426,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "production_db_name",
+            "line": 431,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "log_level",
+            "line": 437,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "log_format",
+            "line": 442,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "log_to_file",
+            "line": 448,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "log_to_console",
+            "line": 453,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "reload",
+            "line": 457,
+            "args": [
+              "self"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "get_settings",
+        "line": 467,
+        "args": [
+          "config_file"
+        ]
+      },
+      {
+        "name": "reload_settings",
+        "line": 485,
+        "args": []
+      }
+    ],
+    "imports": [
+      {
+        "type": "import",
+        "module": "os",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "dataclasses",
+        "name": "dataclass",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\deployment\\pipeline.py",
+    "lines": 584,
+    "classes": [
+      {
+        "name": "DeploymentStage",
+        "line": 14,
+        "methods": [],
+        "bases": [
+          "str",
+          "Enum"
+        ]
+      },
+      {
+        "name": "DeploymentPipeline",
+        "line": 26,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 29,
+            "args": [
+              "self",
+              "storage_path"
+            ]
+          },
+          {
+            "name": "create_deployment",
+            "line": 40,
+            "args": [
+              "self",
+              "change_id",
+              "change_data"
+            ]
+          },
+          {
+            "name": "_get_dev_servers",
+            "line": 70,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_get_production_servers",
+            "line": 76,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "deploy_to_dev",
+            "line": 87,
+            "args": [
+              "self",
+              "config_request"
+            ]
+          },
+          {
+            "name": "validate_dev_deployment",
+            "line": 171,
+            "args": [
+              "self",
+              "deployment_id"
+            ]
+          },
+          {
+            "name": "approve_for_production",
+            "line": 276,
+            "args": [
+              "self",
+              "deployment_id",
+              "approved_by"
+            ]
+          },
+          {
+            "name": "deploy_to_production",
+            "line": 300,
+            "args": [
+              "self",
+              "deployment_id"
+            ]
+          },
+          {
+            "name": "rollback_deployment",
+            "line": 403,
+            "args": [
+              "self",
+              "deployment_id"
+            ]
+          },
+          {
+            "name": "get_deployment_status",
+            "line": 516,
+            "args": [
+              "self",
+              "deployment_id"
+            ]
+          },
+          {
+            "name": "list_active_deployments",
+            "line": 528,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_get_target_servers",
+            "line": 551,
+            "args": [
+              "self",
+              "change_data"
+            ]
+          },
+          {
+            "name": "_save_deployment",
+            "line": 571,
+            "args": [
+              "self",
+              "deployment"
+            ]
+          },
+          {
+            "name": "_load_deployment",
+            "line": 577,
+            "args": [
+              "self",
+              "deployment_id"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "enum",
+        "name": "Enum",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "uuid",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.config_updater",
+        "name": "ConfigUpdater",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.config_updater",
+        "name": "ConfigUpdater",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.config_updater",
+        "name": "ConfigUpdater",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\updaters\\bedrock_updater.py",
+    "lines": 527,
+    "classes": [
+      {
+        "name": "BedrockUpdater",
+        "line": 18,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 92,
+            "args": [
+              "self",
+              "settings_path"
+            ]
+          },
+          {
+            "name": "check_geysermc_version",
+            "line": 104,
+            "args": [
+              "self",
+              "project",
+              "platform"
+            ]
+          },
+          {
+            "name": "check_hangar_version",
+            "line": 138,
+            "args": [
+              "self",
+              "project",
+              "include_snapshots"
+            ]
+          },
+          {
+            "name": "download_plugin",
+            "line": 178,
+            "args": [
+              "self",
+              "url",
+              "output_path"
+            ]
+          },
+          {
+            "name": "update_geyser_standalone",
+            "line": 220,
+            "args": [
+              "self",
+              "target_path"
+            ]
+          },
+          {
+            "name": "update_floodgate",
+            "line": 270,
+            "args": [
+              "self",
+              "platform",
+              "target_servers"
+            ]
+          },
+          {
+            "name": "update_viaversion",
+            "line": 328,
+            "args": [
+              "self",
+              "include_viabackwards"
+            ]
+          },
+          {
+            "name": "full_bedrock_update",
+            "line": 392,
+            "args": [
+              "self",
+              "restart_services"
+            ]
+          },
+          {
+            "name": "check_all_versions",
+            "line": 456,
+            "args": [
+              "self"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "main",
+        "line": 475,
+        "args": []
+      }
+    ],
+    "imports": [
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "requests",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Tuple",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "argparse",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "shutil",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\updaters\\config_updater.py",
+    "lines": 610,
+    "classes": [
+      {
+        "name": "ConfigUpdater",
+        "line": 14,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 17,
+            "args": [
+              "self",
+              "utildata_path",
+              "dry_run"
+            ]
+          },
+          {
+            "name": "load_change_request",
+            "line": 33,
+            "args": [
+              "self",
+              "request_id"
+            ]
+          },
+          {
+            "name": "validate_change_request",
+            "line": 59,
+            "args": [
+              "self",
+              "change_request"
+            ]
+          },
+          {
+            "name": "create_backup",
+            "line": 97,
+            "args": [
+              "self",
+              "target_files"
+            ]
+          },
+          {
+            "name": "verify_expected_value",
+            "line": 135,
+            "args": [
+              "self",
+              "server_name",
+              "plugin_name",
+              "config_file",
+              "key_path",
+              "expected_value"
+            ]
+          },
+          {
+            "name": "apply_single_change",
+            "line": 177,
+            "args": [
+              "self",
+              "change"
+            ]
+          },
+          {
+            "name": "_update_yaml_key",
+            "line": 221,
+            "args": [
+              "self",
+              "file_path",
+              "change"
+            ]
+          },
+          {
+            "name": "_replace_line",
+            "line": 267,
+            "args": [
+              "self",
+              "file_path",
+              "change"
+            ]
+          },
+          {
+            "name": "_add_line",
+            "line": 318,
+            "args": [
+              "self",
+              "file_path",
+              "change"
+            ]
+          },
+          {
+            "name": "_delete_line",
+            "line": 361,
+            "args": [
+              "self",
+              "file_path",
+              "change"
+            ]
+          },
+          {
+            "name": "apply_change_request",
+            "line": 403,
+            "args": [
+              "self",
+              "change_request"
+            ]
+          },
+          {
+            "name": "rollback_change",
+            "line": 463,
+            "args": [
+              "self",
+              "change_id"
+            ]
+          },
+          {
+            "name": "generate_preview",
+            "line": 518,
+            "args": [
+              "self",
+              "change_request"
+            ]
+          },
+          {
+            "name": "log_change",
+            "line": 557,
+            "args": [
+              "self",
+              "change",
+              "result"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "os",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.config_parser",
+        "name": "ConfigParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.safety_validator",
+        "name": "SafetyValidator",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "shutil",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "shutil",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\updaters\\plugin_checker.py",
+    "lines": 443,
+    "classes": [
+      {
+        "name": "PluginChecker",
+        "line": 14,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 17,
+            "args": [
+              "self",
+              "api_endpoints_config"
+            ]
+          },
+          {
+            "name": "load_api_endpoints",
+            "line": 27,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "check_github_release",
+            "line": 76,
+            "args": [
+              "self",
+              "repo"
+            ]
+          },
+          {
+            "name": "check_spigot_resource",
+            "line": 118,
+            "args": [
+              "self",
+              "resource_id"
+            ]
+          },
+          {
+            "name": "check_hangar",
+            "line": 154,
+            "args": [
+              "self",
+              "plugin_slug"
+            ]
+          },
+          {
+            "name": "get_installed_version",
+            "line": 202,
+            "args": [
+              "self",
+              "plugin_name",
+              "server_name",
+              "utildata_path"
+            ]
+          },
+          {
+            "name": "check_all_plugins",
+            "line": 258,
+            "args": [
+              "self",
+              "utildata_path"
+            ]
+          },
+          {
+            "name": "assess_update_risk",
+            "line": 342,
+            "args": [
+              "self",
+              "plugin_name",
+              "current_version",
+              "new_version"
+            ]
+          },
+          {
+            "name": "generate_update_report",
+            "line": 391,
+            "args": [
+              "self",
+              "output_path",
+              "update_data"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.settings",
+        "name": "get_settings",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "requests",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "requests",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "requests",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "zipfile",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "tempfile",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.settings",
+        "name": "get_settings",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "re",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "re",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "re",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\utils\\error_handler.py",
+    "lines": 251,
+    "classes": [
+      {
+        "name": "ErrorSeverity",
+        "line": 11,
+        "methods": [],
+        "bases": [
+          "Enum"
+        ]
+      },
+      {
+        "name": "ErrorHandler",
+        "line": 19,
+        "methods": [
+          {
+            "name": "handle_file_not_found",
+            "line": 23,
+            "args": [
+              "file_path"
+            ]
+          },
+          {
+            "name": "handle_parse_error",
+            "line": 55,
+            "args": [
+              "file_path",
+              "error"
+            ]
+          },
+          {
+            "name": "handle_validation_error",
+            "line": 91,
+            "args": [
+              "field",
+              "reason"
+            ]
+          },
+          {
+            "name": "handle_network_error",
+            "line": 126,
+            "args": [
+              "url",
+              "error"
+            ]
+          },
+          {
+            "name": "with_retry",
+            "line": 163,
+            "args": [
+              "func",
+              "max_attempts",
+              "backoff_seconds"
+            ]
+          },
+          {
+            "name": "create_error_report",
+            "line": 203,
+            "args": [
+              "errors",
+              "output_path"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Callable",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "enum",
+        "name": "Enum",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "time",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\utils\\logging.py",
+    "lines": 103,
+    "classes": [
+      {
+        "name": "LogConfig",
+        "line": 15,
+        "methods": [],
+        "bases": []
+      },
+      {
+        "name": "Logger",
+        "line": 23,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 26,
+            "args": [
+              "self",
+              "name",
+              "config"
+            ]
+          },
+          {
+            "name": "info",
+            "line": 60,
+            "args": [
+              "self",
+              "message"
+            ]
+          },
+          {
+            "name": "warning",
+            "line": 64,
+            "args": [
+              "self",
+              "message"
+            ]
+          },
+          {
+            "name": "error",
+            "line": 68,
+            "args": [
+              "self",
+              "message"
+            ]
+          },
+          {
+            "name": "debug",
+            "line": 72,
+            "args": [
+              "self",
+              "message"
+            ]
+          },
+          {
+            "name": "critical",
+            "line": 76,
+            "args": [
+              "self",
+              "message"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [
+      {
+        "name": "setup_logging",
+        "line": 81,
+        "args": [
+          "level",
+          "console_enabled",
+          "file_enabled",
+          "file_path"
+        ]
+      }
+    ],
+    "imports": [
+      {
+        "type": "import",
+        "module": "logging",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "dataclasses",
+        "name": "dataclass",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\utils\\metrics.py",
+    "lines": 133,
+    "classes": [
+      {
+        "name": "MetricsExporter",
+        "line": 13,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 16,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "update_agent_health",
+            "line": 95,
+            "args": [
+              "self",
+              "server",
+              "is_up"
+            ]
+          },
+          {
+            "name": "update_drift_count",
+            "line": 100,
+            "args": [
+              "self",
+              "server",
+              "plugin",
+              "count"
+            ]
+          },
+          {
+            "name": "record_drift_check",
+            "line": 104,
+            "args": [
+              "self",
+              "server"
+            ]
+          },
+          {
+            "name": "record_change_applied",
+            "line": 108,
+            "args": [
+              "self",
+              "server",
+              "success",
+              "duration"
+            ]
+          },
+          {
+            "name": "update_plugin_version",
+            "line": 114,
+            "args": [
+              "self",
+              "server",
+              "plugin",
+              "version"
+            ]
+          },
+          {
+            "name": "update_outdated_plugins",
+            "line": 118,
+            "args": [
+              "self",
+              "server",
+              "count"
+            ]
+          },
+          {
+            "name": "update_deviations",
+            "line": 122,
+            "args": [
+              "self",
+              "server",
+              "pending",
+              "flagged_bad"
+            ]
+          },
+          {
+            "name": "export_metrics",
+            "line": 127,
+            "args": [
+              "self"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "prometheus_client",
+        "name": "Counter",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "prometheus_client",
+        "name": "Gauge",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "prometheus_client",
+        "name": "Histogram",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "prometheus_client",
+        "name": "generate_latest",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "prometheus_client.core",
+        "name": "CollectorRegistry",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\web\\api.py",
+    "lines": 938,
+    "classes": [
+      {
+        "name": "ChangeRequest",
+        "line": 53,
+        "methods": [],
+        "bases": [
+          "BaseModel"
+        ]
+      },
+      {
+        "name": "ChangeRequestBatch",
+        "line": 65,
+        "methods": [],
+        "bases": [
+          "BaseModel"
+        ]
+      },
+      {
+        "name": "DeviationReview",
+        "line": 74,
+        "methods": [],
+        "bases": [
+          "BaseModel"
+        ]
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "fastapi",
+        "name": "FastAPI",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi",
+        "name": "HTTPException",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi",
+        "name": "BackgroundTasks",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi",
+        "name": "UploadFile",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi",
+        "name": "File",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi",
+        "name": "Form",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi.staticfiles",
+        "name": "StaticFiles",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi.responses",
+        "name": "FileResponse",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi.responses",
+        "name": "HTMLResponse",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi.responses",
+        "name": "JSONResponse",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pydantic",
+        "name": "BaseModel",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "models",
+        "name": "DeviationParser",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "models",
+        "name": "DeviationManager",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "models",
+        "name": "DeviationItem",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "models",
+        "name": "DeviationStatus",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "models",
+        "name": "ServerView",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "models",
+        "name": "GlobalView",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "models",
+        "name": "PluginConfig",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.settings",
+        "name": "get_settings",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.bedrock_updater",
+        "name": "BedrockUpdater",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "utils.metrics",
+        "name": "metrics",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "fastapi.responses",
+        "name": "Response",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.plugin_checker",
+        "name": "PluginChecker",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.plugin_checker",
+        "name": "PluginChecker",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.plugin_checker",
+        "name": "PluginChecker",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.plugin_checker",
+        "name": "PluginChecker",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.plugin_checker",
+        "name": "PluginChecker",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "deployment.pipeline",
+        "name": "DeploymentPipeline",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "deployment.pipeline",
+        "name": "DeploymentPipeline",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "deployment.pipeline",
+        "name": "DeploymentPipeline",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "deployment.pipeline",
+        "name": "DeploymentPipeline",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "deployment.pipeline",
+        "name": "DeploymentPipeline",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "CloudStorage",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "ChangeRequestManager",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.config_updater",
+        "name": "ConfigUpdater",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "CloudStorage",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "ChangeRequestManager",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "CloudStorage",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.cloud_storage",
+        "name": "ChangeRequestManager",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "updaters.plugin_checker",
+        "name": "PluginChecker",
+        "asname": null
+      }
+    ]
+  },
+  {
+    "path": "src\\web\\models.py",
+    "lines": 654,
+    "classes": [
+      {
+        "name": "DeviationStatus",
+        "line": 16,
+        "methods": [],
+        "bases": [
+          "str",
+          "Enum"
+        ]
+      },
+      {
+        "name": "DeviationItem",
+        "line": 24,
+        "methods": [],
+        "bases": [
+          "BaseModel"
+        ]
+      },
+      {
+        "name": "PluginConfig",
+        "line": 39,
+        "methods": [],
+        "bases": [
+          "BaseModel"
+        ]
+      },
+      {
+        "name": "ServerView",
+        "line": 46,
+        "methods": [],
+        "bases": [
+          "BaseModel"
+        ]
+      },
+      {
+        "name": "GlobalView",
+        "line": 58,
+        "methods": [],
+        "bases": [
+          "BaseModel"
+        ]
+      },
+      {
+        "name": "DeviationParser",
+        "line": 68,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 71,
+            "args": [
+              "self",
+              "deviations_file",
+              "universal_file",
+              "base_repo_path"
+            ]
+          },
+          {
+            "name": "load_universal_configs",
+            "line": 91,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_save_universal_config",
+            "line": 166,
+            "args": [
+              "self",
+              "configs",
+              "plugin",
+              "config_file",
+              "content"
+            ]
+          },
+          {
+            "name": "load_deviations",
+            "line": 187,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "_parse_value",
+            "line": 308,
+            "args": [
+              "self",
+              "value_str"
+            ]
+          },
+          {
+            "name": "get_deviations_by_server",
+            "line": 339,
+            "args": [
+              "self",
+              "server_name"
+            ]
+          },
+          {
+            "name": "get_deviations_by_plugin",
+            "line": 351,
+            "args": [
+              "self",
+              "plugin_name"
+            ]
+          },
+          {
+            "name": "get_deviations_by_status",
+            "line": 363,
+            "args": [
+              "self",
+              "status"
+            ]
+          },
+          {
+            "name": "get_universal_config",
+            "line": 375,
+            "args": [
+              "self",
+              "plugin",
+              "config_file",
+              "key_path"
+            ]
+          }
+        ],
+        "bases": []
+      },
+      {
+        "name": "DeviationManager",
+        "line": 411,
+        "methods": [
+          {
+            "name": "__init__",
+            "line": 414,
+            "args": [
+              "self",
+              "storage_path"
+            ]
+          },
+          {
+            "name": "flag_deviation",
+            "line": 424,
+            "args": [
+              "self",
+              "server_name",
+              "plugin_name",
+              "config_path",
+              "reason"
+            ]
+          },
+          {
+            "name": "get_flagged_bad_deviations",
+            "line": 470,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "generate_fix_changes",
+            "line": 515,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "save_reviews",
+            "line": 582,
+            "args": [
+              "self"
+            ]
+          },
+          {
+            "name": "load_reviews",
+            "line": 618,
+            "args": [
+              "self"
+            ]
+          }
+        ],
+        "bases": []
+      }
+    ],
+    "functions": [],
+    "imports": [
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Dict",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "List",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Optional",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "typing",
+        "name": "Any",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pathlib",
+        "name": "Path",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pydantic",
+        "name": "BaseModel",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "pydantic",
+        "name": "Field",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "enum",
+        "name": "Enum",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.data_loader",
+        "name": "ProductionDataLoader",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "core.data_loader",
+        "name": "ServerInfo",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "from",
+        "module": "datetime",
+        "name": "datetime",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "uuid",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "json",
+        "asname": null
+      },
+      {
+        "type": "import",
+        "module": "yaml",
+        "asname": null
+      }
+    ]
+  }
+]

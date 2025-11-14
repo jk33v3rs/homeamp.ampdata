@@ -1,0 +1,128 @@
+{
+  "timestamp": "1763009556.8075206",
+  "total_plugins": 88,
+  "platforms": {
+    "paper": {
+      "count": 62,
+      "plugins": [
+        "AxiomPaper",
+        "BattleRoyale",
+        "BentoBox",
+        "BetterStructures",
+        "CMI",
+        "CMILib",
+        "CSMC",
+        "Chunky",
+        "ChunkyBorder",
+        "Citizens",
+        "CombatPets",
+        "CommunityQuests",
+        "CoreProtect",
+        "CraftBook",
+        "CreativeSuite",
+        "DamageIndicator",
+        "EliteMobs",
+        "EternalTD",
+        "ExcellentEnchants",
+        "ExcellentJobs",
+        "ExcellentQuests",
+        "FreeMinecraftModels",
+        "GlowingItems",
+        "GregoRail",
+        "HandsOffMyBook",
+        "Hurricane",
+        "HuskSync",
+        "HuskTowns",
+        "ImageFrame",
+        "JobListings",
+        "JobsReborn",
+        "LevelledMobs",
+        "LibsDisguises",
+        "Lootin",
+        "LuckPerms",
+        "Minetorio",
+        "PAPIProxyBridge-Bukkit",
+        "PaperTweaks",
+        "Pl3xMapExtras",
+        "PlaceholderAPI",
+        "Plan",
+        "ProtocolLib",
+        "Quests",
+        "QuickShop-Hikari",
+        "ResourcePackManager",
+        "ResurrectionChest",
+        "TheNewEconomy",
+        "TreeFeller",
+        "Vault",
+        "ViaBackwards",
+        "ViaVersion",
+        "VillagerOptimiser",
+        "WorldBorder",
+        "WorldEdit",
+        "WorldGuard",
+        "eShulkerBox",
+        "floodgate",
+        "mcMMO",
+        "nightcore",
+        "packetevents-spigot",
+        "spark",
+        "spicord"
+      ]
+    },
+    "velocity": {
+      "count": 10,
+      "plugins": [
+        "autoviaupdater",
+        "papiproxybridge-velocity",
+        "plan-velocity",
+        "vcustombrand",
+        "velocitab",
+        "viabackwards-velocity",
+        "viarewind",
+        "viaversion-velocity",
+        "vserverinfo",
+        "vwhitelist"
+      ]
+    },
+    "geyser": {
+      "count": 1,
+      "plugins": [
+        "Geyser-Recipe-Fix"
+      ]
+    }
+  },
+  "consolidated": {
+    "QuickShop-Hikari": [
+      "Addon-Discount",
+      "Addon-DisplayControl",
+      "Addon-Limited",
+      "Addon-List",
+      "Addon-Plan",
+      "Addon-ShopItemOnly",
+      "Compat-EliteMobs",
+      "Compat-WorldEdit",
+      "Compat-WorldGuard",
+      "economy-bridge",
+      "Shop-Search"
+    ],
+    "BentoBox": [
+      "BoxedEyes",
+      "PhantomWorlds",
+      "VoidSpawn"
+    ],
+    "LuckPerms": [
+      "luckperms-velocity"
+    ]
+  },
+  "excluded": [
+    "DeluxeMenus",
+    "Duels",
+    "Essentials",
+    "EssentialsChat",
+    "EssentialsSpawn",
+    "Geyser-Spigot",
+    "LibertyBans",
+    "LiveAtlas",
+    "Pl3xMap"
+  ]
+}
