@@ -48,7 +48,7 @@ REPO_SUBDIR="software/homeamp-config-manager"
 
 # Step 1: Install system dependencies
 echo -e "${YELLOW}[1/9] Installing system dependencies...${NC}"
-apt-get update
+apt-get update || echo "Warning: apt-get update had errors, continuing anyway..."
 apt-get install -y python3 python3-pip python3-venv git curl
 
 # Step 2: Create directories
