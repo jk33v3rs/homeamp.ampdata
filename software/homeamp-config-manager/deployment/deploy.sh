@@ -60,26 +60,32 @@ mkdir -p "$LOG_DIR"
 
 # Step 3: Clone repository (or pull latest)
 echo -e "${YELLOW}[3/9] Fetching code from GitHub...${NC}"
-if [ -d "$INSTALL_DIR/.git" ]; then
-  echo "Repository exists, pulling latest changes..."
-  cd "$INSTALL_DIR"
-  git pull
-else
-  echo "Cloning repository..."
-  cd /opt
-  git clone "$REPO_URL" homeamp.ampdata.temp
-  mv homeamp.ampdata.temp/$REPO_SUBDIR/* "$INSTALL_DIR/"
-  rm -rf homeamp.ampdata.temp
-fi
+echo "Cloning repository..."
+cd /opt
+rm -rf homeamp.ampdata.temp
+git clone "$REPO_URL" homeamp.ampdata.temp
+
+echo "Copying files to installation directory..."
+# Use cp -r to handle existing directories properly
+cp -rf homeamp.ampdata.temp/$REPO_SUBDIR/* "$INSTALL_DIR/"
+rm -rf homeamp.ampdata.temp
 
 cd "$INSTALL_DIR"
 
 # Step 4: Install Python dependencies
 echo -e "${YELLOW}[4/9] Installing Python dependencies...${NC}"
-pip3 install --upgrade pip
+# Create virtual environment if it doesn't exist
+if [ ! -d "$INSTALL_DIR/venv" ]; then
+  echo "Creating virtual environment..."
+  python3 -m venv "$INSTALL_DIR/venv"
+fi
+
+# Activate virtual environment and install dependencies
+source "$INSTALL_DIR/venv/bin/activate"
+pip install --upgrade pip
 if [ -f "requirements.txt" ]; then
   echo "Installing from requirements.txt..."
-  pip3 install -r requirements.txt
+  pip install -r requirements.txt
 else
   echo -e "${RED}ERROR: requirements.txt not found!${NC}"
   exit 1

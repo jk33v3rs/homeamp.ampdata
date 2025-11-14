@@ -15,7 +15,7 @@ Environment="ARCHIVESMP_MINIO_SECURE=false"
 EnvironmentFile=-/etc/archivesmp/secrets.env
 
 # Agent runs with config file specifying server name
-ExecStart=/usr/bin/python3 -m src.agent.service /etc/archivesmp/agent.yaml
+ExecStart=/opt/archivesmp-config-manager/venv/bin/python -m src.agent.service /etc/archivesmp/agent.yaml
 
 # Logging
 StandardOutput=journal

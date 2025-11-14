@@ -16,7 +16,7 @@ Environment="ARCHIVESMP_WEB_PORT=8000"
 EnvironmentFile=-/etc/archivesmp/secrets.env
 
 # Start web API with uvicorn
-ExecStart=/usr/bin/python3 -m uvicorn src.web.api:app --host ${ARCHIVESMP_WEB_HOST} --port ${ARCHIVESMP_WEB_PORT} --workers 4
+ExecStart=/opt/archivesmp-config-manager/venv/bin/python -m uvicorn src.web.api:app --host ${ARCHIVESMP_WEB_HOST} --port ${ARCHIVESMP_WEB_PORT} --workers 4
 
 # Logging
 StandardOutput=journal

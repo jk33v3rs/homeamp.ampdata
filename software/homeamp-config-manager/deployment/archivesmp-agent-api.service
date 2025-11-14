@@ -14,7 +14,7 @@ Environment="PYTHONPATH=/opt/archivesmp-config-manager"
 EnvironmentFile=-/etc/archivesmp/secrets.env
 
 # Agent API for local instance management (port 8001)
-ExecStart=/usr/bin/python3 -m uvicorn src.agent.api:app --host 0.0.0.0 --port 8001
+ExecStart=/opt/archivesmp-config-manager/venv/bin/python -m uvicorn src.agent.api:app --host 0.0.0.0 --port 8001
 
 # Logging
 StandardOutput=journal
