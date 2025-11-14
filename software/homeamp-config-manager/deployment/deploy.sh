@@ -8,8 +8,6 @@
 #   sudo bash deploy.sh hetzner   # Deploy to Hetzner (with Web API)
 #   sudo bash deploy.sh ovh       # Deploy to OVH (agent only)
 
-set -e  # Exit on error
-
 # Colors for output
 RED='\033[0.31m'
 GREEN='\033[0;32m'
