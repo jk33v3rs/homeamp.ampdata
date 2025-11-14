@@ -62,13 +62,17 @@ mkdir -p "$LOG_DIR"
 echo -e "${YELLOW}[3/9] Fetching code from GitHub...${NC}"
 echo "Cloning repository..."
 cd /opt
-rm -rf homeamp.ampdata.temp
-git clone "$REPO_URL" homeamp.ampdata.temp
+
+# Create timestamped temp directory
+TEMP_DIR="homeamp_deploy_$(date +%Y%m%d%H%M%S)"
+git clone "$REPO_URL" "$TEMP_DIR"
 
 echo "Copying files to installation directory..."
 # Use cp -r to handle existing directories properly
-cp -rf homeamp.ampdata.temp/$REPO_SUBDIR/* "$INSTALL_DIR/"
-rm -rf homeamp.ampdata.temp
+cp -rf "$TEMP_DIR/$REPO_SUBDIR"/* "$INSTALL_DIR/"
+
+echo "Cleaning up temporary clone..."
+rm -rf "$TEMP_DIR"
 
 cd "$INSTALL_DIR"
 
