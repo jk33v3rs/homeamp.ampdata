@@ -50,3 +50,11 @@ __pycache__/
 # Temporary files
 temp/
 tmp/
+
+# Secrets and credentials (NEVER COMMIT)
+secrets.env
+*.env
+!*.env.template
+.env
+.env.local
+.env.production
