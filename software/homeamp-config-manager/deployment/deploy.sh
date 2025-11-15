@@ -102,10 +102,8 @@ if [ ! -f "$CONFIG_DIR/agent.yaml" ]; then
   # Set server name based on deployment target
   if [ "$SERVER_TYPE" == "hetzner" ]; then
     sed -i 's/server_name: "HETZNER"/server_name: "HETZNER"/' "$CONFIG_DIR/agent.yaml"
-    sed -i 's/endpoint: "localhost:9000"/endpoint: "localhost:9000"/' "$CONFIG_DIR/agent.yaml"
   else
     sed -i 's/server_name: "HETZNER"/server_name: "OVH"/' "$CONFIG_DIR/agent.yaml"
-    sed -i 's/endpoint: "localhost:9000"/endpoint: "135.181.212.169:9000"/' "$CONFIG_DIR/agent.yaml"
   fi
   
   echo -e "${GREEN}✓ Created $CONFIG_DIR/agent.yaml${NC}"

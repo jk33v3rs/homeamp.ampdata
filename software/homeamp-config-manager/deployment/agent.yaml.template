@@ -24,13 +24,12 @@ agent:
 # MinIO storage configuration
 storage:
   minio:
-    # For Hetzner (running MinIO locally): Use localhost
-    # For OVH (accessing Hetzner MinIO): Use public IP
-    endpoint: "localhost:9000"  # Change to "135.181.212.169:9000" on OVH
+    # MinIO hosted on YunoHost, accessible via cloud.archivesmp.site
+    endpoint: "cloud.archivesmp.site"
     access_key: "${ARCHIVESMP_MINIO_ACCESS_KEY}"  # From /etc/archivesmp/secrets.env
     secret_key: "${ARCHIVESMP_MINIO_SECRET_KEY}"  # From /etc/archivesmp/secrets.env
     bucket_name: "archivesmp-config"
-    secure: false  # true if using HTTPS
+    secure: true  # HTTPS via YunoHost reverse proxy
     timeout: 30
     retry_attempts: 3
 
