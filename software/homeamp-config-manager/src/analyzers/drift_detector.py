@@ -268,6 +268,10 @@ class DriftDetector:
                 for config_file, baseline_config in baseline_plugin.items():
                     current_config = current_plugin.get(config_file, {})
                     
+                    # Ensure current_config is a dict before comparing
+                    if not isinstance(current_config, dict):
+                        current_config = {}
+                    
                     # Compare configurations recursively
                     drift_items.extend(
                         self._compare_configs(
