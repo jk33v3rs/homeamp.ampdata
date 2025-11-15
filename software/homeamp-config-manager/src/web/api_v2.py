@@ -229,14 +229,14 @@ async def get_servers():
 async def get_deviations():
     """Get configuration deviations (drift)"""
     # For now return empty list - drift detection needs config_rules populated
-    return {"deviations": [], "count": 0}
+    return []
 
 
 @app.get("/api/plugins")
 async def get_plugins():
     """Get plugin information"""
     # Query distinct plugins from instances (would need plugin tracking table)
-    return {"plugins": [], "count": 0}
+    return []
 
 
 # ============================================================================
