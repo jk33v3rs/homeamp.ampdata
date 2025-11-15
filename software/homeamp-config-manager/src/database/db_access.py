@@ -152,7 +152,7 @@ class ConfigDatabase:
         
         # Query all applicable rules in priority order (0=highest)
         self.cursor.execute("""
-            SELECT config_value, priority_level, scope_type, scope_identifier
+            SELECT config_value, priority, scope_type, scope_selector
             FROM config_rules
             WHERE plugin_name = %s
               AND config_file = %s
@@ -160,19 +160,19 @@ class ConfigDatabase:
               AND is_active = true
               AND (
                   (scope_type = 'GLOBAL')
-                  OR (scope_type = 'SERVER' AND scope_identifier = %s)
-                  OR (scope_type = 'INSTANCE_GROUP' AND scope_identifier IN (%s))
-                  OR (scope_type = 'INSTANCE' AND scope_identifier = %s)
+                  OR (scope_type = 'SERVER' AND scope_selector = %s)
+                  OR (scope_type = 'INSTANCE_GROUP' AND scope_selector IN (%s))
+                  OR (scope_type = 'INSTANCE' AND scope_selector = %s)
               )
-            ORDER BY priority_level ASC
+            ORDER BY priority ASC
             LIMIT 1
         """, (plugin_name, config_file, config_key, server_name, 
               ','.join(groups) if groups else '', instance_id))
         
         result = self.cursor.fetchone()
         if result:
-            scope_desc = f"{result['scope_type']}:{result['scope_identifier']}"
-            return (result['config_value'], result['priority_level'], scope_desc)
+            scope_desc = f"{result['scope_type']}:{result['scope_selector']}"
+            return (result['config_value'], result['priority'], scope_desc)
         
         return (None, None, 'NOT_CONFIGURED')
     
@@ -182,13 +182,13 @@ class ConfigDatabase:
             self.cursor.execute("""
                 SELECT * FROM config_rules
                 WHERE plugin_name = %s AND is_active = true
-                ORDER BY priority_level, plugin_name, config_file, config_key
+                ORDER BY priority, plugin_name, config_file, config_key
             """, (plugin_name,))
         else:
             self.cursor.execute("""
                 SELECT * FROM config_rules
                 WHERE is_active = true
-                ORDER BY priority_level, plugin_name, config_file, config_key
+                ORDER BY priority, plugin_name, config_file, config_key
             """)
         return self.cursor.fetchall()
     
