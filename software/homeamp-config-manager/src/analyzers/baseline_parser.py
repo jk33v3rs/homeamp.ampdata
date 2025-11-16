@@ -62,7 +62,8 @@ class BaselineParser:
     def list_plugins(self) -> List[str]:
         """Get list of plugins with baseline configs"""
         plugins = []
-        for file in self.baselines_dir.glob("*_universal_config.md"):
+        # Search in current dir and subdirs
+        for file in self.baselines_dir.rglob("*_universal_config.md"):
             plugin_name = file.stem.replace("_universal_config", "")
             plugins.append(plugin_name)
         return sorted(plugins)
@@ -73,12 +74,14 @@ class BaselineParser:
         
         Returns dict of config keys to expected values
         """
-        baseline_file = self.baselines_dir / f"{plugin_name}_universal_config.md"
+        # Search recursively for the baseline file
+        baseline_files = list(self.baselines_dir.rglob(f"{plugin_name}_universal_config.md"))
         
-        if not baseline_file.exists():
+        if not baseline_files:
             logger.warning(f"No baseline found for {plugin_name}")
             return {}
         
+        baseline_file = baseline_files[0]
         with open(baseline_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
