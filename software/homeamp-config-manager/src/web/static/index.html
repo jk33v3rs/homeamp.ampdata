@@ -27,6 +27,10 @@
                 <option value="">Select Server...</option>
             </select>
             
+            <select id="instanceSelect" class="server-select-hidden" title="Select instance" onchange="loadInstanceView()" style="display: none;">
+                <option value="">Select Instance...</option>
+            </select>
+            
             <button onclick="refreshData()" class="refresh-button">🔄 Refresh</button>
         </div>
         
@@ -182,27 +186,56 @@
         let currentTab = 'deviations';
         let deviationsData = [];
         let selectedServer = null;
+        let selectedInstance = null;
+        let allInstances = [];
         
         // Initialize
         window.onload = () => {
-            loadServers();
+            loadServersAndInstances();
             refreshData();
         };
         
-        // Load server list
-        async function loadServers() {
-            const servers = [
-                'BENT01', 'BIG01', 'CLIP01', 'CREA01', 'CSMC01', 'DEV01',
-                'EMAD01', 'EVO01', 'HARD01', 'HUB01', 'MIN01', 'MINE01',
-                'PRI01', 'ROY01', 'SMP101', 'SMP201', 'TOW01'
-            ];
+        // Load server and instance lists from API
+        async function loadServersAndInstances() {
+            try {
+                // Load all instances
+                const instancesResponse = await fetch('/api/instances');
+                const instancesData = await instancesResponse.json();
+                allInstances = instancesData.instances || [];
+                
+                // Extract unique server names
+                const serverNames = [...new Set(allInstances.map(i => i.server_name))];
+                
+                // Populate server dropdown
+                const serverSelect = document.getElementById('serverSelect');
+                serverNames.forEach(server => {
+                    const option = document.createElement('option');
+                    option.value = server;
+                    option.textContent = server;
+                    serverSelect.appendChild(option);
+                });
+                
+                // Populate instance dropdown with all instances initially
+                updateInstanceDropdown();
+            } catch (error) {
+                console.error('Error loading servers/instances:', error);
+            }
+        }
+        
+        // Update instance dropdown based on selected server
+        function updateInstanceDropdown(serverFilter = null) {
+            const instanceSelect = document.getElementById('instanceSelect');
+            instanceSelect.innerHTML = '<option value="">Select Instance...</option>';
             
-            const select = document.getElementById('serverSelect');
-            servers.forEach(server => {
+            const instances = serverFilter 
+                ? allInstances.filter(i => i.server_name === serverFilter)
+                : allInstances;
+            
+            instances.forEach(instance => {
                 const option = document.createElement('option');
-                option.value = server;
-                option.textContent = server;
-                select.appendChild(option);
+                option.value = instance.instance_id;
+                option.textContent = `${instance.instance_id} (${instance.server_name})`;
+                instanceSelect.appendChild(option);
             });
         }
         
@@ -210,11 +243,24 @@
         function changeViewLevel() {
             const level = document.getElementById('viewLevel').value;
             const serverSelect = document.getElementById('serverSelect');
+            const instanceSelect = document.getElementById('instanceSelect');
             
-            if (level === 'server' || level === 'instance') {
-                serverSelect.style.display = 'block';
+            // Reset selections
+            selectedServer = null;
+            selectedInstance = null;
+            
+            if (level === 'server') {
+                serverSelect.style.display = 'inline-block';
+                instanceSelect.style.display = 'none';
+                serverSelect.value = '';
+            } else if (level === 'instance') {
+                serverSelect.style.display = 'none';
+                instanceSelect.style.display = 'inline-block';
+                instanceSelect.value = '';
+                updateInstanceDropdown(); // Show all instances
             } else {
                 serverSelect.style.display = 'none';
+                instanceSelect.style.display = 'none';
             }
             
             currentView = level;
@@ -633,8 +679,30 @@ ${JSON.stringify(data, null, 2)}
                     return;
                 }
                 
+                // Filter settings based on current view
+                let filteredSettings = allSettings;
+                if (currentView === 'server' && selectedServer) {
+                    // Filter to only show instances from selected server
+                    const serverInstances = allInstances
+                        .filter(i => i.server_name === selectedServer)
+                        .map(i => i.instance_id);
+                    filteredSettings = Object.fromEntries(
+                        Object.entries(allSettings).filter(([name, _]) => serverInstances.includes(name))
+                    );
+                } else if (currentView === 'instance' && selectedInstance) {
+                    // Filter to only show the selected instance
+                    filteredSettings = selectedInstance in allSettings 
+                        ? { [selectedInstance]: allSettings[selectedInstance] }
+                        : {};
+                }
+                
+                if (Object.keys(filteredSettings).length === 0) {
+                    grid.innerHTML = '<p style="color: #8b949e;">No instances in this view</p>';
+                    return;
+                }
+                
                 let html = '';
-                for (const [instanceName, settings] of Object.entries(allSettings)) {
+                for (const [instanceName, settings] of Object.entries(filteredSettings)) {
                     const modeDisplay = {
                         'manual': '🔒 Manual Only',
                         'semi_auto': '⚡ Semi-Automatic',
@@ -802,6 +870,14 @@ ${JSON.stringify(data, null, 2)}
         // Load server view
         function loadServerView() {
             selectedServer = document.getElementById('serverSelect').value;
+            selectedInstance = null;
+            refreshData();
+        }
+        
+        // Load instance view
+        function loadInstanceView() {
+            selectedInstance = document.getElementById('instanceSelect').value;
+            selectedServer = null;
             refreshData();
         }
         
