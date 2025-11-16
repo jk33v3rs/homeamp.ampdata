@@ -10,13 +10,21 @@ USE asmp_config;
 -- ============================================================================
 
 -- Config rules with priority hierarchy (GLOBAL → SERVER → META_TAG → INSTANCE)
+-- Handles PLUGINS, STANDARD CONFIGS (server.properties, bukkit.yml), and DATAPACKS
 CREATE TABLE IF NOT EXISTS config_rules (
     rule_id INT AUTO_INCREMENT PRIMARY KEY,
     
+    -- What type of config is this?
+    config_type VARCHAR(16) NOT NULL DEFAULT 'plugin',  -- plugin, standard, datapack
+    
     -- What config is this rule for?
-    plugin_name VARCHAR(128) NOT NULL,
-    config_file VARCHAR(255) DEFAULT 'config.yml',
-    config_key VARCHAR(512) NOT NULL,
+    plugin_name VARCHAR(128),          -- For plugin configs (EliteMobs, HuskSync) or NULL for standard
+    config_file VARCHAR(255) NOT NULL, -- config.yml, server.properties, bukkit.yml, etc.
+    config_key VARCHAR(512) NOT NULL,  -- Key path (can be dot notation)
+    
+    -- For datapacks (only used when config_type='datapack')
+    datapack_name VARCHAR(128),        -- Name of required datapack
+    world_name VARCHAR(64),            -- Which world (or NULL for all worlds)
     
     -- Scope definition (what instances does this apply to?)
     scope_type VARCHAR(16) NOT NULL,  -- GLOBAL, SERVER, META_TAG, INSTANCE
@@ -24,7 +32,7 @@ CREATE TABLE IF NOT EXISTS config_rules (
     
     -- Value
     config_value TEXT,
-    value_type VARCHAR(16) DEFAULT 'string',  -- string, int, float, boolean, json, list
+    value_type VARCHAR(16) DEFAULT 'string',  -- string, int, float, boolean, json, list, required, optional
     
     -- Priority (auto-calculated: 1=INSTANCE, 2=META_TAG, 3=SERVER, 4=GLOBAL)
     priority INT NOT NULL DEFAULT 4,
@@ -37,10 +45,13 @@ CREATE TABLE IF NOT EXISTS config_rules (
     is_active BOOLEAN DEFAULT true,
     
     -- Indexes
+    INDEX idx_rules_type (config_type),
     INDEX idx_rules_plugin (plugin_name),
+    INDEX idx_rules_file (config_file),
     INDEX idx_rules_scope (scope_type, scope_selector),
     INDEX idx_rules_priority (priority),
-    INDEX idx_rules_lookup (plugin_name, config_file, config_key)
+    INDEX idx_rules_lookup (config_type, config_file, config_key),
+    INDEX idx_rules_datapack (datapack_name, world_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Instance tag assignments (for meta-tag based rules)
@@ -87,12 +98,18 @@ CREATE TABLE IF NOT EXISTS config_variables (
 -- ============================================================================
 
 -- Variance cache (pre-calculated for UI performance)
+-- Tracks variance for PLUGINS, STANDARD CONFIGS, and DATAPACKS
 CREATE TABLE IF NOT EXISTS config_variance_cache (
     cache_id INT AUTO_INCREMENT PRIMARY KEY,
     
-    plugin_name VARCHAR(128) NOT NULL,
-    config_file VARCHAR(255) DEFAULT 'config.yml',
-    config_key VARCHAR(512) NOT NULL,
+    config_type VARCHAR(16) NOT NULL DEFAULT 'plugin',  -- plugin, standard, datapack
+    plugin_name VARCHAR(128),          -- For plugins, NULL for standard configs
+    config_file VARCHAR(255) NOT NULL, -- config.yml, server.properties, etc.
+    config_key VARCHAR(512) NOT NULL,  -- Key path
+    
+    -- For datapacks
+    datapack_name VARCHAR(128),
+    world_name VARCHAR(64),
     
     -- Variance classification
     variance_classification VARCHAR(16),  -- NONE, VARIABLE, META_TAG, INSTANCE, DRIFT
@@ -110,19 +127,26 @@ CREATE TABLE IF NOT EXISTS config_variance_cache (
     last_scanned TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     scan_version INT DEFAULT 1,
     
-    UNIQUE KEY unique_config_key (plugin_name, config_file, config_key),
+    UNIQUE KEY unique_config_key (config_type, COALESCE(plugin_name, ''), config_file, config_key, COALESCE(datapack_name, ''), COALESCE(world_name, '')),
+    INDEX idx_variance_type (config_type),
     INDEX idx_variance_classification (variance_classification),
     INDEX idx_variance_drift (is_expected_variance)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Detected drift entries (actual differences found)
+-- Handles PLUGINS, STANDARD CONFIGS, and DATAPACKS
 CREATE TABLE IF NOT EXISTS config_drift_log (
     drift_id INT AUTO_INCREMENT PRIMARY KEY,
     
     instance_id VARCHAR(16) NOT NULL,
-    plugin_name VARCHAR(128) NOT NULL,
+    config_type VARCHAR(16) NOT NULL DEFAULT 'plugin',  -- plugin, standard, datapack
+    plugin_name VARCHAR(128),          -- For plugins, NULL for standard
     config_file VARCHAR(255),
-    config_key VARCHAR(512) NOT NULL,
+    config_key VARCHAR(512),
+    
+    -- For datapacks
+    datapack_name VARCHAR(128),
+    world_name VARCHAR(64),
     
     -- Values
     baseline_value TEXT,          -- Expected value from rule/baseline
@@ -145,6 +169,7 @@ CREATE TABLE IF NOT EXISTS config_drift_log (
     FOREIGN KEY (instance_id) REFERENCES instances(instance_id) ON DELETE CASCADE,
     
     INDEX idx_drift_instance (instance_id),
+    INDEX idx_drift_type (config_type),
     INDEX idx_drift_plugin (plugin_name),
     INDEX idx_drift_status (status),
     INDEX idx_drift_severity (severity),
@@ -221,18 +246,66 @@ INSERT IGNORE INTO meta_tags (tag_name, category_id, display_name, color_code, i
 -- Seed default variables for all instances (will be populated by agent)
 -- Common variables: SHORTNAME, SERVER_PORT, DATABASE_NAME, WORLD_NAME, CLUSTER_ID
 
--- Seed a few sample global rules (examples)
-INSERT IGNORE INTO config_rules (plugin_name, config_file, config_key, scope_type, scope_selector, config_value, value_type, priority, created_by, notes) VALUES
-    -- Global defaults
-    ('EliteMobs', 'config.yml', 'language', 'GLOBAL', NULL, 'english', 'string', 4, 'system', 'Universal language setting'),
-    ('EliteMobs', 'config.yml', 'setupDoneV4', 'GLOBAL', NULL, 'true', 'boolean', 4, 'system', 'Setup completion flag'),
+-- ============================================================================
+-- SAMPLE RULES - Examples of all three config types
+-- ============================================================================
+
+-- PLUGIN CONFIG RULES
+INSERT IGNORE INTO config_rules (config_type, plugin_name, config_file, config_key, scope_type, scope_selector, config_value, value_type, priority, created_by, notes) VALUES
+    -- Plugin: Global defaults
+    ('plugin', 'EliteMobs', 'config.yml', 'language', 'GLOBAL', NULL, 'english', 'string', 4, 'system', 'Universal language setting'),
+    ('plugin', 'EliteMobs', 'config.yml', 'setupDoneV4', 'GLOBAL', NULL, 'true', 'boolean', 4, 'system', 'Setup completion flag'),
     
-    -- Server-specific (example - database hosts differ by server)
-    ('HuskSync', 'config.yml', 'database.host', 'SERVER', 'Hetzner', '135.181.212.169', 'string', 3, 'system', 'Hetzner DB host'),
-    ('HuskSync', 'config.yml', 'database.host', 'SERVER', 'OVH', '37.187.143.41', 'string', 3, 'system', 'OVH DB host'),
+    -- Plugin: Server-specific (database hosts differ by physical server)
+    ('plugin', 'HuskSync', 'config.yml', 'database.host', 'SERVER', 'Hetzner', '135.181.212.169', 'string', 3, 'system', 'Hetzner DB host'),
+    ('plugin', 'HuskSync', 'config.yml', 'database.host', 'SERVER', 'OVH', '37.187.143.41', 'string', 3, 'system', 'OVH DB host'),
     
-    -- Meta-tag rules (creative mode instances get different settings)
-    ('Minecraft', 'server.properties', 'gamemode', 'META_TAG', 'creative', 'creative', 'string', 2, 'system', 'Creative worlds force creative mode'),
-    ('Minecraft', 'bukkit.yml', 'spawn-protection', 'META_TAG', 'creative', '0', 'int', 2, 'system', 'No spawn protection in creative');
+    -- Plugin: Meta-tag rules (economy disabled in creative)
+    ('plugin', 'Vault', 'config.yml', 'economy.enabled', 'META_TAG', 'creative', 'false', 'boolean', 2, 'system', 'No economy in creative worlds'),
+    ('plugin', 'EssentialsX', 'config.yml', 'economy-enabled', 'META_TAG', 'economy-disabled', 'false', 'boolean', 2, 'system', 'Economy disabled tag');
+
+-- STANDARD CONFIG RULES (server.properties, bukkit.yml, spigot.yml, paper-global.yml)
+INSERT IGNORE INTO config_rules (config_type, plugin_name, config_file, config_key, scope_type, scope_selector, config_value, value_type, priority, created_by, notes) VALUES
+    -- server.properties: Global defaults
+    ('standard', NULL, 'server.properties', 'max-players', 'GLOBAL', NULL, '100', 'int', 4, 'system', 'Default max players'),
+    ('standard', NULL, 'server.properties', 'difficulty', 'GLOBAL', NULL, 'hard', 'string', 4, 'system', 'Default difficulty'),
+    ('standard', NULL, 'server.properties', 'pvp', 'GLOBAL', NULL, 'false', 'boolean', 4, 'system', 'PvP disabled by default'),
+    
+    -- server.properties: Meta-tag overrides
+    ('standard', NULL, 'server.properties', 'gamemode', 'META_TAG', 'creative', 'creative', 'string', 2, 'system', 'Creative worlds force creative mode'),
+    ('standard', NULL, 'server.properties', 'gamemode', 'META_TAG', 'survival', 'survival', 'string', 2, 'system', 'Survival worlds force survival mode'),
+    ('standard', NULL, 'server.properties', 'pvp', 'META_TAG', 'pvp-enabled', 'true', 'boolean', 2, 'system', 'Enable PvP for tagged instances'),
+    ('standard', NULL, 'server.properties', 'difficulty', 'META_TAG', 'creative', 'peaceful', 'string', 2, 'system', 'Creative worlds are peaceful'),
+    
+    -- bukkit.yml: Global and meta-tag
+    ('standard', NULL, 'bukkit.yml', 'spawn-protection', 'GLOBAL', NULL, '16', 'int', 4, 'system', 'Default spawn protection'),
+    ('standard', NULL, 'bukkit.yml', 'spawn-protection', 'META_TAG', 'creative', '0', 'int', 2, 'system', 'No spawn protection in creative'),
+    
+    -- spigot.yml: Global settings
+    ('standard', NULL, 'spigot.yml', 'world-settings.default.view-distance', 'GLOBAL', NULL, '10', 'int', 4, 'system', 'Default view distance'),
+    ('standard', NULL, 'spigot.yml', 'world-settings.default.mob-spawn-range', 'GLOBAL', NULL, '8', 'int', 4, 'system', 'Default mob spawn range'),
+    
+    -- paper-global.yml: Performance settings
+    ('standard', NULL, 'config/paper-global.yml', 'chunk-loading.async-chunks', 'GLOBAL', NULL, 'true', 'boolean', 4, 'system', 'Enable async chunk loading'),
+    ('standard', NULL, 'config/paper-global.yml', 'timings.enabled', 'GLOBAL', NULL, 'true', 'boolean', 4, 'system', 'Enable timings'),
+    
+    -- Instance-specific overrides
+    ('standard', NULL, 'server.properties', 'spawn-protection', 'INSTANCE', 'SMP101', '32', 'int', 1, 'admin', 'SMP101 has larger spawn protection');
+
+-- DATAPACK RULES (required/optional datapacks per world/instance)
+INSERT IGNORE INTO config_rules (config_type, datapack_name, world_name, scope_type, scope_selector, config_value, value_type, priority, created_by, notes) VALUES
+    -- Global: Required datapacks for all survival worlds
+    ('datapack', 'VanillaTweaks-AFK', 'world', 'META_TAG', 'survival', 'required', 'required', 2, 'system', 'AFK display for survival worlds'),
+    ('datapack', 'VanillaTweaks-PlayerHeadDrops', 'world', 'META_TAG', 'survival', 'required', 'required', 2, 'system', 'Player head drops for survival'),
+    
+    -- Creative-specific datapacks
+    ('datapack', 'WorldEdit', NULL, 'META_TAG', 'creative', 'required', 'required', 2, 'system', 'WorldEdit datapack for creative'),
+    
+    -- Instance-specific datapack requirements
+    ('datapack', 'CustomDungeon-TowerDefense', 'TOWER_WORLD', 'INSTANCE', 'TOWER01', 'required', 'required', 1, 'admin', 'Tower Defense custom datapack'),
+    ('datapack', 'Terralith', 'world', 'INSTANCE', 'SMP101', 'required', 'required', 1, 'admin', 'Terralith terrain gen for SMP101'),
+    
+    -- Optional datapacks
+    ('datapack', 'VanillaTweaks-ArmorStandEditor', NULL, 'GLOBAL', NULL, 'optional', 'optional', 4, 'system', 'Optional armor stand editor');
 
 COMMIT;
