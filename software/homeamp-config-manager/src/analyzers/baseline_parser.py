@@ -9,6 +9,9 @@ import re
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Tuple
 import logging
+import zipfile
+import tempfile
+import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -18,13 +21,43 @@ class BaselineParser:
     
     def __init__(self, baselines_dir: str = "data/baselines/universal_configs"):
         self.baselines_dir = Path(baselines_dir)
-        if not self.baselines_dir.exists():
+        self.temp_dir = None
+        self.using_zip = False
+        
+        # Check if it's a zip file path
+        zip_path = Path(str(baselines_dir) + ".zip")
+        if zip_path.exists():
+            # Extract zip to temp directory
+            self.temp_dir = tempfile.mkdtemp(prefix="baselines_")
+            logger.info(f"Extracting baselines from {zip_path} to {self.temp_dir}")
+            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                zip_ref.extractall(self.temp_dir)
+            self.baselines_dir = Path(self.temp_dir)
+            self.using_zip = True
+        elif not self.baselines_dir.exists():
             # Try absolute path from project root
             project_root = Path(__file__).parent.parent.parent
             self.baselines_dir = project_root / baselines_dir
-        
-        if not self.baselines_dir.exists():
-            raise FileNotFoundError(f"Baselines directory not found: {baselines_dir}")
+            
+            # Check for zip at absolute path
+            zip_path = Path(str(self.baselines_dir) + ".zip")
+            if zip_path.exists():
+                self.temp_dir = tempfile.mkdtemp(prefix="baselines_")
+                logger.info(f"Extracting baselines from {zip_path} to {self.temp_dir}")
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    zip_ref.extractall(self.temp_dir)
+                self.baselines_dir = Path(self.temp_dir)
+                self.using_zip = True
+            elif not self.baselines_dir.exists():
+                raise FileNotFoundError(f"Baselines directory or zip not found: {baselines_dir}")
+    
+    def __del__(self):
+        """Clean up temp directory if using zip"""
+        if self.temp_dir and Path(self.temp_dir).exists():
+            try:
+                shutil.rmtree(self.temp_dir)
+            except Exception as e:
+                logger.warning(f"Failed to cleanup temp dir {self.temp_dir}: {e}")
     
     def list_plugins(self) -> List[str]:
         """Get list of plugins with baseline configs"""
