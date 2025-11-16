@@ -11,6 +11,7 @@ from enum import Enum
 import json
 
 from ..core.data_loader import ProductionDataLoader, ServerInfo
+from ..core.settings import get_settings
 
 
 class DeviationStatus(str, Enum):
@@ -583,6 +584,8 @@ class DeviationManager:
         """Save review data to disk"""
         try:
             import json
+            from ..core.settings import get_settings
+            settings = get_settings()
             reviews_file = self.storage_path / settings.get_file_path("deviation_reviews")
             
             # Convert reviews to serializable format
@@ -619,6 +622,8 @@ class DeviationManager:
         """Load review data from disk"""
         try:
             import json
+            from ..core.settings import get_settings
+            settings = get_settings()
             reviews_file = self.storage_path / settings.get_file_path("deviation_reviews")
             
             if not reviews_file.exists():

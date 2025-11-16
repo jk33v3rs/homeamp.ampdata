@@ -7,7 +7,7 @@ GitHub releases, and other plugin distribution sources.
 
 from typing import Dict, List, Optional, Any
 from pathlib import Path
-from core.settings import get_settings
+from ..core.settings import get_settings
 from datetime import datetime
 
 
@@ -271,7 +271,7 @@ class PluginChecker:
         if not self.endpoints:
             self.load_api_endpoints()
         
-        from core.settings import get_settings
+        from ..core.settings import get_settings
         
         settings = get_settings()
         update_info = {}
