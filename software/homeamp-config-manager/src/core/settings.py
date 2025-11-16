@@ -432,6 +432,33 @@ class SettingsHandler:
         """Get production database name"""
         return self.get('database', 'production_db_name', default='asmp_SQL')
     
+    @property
+    def DB_HOST(self) -> str:
+        """Get database host (backwards compat)"""
+        host_port = self.production_db_host
+        return host_port.split(':')[0] if ':' in host_port else host_port
+    
+    @property
+    def DB_PORT(self) -> int:
+        """Get database port (backwards compat)"""
+        host_port = self.production_db_host
+        return int(host_port.split(':')[1]) if ':' in host_port else 3306
+    
+    @property
+    def DB_NAME(self) -> str:
+        """Get database name (backwards compat)"""
+        return self.production_db_name
+    
+    @property
+    def DB_USER(self) -> str:
+        """Get database user"""
+        return self.get('database', 'user', default='archivesmp')
+    
+    @property
+    def DB_PASSWORD(self) -> str:
+        """Get database password"""
+        return self.get('database', 'password', default='')
+    
     # Logging Configuration
     @property
     def log_level(self) -> str:
