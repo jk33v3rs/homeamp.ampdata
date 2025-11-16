@@ -21,7 +21,7 @@ class AMPInstanceScanner:
     
     def discover_instances(self) -> List[Dict[str, Any]]:
         """
-        Discover all AMP instances
+        Discover all AMP instances (Paper, Geyser, Velocity)
         
         Returns:
             List of instance dicts with keys: name, path, config_path
@@ -36,20 +36,37 @@ class AMPInstanceScanner:
             if not instance_dir.is_dir():
                 continue
             
-            # Check for Minecraft directory (indicator of valid instance)
-            minecraft_dir = instance_dir / "Minecraft"
-            if not minecraft_dir.exists():
+            # Skip ADS controller instances
+            if (instance_dir / "ADSModule.kvp").exists():
                 continue
             
-            plugins_dir = minecraft_dir / "plugins"
+            # Check for Minecraft directory (Paper servers)
+            minecraft_dir = instance_dir / "Minecraft"
+            if minecraft_dir.exists():
+                plugins_dir = minecraft_dir / "plugins"
+                instances.append({
+                    'name': instance_dir.name,
+                    'path': str(instance_dir),
+                    'minecraft_path': str(minecraft_dir),
+                    'plugins_path': str(plugins_dir) if plugins_dir.exists() else None,
+                    'has_plugins': plugins_dir.exists(),
+                    'platform': 'paper'
+                })
+                continue
             
-            instances.append({
-                'name': instance_dir.name,
-                'path': str(instance_dir),
-                'minecraft_path': str(minecraft_dir),
-                'plugins_path': str(plugins_dir) if plugins_dir.exists() else None,
-                'has_plugins': plugins_dir.exists()
-            })
+            # Check for Geyser standalone (GenericApplication)
+            geyser_dir = instance_dir / "GenericApplication"
+            if geyser_dir.exists():
+                config_dir = geyser_dir / "config"
+                instances.append({
+                    'name': instance_dir.name,
+                    'path': str(instance_dir),
+                    'minecraft_path': str(geyser_dir),
+                    'plugins_path': str(config_dir) if config_dir.exists() else None,
+                    'has_plugins': config_dir.exists(),
+                    'platform': 'geyser'
+                })
+                continue
         
         logger.info(f"Discovered {len(instances)} instances in {self.base_dir}")
         return instances
