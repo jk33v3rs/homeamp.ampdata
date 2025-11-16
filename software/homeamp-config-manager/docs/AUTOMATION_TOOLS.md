@@ -17,7 +17,7 @@ python3 scripts/load_baselines.py
 ```
 
 **What it does:**
-- Parses all 57 `*_universal_config.md` files
+- Parses all 82 `*_universal_config.md` files
 - Populates `baseline_snapshots` table
 - Creates GLOBAL priority rules in `config_rules` table
 - Sets up initial expected values for all plugins
