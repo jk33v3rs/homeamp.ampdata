@@ -487,3 +487,6 @@ def reload_settings() -> None:
     global _settings_instance
     if _settings_instance:
         _settings_instance.reload()
+
+# Global settings instance
+settings = get_settings()
