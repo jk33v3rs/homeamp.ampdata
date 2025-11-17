@@ -22,6 +22,9 @@ openpyxl==3.1.2  # Excel file support for pandas
 # Configuration & Serialization  
 pyyaml==6.0.1
 
+# Database
+mysql-connector-python==8.2.0
+
 # File System Monitoring
 watchdog==3.0.0
 
