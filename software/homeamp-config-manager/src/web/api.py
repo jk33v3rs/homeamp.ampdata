@@ -644,6 +644,609 @@ async def unassign_tag_from_instance(instance_id: str, tag_id: int):
 
 
 # ============================================================================
+# PLUGIN UPDATE TRACKING
+# ============================================================================
+
+@app.get("/api/plugins")
+async def list_all_plugins():
+    """List all plugins with their update status"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT 
+            pus.plugin_name,
+            pus.latest_version,
+            pus.latest_source,
+            pus.update_available_count,
+            pus.risk_level,
+            pus.last_checked,
+            COUNT(DISTINCT ip.instance_name) as installed_count,
+            GROUP_CONCAT(DISTINCT ip.version_string) as current_versions
+        FROM plugin_update_status pus
+        LEFT JOIN installed_plugins ip ON pus.plugin_name = ip.plugin_name
+        GROUP BY pus.plugin_name
+        ORDER BY pus.update_available_count DESC, pus.plugin_name
+    """)
+    
+    plugins = db.cursor.fetchall()
+    return {"plugins": plugins, "total": len(plugins)}
+
+
+@app.get("/api/plugins/{plugin_name}")
+async def get_plugin_details(plugin_name: str):
+    """Get detailed information about a specific plugin"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    # Get plugin update status
+    db.cursor.execute("""
+        SELECT * FROM plugin_update_status WHERE plugin_name = %s
+    """, (plugin_name,))
+    status = db.cursor.fetchone()
+    
+    if not status:
+        raise HTTPException(status_code=404, detail=f"Plugin {plugin_name} not found")
+    
+    # Get all sources
+    db.cursor.execute("""
+        SELECT * FROM plugin_sources 
+        WHERE plugin_name = %s AND is_active = TRUE
+        ORDER BY priority
+    """, (plugin_name,))
+    sources = db.cursor.fetchall()
+    
+    # Get installed versions
+    db.cursor.execute("""
+        SELECT 
+            ip.*,
+            i.server_name
+        FROM installed_plugins ip
+        JOIN instances i ON ip.instance_name = i.instance_name
+        WHERE ip.plugin_name = %s
+        ORDER BY i.server_name, ip.instance_name
+    """, (plugin_name,))
+    installations = db.cursor.fetchall()
+    
+    # Get version history
+    db.cursor.execute("""
+        SELECT * FROM plugin_versions
+        WHERE plugin_name = %s
+        ORDER BY version_major DESC, version_minor DESC, version_patch DESC, discovered_at DESC
+        LIMIT 20
+    """, (plugin_name,))
+    version_history = db.cursor.fetchall()
+    
+    # Get documentation
+    db.cursor.execute("""
+        SELECT * FROM plugin_documentation
+        WHERE plugin_name = %s
+        ORDER BY is_primary DESC, doc_type
+    """, (plugin_name,))
+    documentation = db.cursor.fetchall()
+    
+    return {
+        "plugin_name": plugin_name,
+        "status": status,
+        "sources": sources,
+        "installations": installations,
+        "version_history": version_history,
+        "documentation": documentation
+    }
+
+
+@app.get("/api/plugins/outdated")
+async def get_outdated_plugins():
+    """Get plugins that have updates available"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT 
+            pus.*,
+            COUNT(DISTINCT ip.instance_name) as instances_needing_update
+        FROM plugin_update_status pus
+        JOIN installed_plugins ip ON pus.plugin_name = ip.plugin_name
+        WHERE pus.update_available_count > 0
+        AND ip.version_string != pus.latest_version
+        GROUP BY pus.plugin_name
+        ORDER BY pus.risk_level DESC, pus.update_available_count DESC
+    """)
+    
+    outdated = db.cursor.fetchall()
+    return {"plugins": outdated, "count": len(outdated)}
+
+
+@app.post("/api/plugins/check-updates")
+async def check_plugin_updates():
+    """Trigger plugin update check for all configured sources"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    import httpx
+    import asyncio
+    from datetime import datetime
+    
+    # Get all active plugin sources
+    db.cursor.execute("""
+        SELECT DISTINCT plugin_name, source_type, source_identifier
+        FROM plugin_sources
+        WHERE is_active = TRUE
+        ORDER BY plugin_name, priority
+    """)
+    sources = db.cursor.fetchall()
+    
+    results = []
+    
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        for source in sources:
+            plugin_name = source['plugin_name']
+            source_type = source['source_type']
+            identifier = source['source_identifier']
+            
+            try:
+                if source_type == 'github':
+                    # GitHub releases
+                    url = f"https://api.github.com/repos/{identifier}/releases/latest"
+                    response = await client.get(url, headers={"Accept": "application/vnd.github+json"})
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        version = data['tag_name'].lstrip('v')
+                        download_url = None
+                        for asset in data.get('assets', []):
+                            if asset['name'].endswith('.jar'):
+                                download_url = asset['browser_download_url']
+                                break
+                        
+                        # Insert/update version
+                        db.cursor.execute("""
+                            INSERT INTO plugin_versions 
+                            (plugin_name, version_string, source_type, download_url, release_date, changelog, is_prerelease)
+                            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE
+                                download_url = VALUES(download_url),
+                                changelog = VALUES(changelog)
+                        """, (plugin_name, version, 'github', download_url, data['published_at'], 
+                              data.get('body', ''), data.get('prerelease', False)))
+                        
+                        results.append({"plugin": plugin_name, "version": version, "source": "github", "success": True})
+                
+                elif source_type == 'spigot':
+                    # SpigotMC API
+                    url = f"https://api.spigotmc.org/legacy/update.php?resource={identifier}"
+                    response = await client.get(url)
+                    
+                    if response.status_code == 200:
+                        version = response.text.strip()
+                        db.cursor.execute("""
+                            INSERT INTO plugin_versions 
+                            (plugin_name, version_string, source_type, download_url)
+                            VALUES (%s, %s, %s, %s)
+                            ON DUPLICATE KEY UPDATE plugin_name = plugin_name
+                        """, (plugin_name, version, 'spigot', f"https://www.spigotmc.org/resources/{identifier}/"))
+                        
+                        results.append({"plugin": plugin_name, "version": version, "source": "spigot", "success": True})
+                
+                elif source_type == 'modrinth':
+                    # Modrinth API
+                    url = f"https://api.modrinth.com/v2/project/{identifier}/version"
+                    response = await client.get(url)
+                    
+                    if response.status_code == 200:
+                        versions_data = response.json()
+                        if versions_data:
+                            latest = versions_data[0]
+                            version = latest['version_number']
+                            download_url = latest['files'][0]['url'] if latest['files'] else None
+                            
+                            db.cursor.execute("""
+                                INSERT INTO plugin_versions 
+                                (plugin_name, version_string, source_type, download_url, release_date, changelog)
+                                VALUES (%s, %s, %s, %s, %s, %s)
+                                ON DUPLICATE KEY UPDATE download_url = VALUES(download_url)
+                            """, (plugin_name, version, 'modrinth', download_url, 
+                                  latest['date_published'], latest.get('changelog', '')))
+                            
+                            results.append({"plugin": plugin_name, "version": version, "source": "modrinth", "success": True})
+                
+                elif source_type == 'hangar':
+                    # Hangar (Paper plugins)
+                    url = f"https://hangar.papermc.io/api/v1/projects/{identifier}/versions"
+                    response = await client.get(url, headers={"Accept": "application/json"})
+                    
+                    if response.status_code == 200:
+                        versions_data = response.json()
+                        if versions_data.get('result'):
+                            latest = versions_data['result'][0]
+                            version = latest['name']
+                            
+                            db.cursor.execute("""
+                                INSERT INTO plugin_versions 
+                                (plugin_name, version_string, source_type, download_url, release_date, changelog)
+                                VALUES (%s, %s, %s, %s, %s, %s)
+                                ON DUPLICATE KEY UPDATE download_url = VALUES(download_url)
+                            """, (plugin_name, version, 'hangar',
+                                  f"https://hangar.papermc.io/{identifier}/versions/{version}",
+                                  latest.get('createdAt'), latest.get('description', '')))
+                            
+                            results.append({"plugin": plugin_name, "version": version, "source": "hangar", "success": True})
+                
+            except Exception as e:
+                results.append({"plugin": plugin_name, "source": source_type, "success": False, "error": str(e)})
+    
+    db.commit()
+    
+    # Update plugin_update_status table
+    db.cursor.execute("""
+        UPDATE plugin_update_status pus
+        JOIN (
+            SELECT plugin_name, MAX(CONCAT(version_major, '.', version_minor, '.', version_patch)) as latest
+            FROM plugin_versions
+            GROUP BY plugin_name
+        ) latest ON pus.plugin_name = latest.plugin_name
+        SET pus.last_checked = NOW()
+    """)
+    db.commit()
+    
+    return {
+        "success": True,
+        "checked": len(sources),
+        "results": results,
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+# ============================================================================
+# CI/CD INTEGRATION
+# ============================================================================
+
+@app.get("/api/cicd/endpoints")
+async def list_cicd_endpoints():
+    """List all configured CI/CD endpoints"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT * FROM ci_cd_endpoints
+        WHERE is_active = TRUE
+        ORDER BY plugin_name, ci_type
+    """)
+    
+    endpoints = db.cursor.fetchall()
+    return {"endpoints": endpoints, "count": len(endpoints)}
+
+
+@app.post("/api/cicd/endpoints")
+async def add_cicd_endpoint(endpoint: Dict[str, Any]):
+    """Add a new CI/CD endpoint"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        INSERT INTO ci_cd_endpoints 
+        (plugin_name, ci_type, endpoint_url, artifact_pattern, auth_required)
+        VALUES (%s, %s, %s, %s, %s)
+    """, (endpoint['plugin_name'], endpoint['ci_type'], endpoint['endpoint_url'],
+          endpoint.get('artifact_pattern'), endpoint.get('auth_required', False)))
+    db.commit()
+    
+    return {"success": True, "endpoint_id": db.cursor.lastrowid}
+
+
+@app.get("/api/cicd/builds/{plugin_name}")
+async def get_cicd_builds(plugin_name: str, limit: int = 20):
+    """Get recent CI/CD builds for a plugin"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT 
+            b.*,
+            e.ci_type,
+            e.endpoint_url
+        FROM ci_cd_builds b
+        JOIN ci_cd_endpoints e ON b.endpoint_id = e.endpoint_id
+        WHERE b.plugin_name = %s
+        ORDER BY b.build_timestamp DESC
+        LIMIT %s
+    """, (plugin_name, limit))
+    
+    builds = db.cursor.fetchall()
+    return {"plugin_name": plugin_name, "builds": builds, "count": len(builds)}
+
+
+@app.post("/api/cicd/check-builds")
+async def check_cicd_builds():
+    """Check all CI/CD endpoints for new builds"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    import httpx
+    from datetime import datetime
+    
+    # Get all active CI/CD endpoints
+    db.cursor.execute("""
+        SELECT * FROM ci_cd_endpoints
+        WHERE is_active = TRUE
+    """)
+    endpoints = db.cursor.fetchall()
+    
+    results = []
+    
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        for endpoint in endpoints:
+            try:
+                ci_type = endpoint['ci_type']
+                endpoint_url = endpoint['endpoint_url']
+                plugin_name = endpoint['plugin_name']
+                
+                if ci_type == 'github_actions':
+                    # GitHub Actions workflow runs
+                    # URL format: https://api.github.com/repos/owner/repo/actions/runs
+                    response = await client.get(endpoint_url, headers={"Accept": "application/vnd.github+json"})
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        for run in data.get('workflow_runs', [])[:5]:  # Last 5 runs
+                            if run['status'] == 'completed' and run['conclusion'] == 'success':
+                                # Insert build record
+                                db.cursor.execute("""
+                                    INSERT INTO ci_cd_builds
+                                    (endpoint_id, plugin_name, build_number, build_url, build_status, 
+                                     commit_sha, branch_name, build_timestamp)
+                                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                                    ON DUPLICATE KEY UPDATE build_status = VALUES(build_status)
+                                """, (endpoint['endpoint_id'], plugin_name, str(run['id']), 
+                                      run['html_url'], 'success', run['head_sha'], 
+                                      run['head_branch'], run['created_at']))
+                        
+                        results.append({"plugin": plugin_name, "ci_type": ci_type, "success": True})
+                
+                elif ci_type == 'jenkins':
+                    # Jenkins API
+                    # URL format: http://jenkins.example.com/job/PluginName/api/json
+                    response = await client.get(f"{endpoint_url}/api/json")
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        for build in data.get('builds', [])[:5]:
+                            build_url = build['url']
+                            build_response = await client.get(f"{build_url}/api/json")
+                            build_data = build_response.json()
+                            
+                            status = 'success' if build_data['result'] == 'SUCCESS' else 'failure'
+                            
+                            db.cursor.execute("""
+                                INSERT INTO ci_cd_builds
+                                (endpoint_id, plugin_name, build_number, build_url, build_status, build_timestamp)
+                                VALUES (%s, %s, %s, %s, %s, %s)
+                                ON DUPLICATE KEY UPDATE build_status = VALUES(build_status)
+                            """, (endpoint['endpoint_id'], plugin_name, str(build_data['number']),
+                                  build_url, status, datetime.fromtimestamp(build_data['timestamp']/1000)))
+                        
+                        results.append({"plugin": plugin_name, "ci_type": ci_type, "success": True})
+                
+            except Exception as e:
+                results.append({"plugin": plugin_name, "ci_type": ci_type, "success": False, "error": str(e)})
+    
+    db.commit()
+    
+    return {
+        "success": True,
+        "checked": len(endpoints),
+        "results": results,
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+# ============================================================================
+# DOCUMENTATION TRACKING
+# ============================================================================
+
+@app.get("/api/docs/{plugin_name}")
+async def get_plugin_documentation(plugin_name: str):
+    """Get all documentation sources for a plugin"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT * FROM plugin_documentation
+        WHERE plugin_name = %s
+        ORDER BY is_primary DESC, doc_type
+    """, (plugin_name,))
+    
+    docs = db.cursor.fetchall()
+    return {"plugin_name": plugin_name, "documentation": docs, "count": len(docs)}
+
+
+@app.post("/api/docs")
+async def add_plugin_documentation(doc: Dict[str, Any]):
+    """Add a documentation source for a plugin"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        INSERT INTO plugin_documentation
+        (plugin_name, doc_type, doc_url, title, is_primary)
+        VALUES (%s, %s, %s, %s, %s)
+        ON DUPLICATE KEY UPDATE
+            title = VALUES(title),
+            is_primary = VALUES(is_primary),
+            updated_at = NOW()
+    """, (doc['plugin_name'], doc['doc_type'], doc['doc_url'],
+          doc.get('title'), doc.get('is_primary', False)))
+    db.commit()
+    
+    return {"success": True, "doc_id": db.cursor.lastrowid}
+
+
+@app.get("/api/pages/{plugin_name}")
+async def get_plugin_pages(plugin_name: str):
+    """Get all tracked plugin pages (Spigot, Modrinth, etc.)"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT * FROM plugin_pages_tracked
+        WHERE plugin_name = %s
+        ORDER BY page_type
+    """, (plugin_name,))
+    
+    pages = db.cursor.fetchall()
+    return {"plugin_name": plugin_name, "pages": pages, "count": len(pages)}
+
+
+# ============================================================================
+# DATAPACK MANAGEMENT
+# ============================================================================
+
+@app.get("/api/datapacks")
+async def list_datapacks():
+    """List all available datapacks"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT 
+            d.*,
+            COUNT(DISTINCT id.instance_name) as installation_count
+        FROM datapacks d
+        LEFT JOIN installed_datapacks id ON d.datapack_name = id.datapack_name
+        GROUP BY d.datapack_id
+        ORDER BY d.datapack_name, d.version_string DESC
+    """)
+    
+    datapacks = db.cursor.fetchall()
+    return {"datapacks": datapacks, "total": len(datapacks)}
+
+
+@app.get("/api/datapacks/{datapack_name}")
+async def get_datapack_details(datapack_name: str):
+    """Get details about a specific datapack"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT * FROM datapacks WHERE datapack_name = %s
+        ORDER BY version_string DESC
+    """, (datapack_name,))
+    versions = db.cursor.fetchall()
+    
+    if not versions:
+        raise HTTPException(status_code=404, detail=f"Datapack {datapack_name} not found")
+    
+    # Get installations
+    db.cursor.execute("""
+        SELECT 
+            id.*,
+            i.server_name
+        FROM installed_datapacks id
+        JOIN instances i ON id.instance_name = i.instance_name
+        WHERE id.datapack_name = %s
+        ORDER BY i.server_name, id.instance_name, id.world_name
+    """, (datapack_name,))
+    installations = db.cursor.fetchall()
+    
+    return {
+        "datapack_name": datapack_name,
+        "versions": versions,
+        "installations": installations
+    }
+
+
+@app.post("/api/datapacks")
+async def add_datapack(datapack: Dict[str, Any]):
+    """Add a new datapack to the registry"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        INSERT INTO datapacks
+        (datapack_name, version_string, minecraft_version, source_url, description, author, file_hash)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
+    """, (datapack['datapack_name'], datapack.get('version_string'), 
+          datapack.get('minecraft_version'), datapack.get('source_url'),
+          datapack.get('description'), datapack.get('author'), datapack.get('file_hash')))
+    db.commit()
+    
+    return {"success": True, "datapack_id": db.cursor.lastrowid}
+
+
+@app.get("/api/datapacks/installed/{instance_name}")
+async def get_installed_datapacks(instance_name: str):
+    """Get all datapacks installed on an instance"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT 
+            id.*,
+            d.description,
+            d.author,
+            d.source_url
+        FROM installed_datapacks id
+        LEFT JOIN datapacks d ON id.datapack_name = d.datapack_name 
+            AND id.version_string = d.version_string
+        WHERE id.instance_name = %s
+        ORDER BY id.world_name, id.datapack_name
+    """, (instance_name,))
+    
+    datapacks = db.cursor.fetchall()
+    return {"instance_name": instance_name, "datapacks": datapacks, "count": len(datapacks)}
+
+
+# ============================================================================
+# PLUGIN DEPLOYMENT
+# ============================================================================
+
+@app.post("/api/plugins/deploy")
+async def deploy_plugin_update(deployment: Dict[str, Any]):
+    """Deploy a plugin update to specified instances"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    import json
+    
+    plugin_name = deployment['plugin_name']
+    to_version = deployment['to_version']
+    target_instances = deployment['target_instances']
+    initiated_by = deployment.get('initiated_by', 'admin')
+    
+    # Create deployment record
+    db.cursor.execute("""
+        INSERT INTO plugin_deployments
+        (plugin_name, to_version, target_instances, initiated_by, deployment_status)
+        VALUES (%s, %s, %s, %s, 'pending')
+    """, (plugin_name, to_version, json.dumps(target_instances), initiated_by))
+    deployment_id = db.cursor.lastrowid
+    db.commit()
+    
+    return {
+        "success": True,
+        "deployment_id": deployment_id,
+        "message": f"Deployment initiated for {plugin_name} version {to_version}",
+        "target_instances": target_instances
+    }
+
+
+@app.get("/api/plugins/deployments")
+async def list_plugin_deployments(limit: int = 50):
+    """List recent plugin deployments"""
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    db.cursor.execute("""
+        SELECT * FROM plugin_deployments
+        ORDER BY started_at DESC
+        LIMIT %s
+    """, (limit,))
+    
+    deployments = db.cursor.fetchall()
+    return {"deployments": deployments, "count": len(deployments)}
+
+
+# ============================================================================
 # STATIC FILES & ROOT
 # ============================================================================
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ArchiveSMP Configuration Manager</title>
+    <title>ArchiveSMP Configuration Manager v2</title>
     <style>
         * {
             margin: 0;
@@ -13,13 +13,13 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 50%, #006b8f 100%);
             min-height: 100vh;
             padding: 20px;
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -32,19 +32,34 @@
         }
 
         h1 {
-            font-size: 2.5em;
-            color: #2d3748;
+            font-size: 2.8em;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 10px;
         }
 
         .subtitle {
-            color: #718096;
-            font-size: 1.1em;
+            color: #2d3748;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .feature-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin: 5px 5px 5px 0;
+            font-weight: 600;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -55,16 +70,17 @@
             padding: 25px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
             transition: transform 0.2s, box-shadow 0.2s;
+            border-left: 5px solid;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
         }
 
         .stat-card h3 {
             color: #718096;
-            font-size: 0.9em;
+            font-size: 0.85em;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 10px;
@@ -76,14 +92,67 @@
             color: #2d3748;
         }
 
-        .stat-card.primary .stat-value { color: #667eea; }
-        .stat-card.success .stat-value { color: #48bb78; }
-        .stat-card.warning .stat-value { color: #ed8936; }
-        .stat-card.danger .stat-value { color: #f56565; }
+        .stat-card.primary { border-left-color: #00d4ff; }
+        .stat-card.primary .stat-value { color: #00d4ff; }
+        
+        .stat-card.success { border-left-color: #00cc99; }
+        .stat-card.success .stat-value { color: #00cc99; }
+        
+        .stat-card.warning { border-left-color: #ffaa00; }
+        .stat-card.warning .stat-value { color: #ffaa00; }
+        
+        .stat-card.danger { border-left-color: #ff3366; }
+        .stat-card.danger .stat-value { color: #ff3366; }
+
+        .stat-card.info { border-left-color: #7700ff; }
+        .stat-card.info .stat-value { color: #7700ff; }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .link-button {
+            display: block;
+            padding: 20px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 10px rgba(0, 212, 255, 0.3);
+        }
+
+        .link-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5);
+        }
+
+        .link-button.secondary {
+            background: linear-gradient(135deg, #00cc99 0%, #009966 100%);
+            box-shadow: 0 4px 10px rgba(0, 204, 153, 0.3);
+        }
+
+        .link-button.secondary:hover {
+            box-shadow: 0 6px 20px rgba(0, 204, 153, 0.5);
+        }
+
+        .link-button.tertiary {
+            background: linear-gradient(135deg, #7700ff 0%, #5500cc 100%);
+            box-shadow: 0 4px 10px rgba(119, 0, 255, 0.3);
+        }
+
+        .link-button.tertiary:hover {
+            box-shadow: 0 6px 20px rgba(119, 0, 255, 0.5);
+        }
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
@@ -99,7 +168,7 @@
             color: #2d3748;
             margin-bottom: 20px;
             padding-bottom: 15px;
-            border-bottom: 2px solid #e2e8f0;
+            border-bottom: 3px solid #00d4ff;
         }
 
         .feature-list {
@@ -122,66 +191,24 @@
             display: inline-block;
             width: 24px;
             height: 24px;
-            background: #48bb78;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
             color: white;
             border-radius: 50%;
             text-align: center;
             line-height: 24px;
             margin-right: 12px;
             font-weight: bold;
-        }
-
-        .quick-links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .link-button {
-            display: block;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 10px;
-            text-align: center;
-            font-weight: 600;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
-        }
-
-        .link-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        .link-button.secondary {
-            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
-            box-shadow: 0 4px 10px rgba(72, 187, 120, 0.3);
-        }
-
-        .link-button.secondary:hover {
-            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
-        }
-
-        .link-button.tertiary {
-            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
-            box-shadow: 0 4px 10px rgba(237, 137, 54, 0.3);
-        }
-
-        .link-button.tertiary:hover {
-            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
+            flex-shrink: 0;
         }
 
         .api-endpoint {
-            background: #f7fafc;
+            background: #f0faff;
             padding: 10px 15px;
             border-radius: 6px;
             font-family: 'Courier New', monospace;
             font-size: 0.9em;
             margin: 8px 0;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #00d4ff;
         }
 
         .loading {
@@ -192,7 +219,7 @@
 
         .spinner {
             border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid #00d4ff;
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -213,16 +240,41 @@
             margin-right: 8px;
         }
 
-        .status-indicator.online { background: #48bb78; }
-        .status-indicator.offline { background: #f56565; }
-        .status-indicator.warning { background: #ed8936; }
+        .status-indicator.online { background: #00cc99; }
+        .status-indicator.offline { background: #ff3366; }
+        .status-indicator.warning { background: #ffaa00; }
+
+        .new-tag {
+            background: linear-gradient(135deg, #ff3366 0%, #ff0055 100%);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🎮 ArchiveSMP Configuration Manager</h1>
-            <p class="subtitle">Database-Backed Multi-Server Configuration System v2.0</p>
+            <h1>🌊 ArchiveSMP Configuration Manager v2.0</h1>
+            <p class="subtitle">Full-Featured Database-Backed Multi-Server Configuration & Plugin Management System</p>
+            <div style="margin-top: 15px;">
+                <span class="feature-badge">🔄 Plugin Updates</span>
+                <span class="feature-badge">🔧 CI/CD Integration</span>
+                <span class="feature-badge">📚 Docs Tracking</span>
+                <span class="feature-badge">📦 Datapack Manager</span>
+                <span class="feature-badge">🗄️ Database-Backed</span>
+                <span class="feature-badge">🏷️ Meta Tags</span>
+                <span class="feature-badge">📊 Drift Detection</span>
+            </div>
         </header>
 
         <div class="stats-grid" id="statsGrid">
@@ -235,37 +287,49 @@
                 <div class="stat-value" id="activeServers">2</div>
             </div>
             <div class="stat-card warning">
-                <h3>Config Variances</h3>
-                <div class="stat-value" id="totalVariances">--</div>
+                <h3>Plugins Tracked</h3>
+                <div class="stat-value" id="totalPlugins">--</div>
             </div>
             <div class="stat-card danger">
-                <h3>Drift Detected</h3>
-                <div class="stat-value" id="driftCount">--</div>
+                <h3>Updates Available</h3>
+                <div class="stat-value" id="outdatedCount">--</div>
+            </div>
+            <div class="stat-card info">
+                <h3>Datapacks</h3>
+                <div class="stat-value" id="datapackCount">--</div>
             </div>
         </div>
 
         <div class="quick-links">
             <a href="/variance" class="link-button">
-                📊 Variance Dashboard
+                📊 Config Variance
             </a>
             <a href="/deploy" class="link-button secondary">
                 🚀 Deploy Configs
             </a>
-            <a href="/docs" class="link-button tertiary">
-                📚 API Documentation
+            <a href="#plugins" class="link-button tertiary" onclick="loadPluginsView(); return false;">
+                🔌 Plugin Updates<span class="new-tag">NEW</span>
+            </a>
+            <a href="#datapacks" class="link-button" onclick="loadDatapacksView(); return false;">
+                📦 Datapacks<span class="new-tag">NEW</span>
+            </a>
+            <a href="/docs" class="link-button secondary">
+                📚 API Docs
             </a>
         </div>
 
         <div class="dashboard-grid">
             <div class="panel">
-                <h2>✨ New Features</h2>
+                <h2>✨ New Features in v2.0</h2>
                 <ul class="feature-list">
-                    <li>Database-backed configuration storage</li>
-                    <li>Meta-tag based instance grouping</li>
-                    <li>Advanced variance detection</li>
-                    <li>Config rule management system</li>
-                    <li>Instance settings and preferences</li>
-                    <li>Real-time drift monitoring</li>
+                    <li>Plugin update tracking from multiple sources</li>
+                    <li>GitHub Actions & Jenkins CI/CD integration</li>
+                    <li>SpigotMC, Modrinth, Hangar support</li>
+                    <li>Documentation & wiki tracking</li>
+                    <li>Datapack management system</li>
+                    <li>Version comparison & risk assessment</li>
+                    <li>Deployment history tracking</li>
+                    <li>Database-backed storage</li>
                 </ul>
             </div>
 
@@ -274,6 +338,22 @@
                 <div id="serverStatus" class="loading">
                     <div class="spinner"></div>
                     <p>Loading server status...</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🔌 Plugin Updates</h2>
+                <div id="pluginStatus" class="loading">
+                    <div class="spinner"></div>
+                    <p>Checking plugin updates...</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>🔧 CI/CD Activity</h2>
+                <div id="cicdStatus" class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading CI/CD status...</p>
                 </div>
             </div>
 
@@ -288,12 +368,14 @@
             <div class="panel">
                 <h2>🔌 API Endpoints</h2>
                 <div class="api-endpoint">GET /api/instances</div>
+                <div class="api-endpoint">GET /api/plugins</div>
+                <div class="api-endpoint">GET /api/plugins/outdated</div>
+                <div class="api-endpoint">POST /api/plugins/check-updates</div>
+                <div class="api-endpoint">GET /api/cicd/builds/{plugin}</div>
+                <div class="api-endpoint">GET /api/datapacks</div>
                 <div class="api-endpoint">GET /api/variance</div>
-                <div class="api-endpoint">GET /api/tags</div>
-                <div class="api-endpoint">GET /api/groups</div>
-                <div class="api-endpoint">POST /api/rules/create</div>
                 <div style="margin-top: 15px;">
-                    <a href="/docs" style="color: #667eea; text-decoration: none; font-weight: 600;">
+                    <a href="/docs" style="color: #00d4ff; text-decoration: none; font-weight: 600;">
                         View all endpoints →
                     </a>
                 </div>
@@ -309,11 +391,21 @@
                 const instancesData = await instancesRes.json();
                 document.getElementById('totalInstances').textContent = instancesData.count || 0;
 
-                // Load variance summary
-                const varianceRes = await fetch('/api/variance/summary');
-                const varianceData = await varianceRes.json();
-                const totalVariance = varianceData.summary.reduce((sum, item) => sum + item.count, 0);
-                document.getElementById('totalVariances').textContent = totalVariance || 0;
+                // Load plugins
+                const pluginsRes = await fetch('/api/plugins');
+                const pluginsData = await pluginsRes.json();
+                document.getElementById('totalPlugins').textContent = pluginsData.total || 0;
+
+                // Load outdated plugins
+                const outdatedRes = await fetch('/api/plugins/outdated');
+                const outdatedData = await outdatedRes.json();
+                document.getElementById('outdatedCount').textContent = outdatedData.count || 0;
+                renderPluginUpdates(outdatedData.plugins || []);
+
+                // Load datapacks
+                const datapacksRes = await fetch('/api/datapacks');
+                const datapacksData = await datapacksRes.json();
+                document.getElementById('datapackCount').textContent = datapacksData.total || 0;
 
                 // Load servers
                 const serversRes = await fetch('/api/servers');
@@ -325,8 +417,11 @@
                 const groupsData = await groupsRes.json();
                 renderGroups(groupsData.groups || []);
 
-                // Set drift count (placeholder for now)
-                document.getElementById('driftCount').textContent = '0';
+                // Load CI/CD endpoints
+                const cicdRes = await fetch('/api/cicd/endpoints');
+                const cicdData = await cicdRes.json();
+                renderCICD(cicdData.endpoints || []);
+
             } catch (error) {
                 console.error('Error loading dashboard data:', error);
             }
@@ -354,6 +449,57 @@
             `).join('');
         }
 
+        function renderPluginUpdates(plugins) {
+            const container = document.getElementById('pluginStatus');
+            if (plugins.length === 0) {
+                container.innerHTML = '<p style="color: #00cc99;">✓ All plugins up to date!</p>';
+                return;
+            }
+
+            const topPlugins = plugins.slice(0, 5);
+            container.innerHTML = topPlugins.map(plugin => `
+                <div style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <strong>${plugin.plugin_name}</strong>
+                            <div style="color: #718096; font-size: 0.85em;">
+                                ${plugin.instances_needing_update} instance(s) need update
+                            </div>
+                        </div>
+                        <span style="background: ${getRiskColor(plugin.risk_level)}; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.85em;">
+                            ${plugin.risk_level}
+                        </span>
+                    </div>
+                </div>
+            `).join('') + (plugins.length > 5 ? `
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="#plugins" onclick="loadPluginsView(); return false;" style="color: #00d4ff; text-decoration: none; font-weight: 600;">
+                        View all ${plugins.length} updates →
+                    </a>
+                </div>
+            ` : '');
+        }
+
+        function renderCICD(endpoints) {
+            const container = document.getElementById('cicdStatus');
+            if (endpoints.length === 0) {
+                container.innerHTML = '<p style="color: #718096;">No CI/CD endpoints configured</p>';
+                return;
+            }
+
+            container.innerHTML = endpoints.slice(0, 5).map(endpoint => `
+                <div style="padding: 12px 0; border-bottom: 1px solid #e2e8f0;">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <strong>${endpoint.plugin_name}</strong>
+                            <div style="color: #718096; font-size: 0.85em;">${endpoint.ci_type}</div>
+                        </div>
+                        <span class="status-indicator ${endpoint.is_active ? 'online' : 'offline'}"></span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function renderGroups(groups) {
             const container = document.getElementById('groupsStatus');
             if (groups.length === 0) {
@@ -368,25 +514,37 @@
                             <strong>${group.group_name}</strong>
                             <div style="color: #718096; font-size: 0.85em;">${group.group_type}</div>
                         </div>
-                        <span style="background: #667eea; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.85em;">
+                        <span style="background: #00d4ff; color: white; padding: 4px 8px; border-radius: 12px; font-size: 0.85em;">
                             ${group.member_count} members
                         </span>
                     </div>
                 </div>
-            `).join('') + (groups.length > 5 ? `
-                <div style="text-align: center; margin-top: 15px;">
-                    <a href="/variance" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                        View all ${groups.length} groups →
-                    </a>
-                </div>
-            ` : '');
+            `).join('');
+        }
+
+        function getRiskColor(risk) {
+            const colors = {
+                'low': '#00cc99',
+                'medium': '#ffaa00',
+                'high': '#ff3366',
+                'critical': '#cc0000'
+            };
+            return colors[risk] || '#718096';
+        }
+
+        function loadPluginsView() {
+            alert('Plugin management UI coming soon! Use /docs to access API endpoints for now.');
+        }
+
+        function loadDatapacksView() {
+            alert('Datapack management UI coming soon! Use /docs to access API endpoints for now.');
         }
 
         // Load data on page load
         loadDashboardData();
 
-        // Refresh every 30 seconds
-        setInterval(loadDashboardData, 30000);
+        // Refresh every 60 seconds
+        setInterval(loadDashboardData, 60000);
     </script>
 </body>
 </html>
