@@ -36,19 +36,13 @@ db = None
 async def startup():
     """Initialize database connection"""
     global db
-    try:
-        db = ConfigDatabase(
-            host='135.181.212.169',
-            port=3369,
-            user='sqlworkerSMP',
-            password='SQLdb2024!'
-        )
-        db.connect()
-        print("✓ Database connection established")
-    except Exception as e:
-        print(f"✗ Database connection failed: {e}")
-        print("API will run but database endpoints will not work")
-        db = None
+    db = ConfigDatabase(
+        host='135.181.212.169',
+        port=3369,
+        user='sqlworkerSMP',
+        password='SQLdb2024!'
+    )
+    db.connect()
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -58,29 +52,12 @@ async def shutdown():
 
 
 # ============================================================================
-# HEALTH CHECK
-# ============================================================================
-
-@app.get("/health")
-async def health_check():
-    """Check API and database health"""
-    db_status = "connected" if db and db.conn else "disconnected"
-    return {
-        "status": "running",
-        "database": db_status,
-        "version": "2.0.0"
-    }
-
-
-# ============================================================================
 # INSTANCE ENDPOINTS
 # ============================================================================
 
 @app.get("/api/instances")
 async def get_instances(server: Optional[str] = None):
     """Get all instances, optionally filtered by server"""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
     if server:
         instances = db.get_instances_by_server(server)
     else:
@@ -656,8 +633,8 @@ if static_dir.exists():
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    """Serve main dashboard UI"""
-    html_file = static_dir / "index.html"
+    """Serve main web UI - redirect to variance dashboard"""
+    html_file = static_dir / "variance.html"
     if html_file.exists():
         return html_file.read_text()
     return """
@@ -665,7 +642,7 @@ async def root():
         <head><title>ArchiveSMP Config Manager</title></head>
         <body>
             <h1>ArchiveSMP Configuration Manager</h1>
-            <p>Web GUI not deployed. API is running.</p>
+            <p>Web GUI not yet deployed. API is running.</p>
             <h2>API Endpoints:</h2>
             <ul>
                 <li><a href="/docs">/docs</a> - Interactive API documentation</li>
