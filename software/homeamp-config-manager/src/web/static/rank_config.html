@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rank Config - ArchiveSMP</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .rank-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .rank-list {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .rank-item {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .rank-item:hover {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.05);
+        }
+
+        .rank-item.active {
+            border-color: #a855f7;
+            background: rgba(168, 85, 247, 0.1);
+        }
+
+        .rank-priority {
+            display: inline-block;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .config-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .config-rule-form {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 0.9em;
+            color: #2d3748;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-row input, .form-row select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+        }
+
+        .btn-add-rule {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .rules-list {
+            margin-top: 30px;
+        }
+
+        .rule-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #a855f7;
+            margin-bottom: 10px;
+        }
+
+        .rule-key {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .rule-value {
+            font-family: 'Courier New', monospace;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>👑 Rank-Specific Configuration</h1>
+            <p class="subtitle">Configure settings based on LuckPerms ranks</p>
+        </header>
+
+        <div class="rank-grid">
+            <div class="rank-list">
+                <h2 style="margin-bottom: 15px;">Ranks</h2>
+                <div id="rank-list">
+                    <p style="color: #718096;">Loading ranks...</p>
+                </div>
+            </div>
+
+            <div class="config-panel">
+                <h2 style="margin-bottom: 20px;">Rank Configuration</h2>
+                
+                <div class="config-rule-form">
+                    <h3 style="margin-bottom: 15px;">Add Config Rule</h3>
+                    <div class="form-row">
+                        <label>Plugin</label>
+                        <select id="rule-plugin">
+                            <option value="">Select plugin...</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Config Key</label>
+                        <input type="text" id="rule-key" placeholder="permissions.fly">
+                    </div>
+                    <div class="form-row">
+                        <label>Value</label>
+                        <input type="text" id="rule-value" placeholder="true">
+                    </div>
+                    <button class="btn-add-rule" onclick="addRankConfigRule()">+ Add Rule</button>
+                </div>
+
+                <div class="rules-list">
+                    <h3 style="margin-bottom: 15px;">Active Rules</h3>
+                    <div id="rules-container">
+                        <p style="color: #718096; text-align: center; padding: 20px;">
+                            Select a rank to view config rules
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="rank_config.js"></script>
+</body>
+</html>

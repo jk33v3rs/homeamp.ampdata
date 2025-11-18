@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hierarchy Viewer - ArchiveSMP</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .resolver-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .query-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field label {
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-field input,
+        .form-field select {
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .btn-resolve {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-resolve:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+        }
+
+        .result-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .resolved-value {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        .resolved-value h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        .resolved-value .value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #00d4ff;
+            font-family: 'Courier New', monospace;
+        }
+
+        .source-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .source-GLOBAL { background: #e2e8f0; color: #4a5568; }
+        .source-SERVER { background: #dbeafe; color: #1e40af; }
+        .source-META_TAG { background: #fef3c7; color: #92400e; }
+        .source-INSTANCE { background: #d1fae5; color: #065f46; }
+        .source-WORLD { background: #fce7f3; color: #831843; }
+        .source-RANK { background: #ede9fe; color: #5b21b6; }
+        .source-PLAYER { background: #fef2f2; color: #991b1b; }
+
+        .hierarchy-chain {
+            margin-top: 30px;
+        }
+
+        .hierarchy-chain h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .chain-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+        }
+
+        .chain-item.overridden {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .chain-item.active {
+            border-left-color: #00d4ff;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.2);
+        }
+
+        .chain-item .scope {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .chain-item .value-display {
+            font-family: 'Courier New', monospace;
+            color: #4a5568;
+        }
+
+        .hierarchy-diagram {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .level {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .level:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .level-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .level-name {
+            flex: 1;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .level-arrow {
+            color: #cbd5e0;
+            font-size: 1.5em;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Config Hierarchy Viewer</h1>
+            <p class="subtitle">Visualize 7-level config resolution cascade</p>
+        </header>
+
+        <div class="resolver-panel">
+            <h2 style="margin-bottom: 20px;">Query Hierarchy</h2>
+            <div class="query-form">
+                <div class="form-field">
+                    <label>Plugin ID *</label>
+                    <select id="query-plugin">
+                        <option value="">Select Plugin...</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>Config Key *</label>
+                    <input type="text" id="query-key" placeholder="e.g., settings.enabled">
+                </div>
+                <div class="form-field">
+                    <label>Instance *</label>
+                    <select id="query-instance">
+                        <option value="">Select Instance...</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label>World (Optional)</label>
+                    <input type="text" id="query-world" placeholder="world, world_nether...">
+                </div>
+                <div class="form-field">
+                    <label>Rank (Optional)</label>
+                    <input type="text" id="query-rank" placeholder="admin, vip...">
+                </div>
+                <div class="form-field">
+                    <label>Player UUID (Optional)</label>
+                    <input type="text" id="query-player" placeholder="UUID...">
+                </div>
+            </div>
+            <button class="btn-resolve" onclick="resolveHierarchy()">🔍 Resolve Config Value</button>
+        </div>
+
+        <div class="result-panel" id="result-panel" style="display: none;">
+            <div class="result-header">
+                <h2>Resolution Result</h2>
+            </div>
+
+            <div class="resolved-value">
+                <h3>Effective Value</h3>
+                <div class="value" id="effective-value">-</div>
+                <span class="source-badge" id="source-badge">SOURCE</span>
+            </div>
+
+            <div class="hierarchy-chain">
+                <h3>Resolution Chain</h3>
+                <div id="chain-container">
+                    <!-- Chain items populated by JS -->
+                </div>
+            </div>
+
+            <div class="hierarchy-diagram">
+                <h3 style="margin-bottom: 20px;">7-Level Hierarchy</h3>
+                <div class="level">
+                    <div class="level-number">1</div>
+                    <div class="level-name">GLOBAL - Baseline defaults for all servers</div>
+                </div>
+                <div class="level-arrow">↓</div>
+                <div class="level">
+                    <div class="level-number">2</div>
+                    <div class="level-name">SERVER - Server-specific overrides</div>
+                </div>
+                <div class="level-arrow">↓</div>
+                <div class="level">
+                    <div class="level-number">3</div>
+                    <div class="level-name">META_TAG - Group-based configuration</div>
+                </div>
+                <div class="level-arrow">↓</div>
+                <div class="level">
+                    <div class="level-number">4</div>
+                    <div class="level-name">INSTANCE - Per-instance configuration</div>
+                </div>
+                <div class="level-arrow">↓</div>
+                <div class="level">
+                    <div class="level-number">5</div>
+                    <div class="level-name">WORLD - World-specific settings</div>
+                </div>
+                <div class="level-arrow">↓</div>
+                <div class="level">
+                    <div class="level-number">6</div>
+                    <div class="level-name">RANK - Permission rank overrides</div>
+                </div>
+                <div class="level-arrow">↓</div>
+                <div class="level">
+                    <div class="level-number">7</div>
+                    <div class="level-name">PLAYER - Per-player overrides (highest priority)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="hierarchy_viewer.js"></script>
+    <script src="hierarchy_viewer.js"></script>
+</body>
+</html>

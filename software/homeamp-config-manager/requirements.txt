@@ -21,6 +21,8 @@ openpyxl==3.1.2  # Excel file support for pandas
 
 # Configuration & Serialization  
 pyyaml==6.0.1
+ruamel.yaml==0.18.5  # Format-preserving YAML for config modification
+configparser>=5.3.0  # For AMP Instance.conf parsing
 
 # Database
 mysql-connector-python==8.2.0

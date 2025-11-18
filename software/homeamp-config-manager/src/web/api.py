@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from pathlib import Path
 
 from ..database.db_access import ConfigDatabase
+from .api_config_endpoints import get_config_router
 
 app = FastAPI(
     title="ArchiveSMP Configuration Manager",
@@ -31,6 +32,9 @@ app.add_middleware(
 
 # Database connection (configured on startup)
 db = None
+
+# Include config management router
+app.include_router(get_config_router(), prefix="", tags=["config"])
 
 @app.on_event("startup")
 async def startup():
@@ -1262,6 +1266,385 @@ async def get_change_statistics():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+# ============================================================================
+# DYNAMIC CONFIG MANAGEMENT - UNIVERSAL SETTINGS
+# ============================================================================
+
+@app.get("/api/plugins/discovered")
+async def get_discovered_plugins():
+    """
+    Get all dynamically discovered plugins from agent scans
+    NO HARDCODING - returns whatever the agent found
+    """
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        db.cursor.execute("""
+            SELECT 
+                p.plugin_id,
+                p.plugin_name,
+                p.display_name,
+                p.platform,
+                p.description,
+                p.author,
+                p.current_stable_version,
+                p.latest_version,
+                COUNT(DISTINCT ip.instance_id) as instance_count,
+                COUNT(DISTINCT cr.rule_id) as config_key_count
+            FROM plugins p
+            LEFT JOIN instance_plugins ip ON p.plugin_id = ip.plugin_id
+            LEFT JOIN config_rules cr ON p.plugin_name = cr.plugin_name
+            GROUP BY p.plugin_id
+            ORDER BY instance_count DESC, p.plugin_name
+        """)
+        
+        plugins = db.cursor.fetchall()
+        
+        return {
+            'plugins': plugins,
+            'total': len(plugins),
+            'discovery_note': 'Auto-discovered from agent scans - no hardcoded plugin list'
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.get("/api/config/plugin/{plugin_id}")
+async def get_plugin_config(plugin_id: str, scope: str = 'universal'):
+    """
+    Get all config keys for a plugin at specified scope
+    Returns current values, hierarchy source, and metadata
+    
+    Args:
+        plugin_id: Plugin identifier
+        scope: universal|server|group|instance
+    """
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        # Get plugin name from ID
+        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
+        plugin = db.cursor.fetchone()
+        
+        if not plugin:
+            raise HTTPException(status_code=404, detail="Plugin not found")
+        
+        plugin_name = plugin['plugin_name']
+        
+        # Get all config keys for this plugin
+        db.cursor.execute("""
+            SELECT DISTINCT
+                cr.config_file,
+                cr.config_key,
+                cr.scope_type,
+                cr.scope_selector,
+                cr.config_value,
+                cr.value_type,
+                cr.priority,
+                cr.notes
+            FROM config_rules cr
+            WHERE cr.plugin_name = %s
+            AND cr.is_active = true
+            ORDER BY cr.config_file, cr.config_key, cr.priority
+        """, (plugin_name,))
+        
+        rules = db.cursor.fetchall()
+        
+        # Organize by file and key
+        config_structure = {}
+        
+        for rule in rules:
+            file = rule['config_file']
+            key = rule['config_key']
+            full_key = f"{file}:{key}"
+            
+            if full_key not in config_structure:
+                config_structure[full_key] = {
+                    'file': file,
+                    'key': key,
+                    'value': None,
+                    'source': 'default',
+                    'source_description': 'No value set',
+                    'hierarchy': []
+                }
+            
+            # Add to hierarchy
+            config_structure[full_key]['hierarchy'].append({
+                'scope': rule['scope_type'],
+                'selector': rule['scope_selector'],
+                'value': rule['config_value'],
+                'priority': rule['priority']
+            })
+            
+            # Determine effective value based on scope filter
+            if scope == 'universal' and rule['scope_type'] == 'GLOBAL':
+                config_structure[full_key]['value'] = rule['config_value']
+                config_structure[full_key]['source'] = 'universal'
+                config_structure[full_key]['source_description'] = 'Universal default (applies to all)'
+            elif rule['scope_type'] in ['SERVER', 'META_TAG', 'INSTANCE']:
+                # Higher priority override
+                if config_structure[full_key]['value'] is None or rule['priority'] < config_structure[full_key].get('effective_priority', 999):
+                    config_structure[full_key]['value'] = rule['config_value']
+                    config_structure[full_key]['source'] = rule['scope_type'].lower()
+                    config_structure[full_key]['effective_priority'] = rule['priority']
+                    
+                    if rule['scope_selector']:
+                        config_structure[full_key]['source_description'] = f"Override: {rule['scope_type']} = {rule['scope_selector']}"
+        
+        return {
+            'plugin_id': plugin_id,
+            'plugin_name': plugin_name,
+            'scope': scope,
+            'keys': config_structure,
+            'total_keys': len(config_structure)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.post("/api/config/universal")
+async def set_universal_config(config: Dict[str, Any]):
+    """
+    Set a universal config value (applies to ALL instances)
+    Creates or updates a GLOBAL scope rule
+    
+    Body:
+        plugin_id: Plugin identifier
+        config_key: Full key path (e.g., "config.yml:server.max-players")
+        value: The value to set
+        notes: Optional notes about why this was set
+    """
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        plugin_id = config['plugin_id']
+        config_key = config['config_key']
+        value = config['value']
+        notes = config.get('notes', 'Set via Universal Config UI')
+        
+        # Get plugin name
+        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
+        plugin = db.cursor.fetchone()
+        
+        if not plugin:
+            raise HTTPException(status_code=404, detail="Plugin not found")
+        
+        plugin_name = plugin['plugin_name']
+        
+        # Parse file and key from full key
+        if ':' in config_key:
+            file, key = config_key.split(':', 1)
+        else:
+            file = 'config.yml'
+            key = config_key
+        
+        # Check if universal rule already exists
+        db.cursor.execute("""
+            SELECT rule_id FROM config_rules
+            WHERE plugin_name = %s
+            AND config_file = %s
+            AND config_key = %s
+            AND scope_type = 'GLOBAL'
+        """, (plugin_name, file, key))
+        
+        existing = db.cursor.fetchone()
+        
+        if existing:
+            # Update existing
+            db.cursor.execute("""
+                UPDATE config_rules
+                SET config_value = %s,
+                    notes = %s,
+                    updated_at = NOW()
+                WHERE rule_id = %s
+            """, (value, notes, existing['rule_id']))
+            
+            rule_id = existing['rule_id']
+            action = 'updated'
+        else:
+            # Create new
+            db.cursor.execute("""
+                INSERT INTO config_rules 
+                (plugin_name, config_file, config_key, scope_type, scope_selector, 
+                 config_value, value_type, priority, created_by, notes)
+                VALUES (%s, %s, %s, 'GLOBAL', NULL, %s, 'string', 4, 'web_ui', %s)
+            """, (plugin_name, file, key, value, notes))
+            
+            rule_id = db.cursor.lastrowid
+            action = 'created'
+        
+        db.commit()
+        
+        return {
+            'success': True,
+            'action': action,
+            'rule_id': rule_id,
+            'plugin_name': plugin_name,
+            'config_key': f"{file}:{key}",
+            'value': value
+        }
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.delete("/api/config/override")
+async def clear_config_override(config: Dict[str, Any]):
+    """
+    Clear a config override at specified scope
+    
+    Body:
+        plugin_id: Plugin identifier
+        config_key: Full key path
+        scope: universal|server|group|instance
+        selector: Optional scope selector (server name, tag, etc.)
+    """
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        plugin_id = config['plugin_id']
+        config_key = config['config_key']
+        scope = config.get('scope', 'universal')
+        selector = config.get('selector')
+        
+        # Get plugin name
+        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
+        plugin = db.cursor.fetchone()
+        
+        if not plugin:
+            raise HTTPException(status_code=404, detail="Plugin not found")
+        
+        plugin_name = plugin['plugin_name']
+        
+        # Parse file and key
+        if ':' in config_key:
+            file, key = config_key.split(':', 1)
+        else:
+            file = 'config.yml'
+            key = config_key
+        
+        # Map scope to scope_type
+        scope_map = {
+            'universal': 'GLOBAL',
+            'server': 'SERVER',
+            'group': 'META_TAG',
+            'instance': 'INSTANCE'
+        }
+        
+        scope_type = scope_map.get(scope, 'GLOBAL')
+        
+        # Delete rule
+        query = """
+            DELETE FROM config_rules
+            WHERE plugin_name = %s
+            AND config_file = %s
+            AND config_key = %s
+            AND scope_type = %s
+        """
+        params = [plugin_name, file, key, scope_type]
+        
+        if selector:
+            query += " AND scope_selector = %s"
+            params.append(selector)
+        
+        db.cursor.execute(query, params)
+        deleted_count = db.cursor.rowcount
+        db.commit()
+        
+        return {
+            'success': True,
+            'deleted_count': deleted_count,
+            'plugin_name': plugin_name,
+            'config_key': f"{file}:{key}",
+            'scope': scope
+        }
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.post("/api/config/bulk-update")
+async def bulk_update_configs(updates: Dict[str, Any]):
+    """
+    Bulk update multiple config values at once
+    
+    Body:
+        scope: universal|server|group|instance
+        changes: {plugin_id: {config_key: value}}
+    """
+    if not db:
+        raise HTTPException(status_code=503, detail="Database not connected")
+    
+    try:
+        scope = updates.get('scope', 'universal')
+        changes = updates.get('changes', {})
+        
+        results = []
+        errors = []
+        
+        for plugin_id, config_changes in changes.items():
+            for config_key, value in config_changes.items():
+                try:
+                    # Use the set_universal_config logic
+                    result = await set_universal_config({
+                        'plugin_id': plugin_id,
+                        'config_key': config_key,
+                        'value': value,
+                        'notes': f'Bulk update via API (scope: {scope})'
+                    })
+                    results.append(result)
+                except Exception as e:
+                    errors.append({
+                        'plugin_id': plugin_id,
+                        'config_key': config_key,
+                        'error': str(e)
+                    })
+        
+        return {
+            'success': len(errors) == 0,
+            'total_changes': len(results),
+            'successful': results,
+            'errors': errors
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.get("/universal_config", response_class=HTMLResponse)
+async def universal_config_page():
+    """Serve Universal Config Manager UI"""
+    html_file = static_dir / "universal_config.html"
+    if html_file.exists():
+        return html_file.read_text()
+    raise HTTPException(status_code=404, detail="Universal Config UI not found")
+
+
+@app.get("/history", response_class=HTMLResponse)
+async def history_page():
+    """Serve Change History UI"""
+    html_file = static_dir / "history.html"
+    if html_file.exists():
+        return html_file.read_text()
+    raise HTTPException(status_code=404, detail="History UI not found")
+
+
+@app.get("/migrations", response_class=HTMLResponse)
+async def migrations_page():
+    """Serve Migrations UI"""
+    html_file = static_dir / "migrations.html"
+    if html_file.exists():
+        return html_file.read_text()
+    raise HTTPException(status_code=404, detail="Migrations UI not found")
 
 
 if __name__ == "__main__":

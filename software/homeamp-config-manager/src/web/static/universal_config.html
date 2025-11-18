@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Config Manager - ArchiveSMP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .config-browser {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .plugin-list {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .plugin-item {
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .plugin-item:hover {
+            background: #f5f7ff;
+        }
+
+        .plugin-item.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .plugin-item .name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .plugin-item .stats {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .config-editor {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-height: 800px;
+            overflow-y: auto;
+        }
+
+        .scope-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+
+        .scope-tab {
+            padding: 10px 20px;
+            background: #f5f5f5;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .scope-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .config-file {
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .config-file-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .config-entries {
+            padding: 20px;
+        }
+
+        .config-entry {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .config-key {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .config-value-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .hierarchy-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-universal { background: #ff6b6b; color: white; }
+        .badge-server { background: #4ecdc4; color: white; }
+        .badge-group { background: #45b7d1; color: white; }
+        .badge-instance { background: #96ceb4; color: white; }
+        .badge-default { background: #95a5a6; color: white; }
+
+        .value-source {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .override-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .override-controls button {
+            font-size: 12px;
+            padding: 6px 12px;
+        }
+
+        .btn-override {
+            background: linear-gradient(135deg, #45b7d1 0%, #4ecdc4 100%);
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .no-plugin-selected {
+            text-align: center;
+            padding: 100px 20px;
+            color: #999;
+        }
+
+        .no-plugin-selected h2 {
+            margin-bottom: 10px;
+        }
+
+        .instance-selector {
+            background: #f5f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .instance-selector label {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .dynamic-discovery-notice {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .dynamic-discovery-notice h3 {
+            color: #856404;
+            margin-bottom: 8px;
+        }
+
+        .dynamic-discovery-notice p {
+            color: #856404;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎛️ Universal Config Manager</h1>
+            <p class="subtitle">Set config values once at universal scope - automatically propagate to all instances. Discovered plugins appear dynamically.</p>
+        </div>
+
+        <div class="dynamic-discovery-notice">
+            <h3>🔍 Dynamic Discovery Active</h3>
+            <p>This system automatically discovers all plugins from your instances. No hardcoded plugin lists - add any plugin to any instance and it will appear here after the next agent scan.</p>
+        </div>
+
+        <div class="controls">
+            <div class="filter-group">
+                <label>Scope:</label>
+                <select id="scopeFilter">
+                    <option value="universal">Universal (All Servers)</option>
+                    <option value="server">Server-Specific</option>
+                    <option value="group">Instance Group</option>
+                    <option value="instance">Single Instance</option>
+                </select>
+
+                <label>Filter Plugins:</label>
+                <input type="text" id="pluginSearch" placeholder="Search plugins..." />
+
+                <label>Platform:</label>
+                <select id="platformFilter">
+                    <option value="all">All Platforms</option>
+                    <option value="paper">Paper</option>
+                    <option value="fabric">Fabric</option>
+                    <option value="datapack">Datapacks</option>
+                </select>
+
+                <button onclick="refreshData()">🔄 Refresh</button>
+                <button onclick="saveAllChanges()">💾 Save All Changes</button>
+            </div>
+        </div>
+
+        <div class="config-browser">
+            <div class="plugin-list">
+                <h3 style="margin-bottom: 15px;">Discovered Plugins</h3>
+                <div id="pluginListContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading plugins...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="config-editor">
+                <div id="configEditorContainer">
+                    <div class="no-plugin-selected">
+                        <h2>Select a Plugin</h2>
+                        <p>Choose a plugin from the list to view and edit its configuration</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentScope = 'universal';
+        let currentPlugin = null;
+        let pluginsData = [];
+        let configChanges = {};
+
+        async function loadPlugins() {
+            try {
+                const response = await fetch('/api/plugins/discovered');
+                const data = await response.json();
+                pluginsData = data.plugins || [];
+                renderPluginList();
+            } catch (error) {
+                console.error('Failed to load plugins:', error);
+            }
+        }
+
+        function renderPluginList() {
+            const container = document.getElementById('pluginListContainer');
+            const searchTerm = document.getElementById('pluginSearch').value.toLowerCase();
+            const platformFilter = document.getElementById('platformFilter').value;
+
+            const filtered = pluginsData.filter(p => {
+                const matchesSearch = p.display_name.toLowerCase().includes(searchTerm) || 
+                                     p.plugin_id.toLowerCase().includes(searchTerm);
+                const matchesPlatform = platformFilter === 'all' || p.platform === platformFilter;
+                return matchesSearch && matchesPlatform;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No plugins found</p>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(plugin => `
+                <div class="plugin-item ${currentPlugin === plugin.plugin_id ? 'active' : ''}" 
+                     onclick="selectPlugin('${plugin.plugin_id}')">
+                    <div class="name">${plugin.display_name || plugin.plugin_name}</div>
+                    <div class="stats">
+                        📦 ${plugin.platform} | 
+                        ${plugin.instance_count || 0} instances | 
+                        ${plugin.config_key_count || 0} keys
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function selectPlugin(pluginId) {
+            currentPlugin = pluginId;
+            renderPluginList();
+            await loadPluginConfig(pluginId);
+        }
+
+        async function loadPluginConfig(pluginId) {
+            const container = document.getElementById('configEditorContainer');
+            container.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading configuration...</p></div>';
+
+            try {
+                const scope = document.getElementById('scopeFilter').value;
+                const response = await fetch(`/api/config/plugin/${pluginId}?scope=${scope}`);
+                const data = await response.json();
+
+                renderConfigEditor(pluginId, data);
+            } catch (error) {
+                console.error('Failed to load config:', error);
+                container.innerHTML = '<div class="no-plugin-selected"><h2>Error</h2><p>Failed to load configuration</p></div>';
+            }
+        }
+
+        function renderConfigEditor(pluginId, configData) {
+            const container = document.getElementById('configEditorContainer');
+            const plugin = pluginsData.find(p => p.plugin_id === pluginId);
+
+            let html = `
+                <div style="margin-bottom: 20px;">
+                    <h2>${plugin.display_name || plugin.plugin_name}</h2>
+                    <p style="color: #666; margin-top: 5px;">${plugin.description || 'No description'}</p>
+                </div>
+
+                <div class="instance-selector" id="instanceSelector" style="display: none;">
+                    <label>Select Instance:</label>
+                    <select id="instanceSelect" onchange="loadPluginConfig('${pluginId}')">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+
+                <div class="scope-tabs">
+                    <div class="scope-tab active">Universal Settings</div>
+                    <div class="scope-tab">Effective Values</div>
+                    <div class="scope-tab">Override History</div>
+                </div>
+            `;
+
+            // Group configs by file
+            const fileGroups = {};
+            for (const [key, value] of Object.entries(configData.keys || {})) {
+                const [file, ...keyPath] = key.split(':');
+                if (!fileGroups[file]) fileGroups[file] = [];
+                fileGroups[file].push({ fullKey: key, keyPath: keyPath.join(':'), value });
+            }
+
+            for (const [file, entries] of Object.entries(fileGroups)) {
+                html += `
+                    <div class="config-file">
+                        <div class="config-file-header">
+                            <span>📄 ${file}</span>
+                            <span>${entries.length} keys</span>
+                        </div>
+                        <div class="config-entries">
+                `;
+
+                for (const entry of entries) {
+                    const hierarchyBadge = getHierarchyBadge(entry.value.source);
+                    const valueDisplay = entry.value.value || '<not set>';
+                    
+                    html += `
+                        <div class="config-entry">
+                            <div class="config-key">
+                                ${entry.keyPath}
+                                ${hierarchyBadge}
+                            </div>
+                            <input type="text" 
+                                   class="config-value-input" 
+                                   value="${escapeHtml(valueDisplay)}"
+                                   data-key="${entry.fullKey}"
+                                   onchange="trackChange('${pluginId}', '${entry.fullKey}', this.value)" />
+                            <div class="value-source">
+                                ${entry.value.source_description || `Source: ${entry.value.source}`}
+                            </div>
+                            <div class="override-controls">
+                                <button class="btn-override" onclick="setUniversalValue('${pluginId}', '${entry.fullKey}')">
+                                    Set as Universal
+                                </button>
+                                <button class="btn-clear" onclick="clearOverride('${pluginId}', '${entry.fullKey}')">
+                                    Clear Override
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function getHierarchyBadge(source) {
+            const badges = {
+                'universal': '<span class="hierarchy-badge badge-universal">UNIVERSAL</span>',
+                'server': '<span class="hierarchy-badge badge-server">SERVER</span>',
+                'group': '<span class="hierarchy-badge badge-group">GROUP</span>',
+                'instance': '<span class="hierarchy-badge badge-instance">INSTANCE</span>',
+                'default': '<span class="hierarchy-badge badge-default">DEFAULT</span>'
+            };
+            return badges[source] || badges['default'];
+        }
+
+        function trackChange(pluginId, key, value) {
+            if (!configChanges[pluginId]) configChanges[pluginId] = {};
+            configChanges[pluginId][key] = value;
+            console.log('Tracked change:', pluginId, key, value);
+        }
+
+        async function setUniversalValue(pluginId, key) {
+            const input = document.querySelector(`input[data-key="${key}"]`);
+            const value = input.value;
+
+            try {
+                const response = await fetch('/api/config/universal', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        plugin_id: pluginId,
+                        config_key: key,
+                        value: value,
+                        scope: 'universal'
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ Universal value set successfully!');
+                    loadPluginConfig(pluginId);
+                } else {
+                    alert('❌ Failed to set universal value');
+                }
+            } catch (error) {
+                console.error('Error setting universal value:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        async function clearOverride(pluginId, key) {
+            if (!confirm('Clear this config override?')) return;
+
+            try {
+                const response = await fetch('/api/config/override', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        plugin_id: pluginId,
+                        config_key: key,
+                        scope: currentScope
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ Override cleared!');
+                    loadPluginConfig(pluginId);
+                } else {
+                    alert('❌ Failed to clear override');
+                }
+            } catch (error) {
+                console.error('Error clearing override:', error);
+            }
+        }
+
+        async function saveAllChanges() {
+            if (Object.keys(configChanges).length === 0) {
+                alert('No changes to save');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/config/bulk-update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        scope: currentScope,
+                        changes: configChanges
+                    })
+                });
+
+                if (response.ok) {
+                    alert('✅ All changes saved successfully!');
+                    configChanges = {};
+                    if (currentPlugin) loadPluginConfig(currentPlugin);
+                } else {
+                    alert('❌ Failed to save changes');
+                }
+            } catch (error) {
+                console.error('Error saving changes:', error);
+                alert('❌ Error: ' + error.message);
+            }
+        }
+
+        function refreshData() {
+            loadPlugins();
+            if (currentPlugin) loadPluginConfig(currentPlugin);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('pluginSearch').addEventListener('input', renderPluginList);
+        document.getElementById('platformFilter').addEventListener('change', renderPluginList);
+        document.getElementById('scopeFilter').addEventListener('change', () => {
+            currentScope = document.getElementById('scopeFilter').value;
+            if (currentPlugin) loadPluginConfig(currentPlugin);
+        });
+
+        // Initial load
+        loadPlugins();
+    </script>
+</body>
+</html>

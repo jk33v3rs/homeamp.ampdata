@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Config - ArchiveSMP</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .world-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .world-list {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .world-item {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .world-item:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .world-item.active {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .world-type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.7em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .type-normal { background: #d1fae5; color: #065f46; }
+        .type-nether { background: #fee2e2; color: #991b1b; }
+        .type-end { background: #e0e7ff; color: #3730a3; }
+        .type-custom { background: #fef3c7; color: #92400e; }
+
+        .config-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .config-rule-form {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .form-row {
+            margin-bottom: 15px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 0.9em;
+            color: #2d3748;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-row input, .form-row select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+        }
+
+        .btn-add-rule {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .rules-list {
+            margin-top: 30px;
+        }
+
+        .rule-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .rule-key {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .rule-value {
+            font-family: 'Courier New', monospace;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌍 World-Specific Configuration</h1>
+            <p class="subtitle">Configure settings per-world within instances</p>
+        </header>
+
+        <div class="world-grid">
+            <div class="world-list">
+                <h2 style="margin-bottom: 15px;">Worlds</h2>
+                <div id="world-list">
+                    <p style="color: #718096;">Loading worlds...</p>
+                </div>
+            </div>
+
+            <div class="config-panel">
+                <h2 style="margin-bottom: 20px;">World Configuration</h2>
+                
+                <div class="config-rule-form">
+                    <h3 style="margin-bottom: 15px;">Add Config Rule</h3>
+                    <div class="form-row">
+                        <label>Plugin</label>
+                        <select id="rule-plugin">
+                            <option value="">Select plugin...</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Config Key</label>
+                        <input type="text" id="rule-key" placeholder="settings.spawn.protection">
+                    </div>
+                    <div class="form-row">
+                        <label>Value</label>
+                        <input type="text" id="rule-value" placeholder="true">
+                    </div>
+                    <button class="btn-add-rule" onclick="addWorldConfigRule()">+ Add Rule</button>
+                </div>
+
+                <div class="rules-list">
+                    <h3 style="margin-bottom: 15px;">Active Rules</h3>
+                    <div id="rules-container">
+                        <p style="color: #718096; text-align: center; padding: 20px;">
+                            Select a world to view config rules
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="world_config.js"></script>
+</body>
+</html>

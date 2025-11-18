@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config File Browser - ArchiveSMP</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .filter-bar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-group {
+            display: inline-block;
+            margin-right: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.85em;
+            color: #718096;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1em;
+            min-width: 200px;
+        }
+
+        .config-table {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .config-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .config-table th {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+
+        .config-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .config-table tr:hover {
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .file-type-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .file-type-yaml { background: #fef3c7; color: #92400e; }
+        .file-type-json { background: #dbeafe; color: #1e40af; }
+        .file-type-properties { background: #d1fae5; color: #065f46; }
+        .file-type-toml { background: #fce7f3; color: #831843; }
+
+        .action-btn {
+            padding: 6px 12px;
+            margin: 0 3px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-view {
+            background: #00d4ff;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #00cc99;
+            color: white;
+        }
+
+        .btn-backup {
+            background: #fbbf24;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats-mini {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-mini {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #00d4ff;
+        }
+
+        .stat-mini h4 {
+            font-size: 0.75em;
+            color: #718096;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-mini .value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📁 Config File Browser</h1>
+            <p class="subtitle">Browse and manage configuration files across all instances</p>
+        </header>
+
+        <div class="stats-mini">
+            <div class="stat-mini">
+                <h4>Total Files</h4>
+                <div class="value" id="total-files">-</div>
+            </div>
+            <div class="stat-mini">
+                <h4>Instances</h4>
+                <div class="value" id="total-instances">-</div>
+            </div>
+            <div class="stat-mini">
+                <h4>Plugins</h4>
+                <div class="value" id="total-plugins">-</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>Instance</label>
+                <select id="filter-instance">
+                    <option value="">All Instances</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Plugin</label>
+                <select id="filter-plugin">
+                    <option value="">All Plugins</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>File Type</label>
+                <select id="filter-type">
+                    <option value="">All Types</option>
+                    <option value="yaml">YAML</option>
+                    <option value="json">JSON</option>
+                    <option value="properties">Properties</option>
+                    <option value="toml">TOML</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Search</label>
+                <input type="text" id="filter-search" placeholder="Search files...">
+            </div>
+        </div>
+
+        <div class="config-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Instance</th>
+                        <th>Plugin</th>
+                        <th>File Path</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Modified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="config-table-body">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            Loading config files...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="config_browser.js"></script>
+    <script src="config_browser.js"></script>
+</body>
+</html>

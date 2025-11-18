@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Editor - ArchiveSMP</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .editor-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            height: fit-content;
+        }
+
+        .sidebar h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .info-row {
+            margin-bottom: 12px;
+        }
+
+        .info-row label {
+            display: block;
+            font-size: 0.75em;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .info-row .value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+
+        .editor-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .editor-header h2 {
+            color: #2d3748;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: #00cc99;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        #code-editor {
+            width: 100%;
+            min-height: 500px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f7fafc;
+        }
+
+        .modification-form {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9em;
+            color: #2d3748;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .form-group small {
+            color: #718096;
+            font-size: 0.85em;
+        }
+
+        .backup-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .backup-item {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .backup-item:hover {
+            background: rgba(0, 212, 255, 0.05);
+            border-color: #00d4ff;
+        }
+
+        .backup-item .backup-date {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .backup-item .backup-reason {
+            font-size: 0.85em;
+            color: #718096;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✏️ Config Editor</h1>
+            <p class="subtitle">Edit configuration files with automatic backup and validation</p>
+        </header>
+
+        <div class="editor-container">
+            <div class="sidebar">
+                <h3>File Info</h3>
+                <div class="info-row">
+                    <label>Instance</label>
+                    <div class="value" id="info-instance">-</div>
+                </div>
+                <div class="info-row">
+                    <label>Plugin</label>
+                    <div class="value" id="info-plugin">-</div>
+                </div>
+                <div class="info-row">
+                    <label>File Type</label>
+                    <div class="value" id="info-type">-</div>
+                </div>
+                <div class="info-row">
+                    <label>File Size</label>
+                    <div class="value" id="info-size">-</div>
+                </div>
+                <div class="info-row">
+                    <label>Last Modified</label>
+                    <div class="value" id="info-modified">-</div>
+                </div>
+
+                <h3 style="margin-top: 30px;">Recent Backups</h3>
+                <div class="backup-list" id="backup-list">
+                    <p style="color: #718096; font-size: 0.9em;">Loading backups...</p>
+                </div>
+            </div>
+
+            <div class="editor-panel">
+                <div class="editor-header">
+                    <h2 id="file-name">Config File</h2>
+                    <div class="editor-actions">
+                        <button class="btn btn-secondary" onclick="createBackup()">💾 Backup</button>
+                        <button class="btn btn-success" onclick="saveChanges()">💾 Save Changes</button>
+                        <button class="btn btn-primary" onclick="window.location='config_browser.html'">← Back</button>
+                    </div>
+                </div>
+
+                <textarea id="code-editor" placeholder="Loading file content..."></textarea>
+
+                <div class="modification-form">
+                    <h3>Quick Key Modification</h3>
+                    <div class="form-group">
+                        <label>Key Path</label>
+                        <input type="text" id="modify-key" placeholder="e.g., settings.economy.enabled">
+                        <small>Use dot notation for nested keys (YAML/JSON only)</small>
+                    </div>
+                    <div class="form-group">
+                        <label>New Value</label>
+                        <input type="text" id="modify-value" placeholder="Enter new value">
+                    </div>
+                    <button class="btn btn-primary" onclick="modifyKey()">Apply Modification</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config_editor.js"></script>
+    <script src="config_editor.js"></script>
+</body>
+</html>

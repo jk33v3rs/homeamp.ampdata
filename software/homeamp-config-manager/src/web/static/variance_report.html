@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Variance Report - ArchiveSMP</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .filter-bar {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .classification-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            border-color: #00d4ff;
+        }
+
+        .tab:hover:not(.active) {
+            border-color: #00d4ff;
+        }
+
+        .variance-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .variance-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            border-left: 5px solid;
+            transition: all 0.2s;
+        }
+
+        .variance-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .variance-card.NONE { border-left-color: #00cc99; }
+        .variance-card.VARIABLE { border-left-color: #fbbf24; }
+        .variance-card.META_TAG { border-left-color: #00d4ff; }
+        .variance-card.INSTANCE { border-left-color: #a855f7; }
+        .variance-card.DRIFT { border-left-color: #ef4444; }
+
+        .variance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+
+        .variance-header h3 {
+            color: #2d3748;
+            font-size: 1.1em;
+        }
+
+        .classification-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-NONE { background: #d1fae5; color: #065f46; }
+        .badge-VARIABLE { background: #fef3c7; color: #92400e; }
+        .badge-META_TAG { background: #dbeafe; color: #1e40af; }
+        .badge-INSTANCE { background: #f3e8ff; color: #6b21a8; }
+        .badge-DRIFT { background: #fee2e2; color: #991b1b; }
+
+        .variance-details {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+        }
+
+        .detail-row .label {
+            color: #718096;
+        }
+
+        .detail-row .value {
+            font-weight: 600;
+            color: #2d3748;
+            font-family: 'Courier New', monospace;
+        }
+
+        .variance-values {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .value-item {
+            padding: 8px;
+            margin-bottom: 5px;
+            background: white;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        .value-item .instance-label {
+            color: #718096;
+            margin-right: 10px;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid;
+        }
+
+        .stat-box.NONE { border-left-color: #00cc99; }
+        .stat-box.VARIABLE { border-left-color: #fbbf24; }
+        .stat-box.META_TAG { border-left-color: #00d4ff; }
+        .stat-box.INSTANCE { border-left-color: #a855f7; }
+        .stat-box.DRIFT { border-left-color: #ef4444; }
+
+        .stat-box h4 {
+            font-size: 0.75em;
+            color: #718096;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .count {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Config Variance Report</h1>
+            <p class="subtitle">Identify configuration differences and drift across instances</p>
+        </header>
+
+        <div class="stats-summary" id="stats-summary">
+            <div class="stat-box NONE">
+                <h4>No Variance</h4>
+                <div class="count" id="count-NONE">-</div>
+            </div>
+            <div class="stat-box VARIABLE">
+                <h4>Variable</h4>
+                <div class="count" id="count-VARIABLE">-</div>
+            </div>
+            <div class="stat-box META_TAG">
+                <h4>Meta Tag</h4>
+                <div class="count" id="count-META_TAG">-</div>
+            </div>
+            <div class="stat-box INSTANCE">
+                <h4>Instance-Specific</h4>
+                <div class="count" id="count-INSTANCE">-</div>
+            </div>
+            <div class="stat-box DRIFT">
+                <h4>Drift Detected</h4>
+                <div class="count" id="count-DRIFT">-</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="classification-tabs">
+                <div class="tab active" data-classification="" onclick="filterByClassification('')">
+                    All
+                </div>
+                <div class="tab" data-classification="DRIFT" onclick="filterByClassification('DRIFT')">
+                    Drift Only
+                </div>
+                <div class="tab" data-classification="INSTANCE" onclick="filterByClassification('INSTANCE')">
+                    Instance-Specific
+                </div>
+                <div class="tab" data-classification="VARIABLE" onclick="filterByClassification('VARIABLE')">
+                    Variable
+                </div>
+                <div class="tab" data-classification="NONE" onclick="filterByClassification('NONE')">
+                    No Variance
+                </div>
+            </div>
+        </div>
+
+        <div class="variance-grid" id="variance-grid">
+            <div style="text-align: center; padding: 40px; color: #718096;">
+                Loading variance report...
+            </div>
+        </div>
+    </div>
+
+    <script src="variance_report.js"></script>
+    <script src="variance_report.js"></script>
+</body>
+</html>

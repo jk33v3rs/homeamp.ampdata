@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meta Tag Manager - ArchiveSMP</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .manager-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        .tag-list-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            height: fit-content;
+        }
+
+        .tag-list-panel h2 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .create-tag-form {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .create-tag-form input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .btn-create {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tag-item {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tag-item:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .tag-item.active {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .tag-item .tag-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .tag-item .tag-description {
+            font-size: 0.85em;
+            color: #718096;
+        }
+
+        .tag-details-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .btn-delete {
+            padding: 8px 16px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .instances-section {
+            margin-top: 30px;
+        }
+
+        .instances-section h3 {
+            color: #2d3748;
+            margin-bottom: 15px;
+        }
+
+        .instance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .instance-badge {
+            padding: 10px;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .instance-badge .remove-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75em;
+        }
+
+        .assign-section {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .assign-section select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .btn-assign {
+            padding: 10px 20px;
+            background: #00cc99;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏷️ Meta Tag Manager</h1>
+            <p class="subtitle">Organize instances into logical groups with meta tags</p>
+        </header>
+
+        <div class="manager-grid">
+            <div class="tag-list-panel">
+                <h2>Meta Tags</h2>
+                
+                <div class="create-tag-form">
+                    <input type="text" id="new-tag-name" placeholder="Tag name...">
+                    <input type="text" id="new-tag-description" placeholder="Description...">
+                    <button class="btn-create" onclick="createTag()">+ Create Tag</button>
+                </div>
+
+                <div id="tag-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="tag-details-panel">
+                <div id="empty-state" class="empty-state">
+                    <h3>No Tag Selected</h3>
+                    <p>Select a tag from the list to view details and manage instances</p>
+                </div>
+
+                <div id="tag-details" style="display: none;">
+                    <div class="details-header">
+                        <div>
+                            <h2 id="detail-tag-name">Tag Name</h2>
+                            <p id="detail-tag-description" style="color: #718096; margin-top: 5px;"></p>
+                        </div>
+                        <button class="btn-delete" onclick="deleteTag()">🗑️ Delete</button>
+                    </div>
+
+                    <div class="instances-section">
+                        <h3>Assigned Instances (<span id="instance-count">0</span>)</h3>
+                        <div class="instance-grid" id="instance-grid">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <div class="assign-section">
+                            <h4 style="margin-bottom: 10px;">Assign New Instance</h4>
+                            <select id="assign-instance-select">
+                                <option value="">Select instance...</option>
+                            </select>
+                            <button class="btn-assign" onclick="assignInstance()">+ Assign to Tag</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="meta_tag_manager.js"></script>
+    <script src="meta_tag_manager.js"></script>
+</body>
+</html>
