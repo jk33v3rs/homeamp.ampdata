@@ -291,3 +291,181 @@ class ConfigDatabase:
             WHERE mt.tag_name = %s
         """, (tag_name,))
         return [row['instance_id'] for row in self.cursor.fetchall()]
+    
+    # ========================================================================
+    # CHANGE HISTORY & TRACKING (NEW - Option C Implementation)
+    # ========================================================================
+    
+    def log_config_change(self, 
+                         instance_id: Optional[str],
+                         plugin_name: str,
+                         config_file: str,
+                         config_key: str,
+                         old_value: Any,
+                         new_value: Any,
+                         change_type: str = 'manual',
+                         change_source: str = 'config_updater',
+                         changed_by: Optional[str] = None,
+                         change_reason: Optional[str] = None,
+                         batch_id: Optional[str] = None,
+                         deployment_id: Optional[int] = None) -> int:
+        """
+        Log a config change to database audit trail
+        
+        Args:
+            instance_id: Instance ID (None for global changes)
+            plugin_name: Plugin name
+            config_file: Config file path
+            config_key: Config key path (dot notation)
+            old_value: Previous value (as JSON string)
+            new_value: New value (as JSON string)
+            change_type: Type of change (manual, automated, drift_fix, rule_based)
+            change_source: Source of change (config_updater, web_ui, api, agent)
+            changed_by: Username who made the change
+            change_reason: Optional reason/description
+            batch_id: Optional batch ID for grouping related changes
+            deployment_id: Optional deployment ID if part of deployment
+            
+        Returns:
+            change_id of inserted record
+        """
+        import json
+        import os
+        
+        # Convert values to JSON strings if they're not already
+        if not isinstance(old_value, str):
+            old_value = json.dumps(old_value)
+        if not isinstance(new_value, str):
+            new_value = json.dumps(new_value)
+        
+        # Get username if not provided
+        if changed_by is None:
+            changed_by = os.getenv('USER', os.getenv('USERNAME', 'unknown'))
+        
+        self.cursor.execute("""
+            INSERT INTO config_change_history
+            (instance_id, plugin_name, config_file, config_key,
+             old_value, new_value, change_type, change_source,
+             changed_by, change_reason, batch_id, deployment_id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            instance_id,
+            plugin_name,
+            config_file,
+            config_key,
+            old_value,
+            new_value,
+            change_type,
+            change_source,
+            changed_by,
+            change_reason,
+            batch_id,
+            deployment_id
+        ))
+        
+        self.commit()
+        
+        return self.cursor.lastrowid
+    
+    def get_change_history(self,
+                          instance_id: Optional[str] = None,
+                          plugin_name: Optional[str] = None,
+                          changed_by: Optional[str] = None,
+                          change_type: Optional[str] = None,
+                          start_date: Optional[datetime] = None,
+                          end_date: Optional[datetime] = None,
+                          limit: int = 100,
+                          offset: int = 0) -> List[Dict[str, Any]]:
+        """
+        Query config change history with filters
+        
+        Returns list of change records
+        """
+        query = "SELECT * FROM config_change_history WHERE 1=1"
+        params = []
+        
+        if instance_id:
+            query += " AND instance_id = %s"
+            params.append(instance_id)
+        
+        if plugin_name:
+            query += " AND plugin_name = %s"
+            params.append(plugin_name)
+        
+        if changed_by:
+            query += " AND changed_by = %s"
+            params.append(changed_by)
+        
+        if change_type:
+            query += " AND change_type = %s"
+            params.append(change_type)
+        
+        if start_date:
+            query += " AND changed_at >= %s"
+            params.append(start_date)
+        
+        if end_date:
+            query += " AND changed_at <= %s"
+            params.append(end_date)
+        
+        query += " ORDER BY changed_at DESC LIMIT %s OFFSET %s"
+        params.extend([limit, offset])
+        
+        self.cursor.execute(query, params)
+        return self.cursor.fetchall()
+    
+    def get_plugin_migrations(self, plugin_name: str) -> List[Dict[str, Any]]:
+        """Get known config key migrations for a plugin"""
+        self.cursor.execute("""
+            SELECT * FROM config_key_migrations
+            WHERE plugin_name = %s
+            ORDER BY from_version, to_version
+        """, (plugin_name,))
+        return self.cursor.fetchall()
+    
+    def create_deployment(self,
+                         deployment_type: str,
+                         scope: str,
+                         target_instances: str,
+                         deployed_by: str,
+                         deployment_notes: Optional[str] = None) -> int:
+        """
+        Create new deployment record
+        
+        Returns deployment_id
+        """
+        self.cursor.execute("""
+            INSERT INTO deployment_history
+            (deployment_type, scope, target_instances, deployed_by, deployment_notes)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (deployment_type, scope, target_instances, deployed_by, deployment_notes))
+        
+        self.commit()
+        
+        return self.cursor.lastrowid
+    
+    def update_deployment_status(self,
+                                 deployment_id: int,
+                                 status: str,
+                                 error_message: Optional[str] = None):
+        """Update deployment status"""
+        if status == 'completed':
+            self.cursor.execute("""
+                UPDATE deployment_history
+                SET deployment_status = %s, completed_at = NOW()
+                WHERE deployment_id = %s
+            """, (status, deployment_id))
+        elif status == 'failed':
+            self.cursor.execute("""
+                UPDATE deployment_history
+                SET deployment_status = %s, completed_at = NOW(), error_message = %s
+                WHERE deployment_id = %s
+            """, (status, error_message, deployment_id))
+        else:
+            self.cursor.execute("""
+                UPDATE deployment_history
+                SET deployment_status = %s
+                WHERE deployment_id = %s
+            """, (status, deployment_id))
+        
+        self.commit()

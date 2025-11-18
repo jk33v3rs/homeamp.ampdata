@@ -556,7 +556,67 @@ class ConfigUpdater:
     
     def log_change(self, change: Dict[str, Any], result: Dict[str, Any]) -> None:
         """
-        Log change to immutable audit trail
+        Log change to database audit trail (replaces file-based logging)
+        
+        Args:
+            change: Change that was attempted
+            result: Result of the change
+        """
+        try:
+            # Import database module
+            from ..database.db_access import ConfigDatabase
+            import os
+            
+            # Get database connection from environment or use defaults
+            db_host = os.getenv('ASMP_DB_HOST', '135.181.212.169')
+            db_port = int(os.getenv('ASMP_DB_PORT', '3369'))
+            db_user = os.getenv('ASMP_DB_USER', 'sqlworkerSMP')
+            db_pass = os.getenv('ASMP_DB_PASSWORD', '2024!SQLdb')
+            
+            # Connect to database
+            db = ConfigDatabase(db_host, db_port, db_user, db_pass)
+            db.connect()
+            
+            # Log each individual config change
+            changes = change.get('changes', [])
+            batch_id = change.get('request_id', None)
+            
+            for cfg_change in changes:
+                try:
+                    change_id = db.log_config_change(
+                        instance_id=change.get('instance_id'),
+                        plugin_name=change.get('plugin_name', cfg_change.get('plugin', 'unknown')),
+                        config_file=cfg_change.get('file_path', ''),
+                        config_key=cfg_change.get('config_path', cfg_change.get('key', '')),
+                        old_value=result.get('old_value', cfg_change.get('old_value')),
+                        new_value=cfg_change.get('new_value', cfg_change.get('value')),
+                        change_type=change.get('change_type', 'manual'),
+                        change_source='config_updater',
+                        changed_by=os.getenv('USER', os.getenv('USERNAME', 'unknown')),
+                        change_reason=change.get('reason', change.get('description')),
+                        batch_id=batch_id,
+                        deployment_id=change.get('deployment_id')
+                    )
+                    
+                    self.logger.info(f"✅ Logged change {change_id} to database")
+                    
+                except Exception as e:
+                    self.logger.warning(f"Failed to log individual change: {e}")
+            
+            db.disconnect()
+            
+            # ALSO keep file-based logging for backward compatibility and redundancy
+            # This ensures we have a fallback if database is unavailable
+            self._log_change_to_file(change, result)
+                
+        except Exception as e:
+            self.logger.error(f"Database logging failed: {e}")
+            # Fallback to file logging if database fails
+            self._log_change_to_file(change, result)
+    
+    def _log_change_to_file(self, change: Dict[str, Any], result: Dict[str, Any]) -> None:
+        """
+        Fallback file-based logging (kept for redundancy)
         
         Args:
             change: Change that was attempted
@@ -606,5 +666,5 @@ class ConfigUpdater:
                 f.write(json.dumps(summary) + '\n')
                 
         except Exception as e:
-            print(f"Error logging change: {e}")
+            self.logger.error(f"File logging also failed: {e}")
             # Don't fail the operation if logging fails
