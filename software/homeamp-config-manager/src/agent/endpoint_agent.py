@@ -53,6 +53,7 @@ class EndpointAgent:
         # Tracking state
         self.current_deployment_id: Optional[int] = None
         self.plugin_cache: Dict[str, Dict[str, str]] = {}  # {instance_id: {plugin: version}}
+        self.drift_cache: Dict[str, set] = {}  # {instance_id: set of drift signatures}
         
         self.running = False
     
@@ -201,6 +202,16 @@ class EndpointAgent:
         # Compare against database expectations
         self._check_drift(instance_id, configs)
     
+    def _normalize_value(self, value: Any) -> Any:
+        """Normalize values to prevent false drift detection"""
+        # Normalize YAML booleans (true/True/TRUE -> True, false/False/FALSE -> False)
+        if isinstance(value, str):
+            if value.lower() == 'true':
+                return True
+            elif value.lower() == 'false':
+                return False
+        return value
+    
     def _check_drift(self, instance_id: str, actual_configs: Dict[str, Dict]):
         """
         Compare actual configs against database rules and log drift
@@ -211,6 +222,10 @@ class EndpointAgent:
             actual_configs: {plugin_name: {config_file: {key: value}}}
         """
         drift_detected = []
+        
+        # Initialize drift cache for this instance
+        if instance_id not in self.drift_cache:
+            self.drift_cache[instance_id] = set()
         
         # For each plugin config key, resolve expected value from database
         for plugin_name, files in actual_configs.items():
@@ -225,38 +240,59 @@ class EndpointAgent:
                     if expected_value:
                         expected_value = self.db.substitute_variables(expected_value, instance_id)
                     
+                    # Normalize both values to prevent false positives (e.g., true vs True)
+                    expected_normalized = self._normalize_value(expected_value)
+                    actual_normalized = self._normalize_value(actual_value)
+                    
                     # Check for drift
-                    if expected_value is not None and actual_value != expected_value:
-                        drift_info = {
-                            'plugin': plugin_name,
-                            'file': config_file,
-                            'key': config_key,
-                            'expected': expected_value,
-                            'actual': actual_value,
-                            'scope': scope
-                        }
-                        drift_detected.append(drift_info)
+                    if expected_normalized is not None and actual_normalized != expected_normalized:
+                        # Create drift signature
+                        drift_sig = f"{plugin_name}:{config_file}:{config_key}:{expected_normalized}:{actual_normalized}"
                         
-                        self.logger.warning(
-                            f"⚠️  DRIFT {instance_id}/{plugin_name}/{config_file}:{config_key} "
-                            f"- Expected: {expected_value} (from {scope}), "
-                            f"Got: {actual_value}"
-                        )
-                        
-                        # Log drift to config_change_history
-                        try:
-                            self.db.log_config_change(
-                                instance_id=instance_id,
-                                plugin_name=plugin_name,
-                                config_key=f"{config_file}:{config_key}",
-                                old_value=str(expected_value),
-                                new_value=str(actual_value),
-                                change_type='automated',  # Agent detected
-                                changed_by=f'agent-{self.server_name}',
-                                reason=f'Drift from {scope} expectation detected during scan'
+                        # Only log if this is NEW drift (not in cache)
+                        if drift_sig not in self.drift_cache[instance_id]:
+                            drift_info = {
+                                'plugin': plugin_name,
+                                'file': config_file,
+                                'key': config_key,
+                                'expected': expected_normalized,
+                                'actual': actual_normalized,
+                                'scope': scope
+                            }
+                            drift_detected.append(drift_info)
+                            
+                            self.logger.warning(
+                                f"🔔 NEW DRIFT {instance_id}/{plugin_name}/{config_file}:{config_key} "
+                                f"- Expected: {expected_normalized} (from {scope}), "
+                                f"Got: {actual_normalized}"
                             )
-                        except Exception as e:
-                            self.logger.error(f"Failed to log drift: {e}")
+                            
+                            # Log drift to config_change_history
+                            try:
+                                self.db.log_config_change(
+                                    instance_id=instance_id,
+                                    plugin_name=plugin_name,
+                                    config_key=f"{config_file}:{config_key}",
+                                    old_value=str(expected_normalized),
+                                    new_value=str(actual_normalized),
+                                    change_type='automated',  # Agent detected
+                                    changed_by=f'agent-{self.server_name}',
+                                    reason=f'Drift from {scope} expectation detected during scan'
+                                )
+                                
+                                # Add to cache
+                                self.drift_cache[instance_id].add(drift_sig)
+                                
+                            except Exception as e:
+                                self.logger.error(f"Failed to log drift: {e}")
+                        # If drift is in cache, it was already logged - skip silently
+                    else:
+                        # Value matches - remove from drift cache if present
+                        drift_sig = f"{plugin_name}:{config_file}:{config_key}"
+                        self.drift_cache[instance_id] = {
+                            sig for sig in self.drift_cache[instance_id]
+                            if not sig.startswith(drift_sig + ":")
+                        }
         
         # Log variance snapshot if drift detected (for trending)
         if drift_detected:
