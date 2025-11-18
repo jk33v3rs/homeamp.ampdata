@@ -166,7 +166,7 @@ def populate_migrations():
     print("=" * 80)
     
     try:
-        conn = mariadb.connect(**DB_CONFIG)
+        conn = mysql.connector.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
         print(f"\n✅ Connected to {DB_CONFIG['host']}:{DB_CONFIG['port']}")
