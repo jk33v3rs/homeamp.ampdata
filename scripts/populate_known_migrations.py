@@ -17,9 +17,8 @@ from datetime import datetime
 
 # Database credentials
 DB_CONFIG = {
-    'host': '135.181.212.169',
-    'port': 3369,
-    'user': 'sqlworkerSMP',
+    'host': 'localhost',
+    'user': 'root',
     'password': '2024!SQLdb',
     'database': 'asmp_config'
 }
