@@ -931,6 +931,22 @@ async def deploy_ui():
         return html_file.read_text()
     raise HTTPException(status_code=404, detail="Deploy UI not found")
 
+@app.get("/history", response_class=HTMLResponse)
+async def history_ui():
+    """Serve change history UI"""
+    html_file = static_dir / "history.html"
+    if html_file.exists():
+        return html_file.read_text()
+    raise HTTPException(status_code=404, detail="History UI not found")
+
+@app.get("/migrations", response_class=HTMLResponse)
+async def migrations_ui():
+    """Serve migrations UI"""
+    html_file = static_dir / "migrations.html"
+    if html_file.exists():
+        return html_file.read_text()
+    raise HTTPException(status_code=404, detail="Migrations UI not found")
+
 
 # ============================================================================
 # HISTORY & TRACKING ENDPOINTS (NEW - Option C Implementation)
