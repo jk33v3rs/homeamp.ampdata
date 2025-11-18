@@ -50,8 +50,8 @@ fi
 
 sudo tee "$NGINX_SITE" > /dev/null << 'EOF'
 server {
-    listen 80;
-    server_name config.archivesmp.site 135.181.212.169;
+    listen 8078;
+    server_name config.archivesmp.site;
     
     root /var/www/archivesmp-config;
     index index.html;
@@ -137,7 +137,7 @@ echo "   - History Viewer (history.html)"
 echo "   - Migrations (migrations.html)"
 echo ""
 echo "📍 Access URLs:"
-echo "   Main GUI:  http://135.181.212.169/"
+echo "   Main GUI:  http://135.181.212.169:8078/"
 echo "   API Docs:  http://135.181.212.169:8000/docs"
 echo ""
 echo "📋 Nginx logs:"
