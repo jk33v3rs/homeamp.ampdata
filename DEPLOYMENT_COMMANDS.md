@@ -1,48 +1,68 @@
 # DEPLOYMENT COMMANDS - Option C Implementation
 
 **Date**: 2025-11-18  
-**Target Server**: Hetzner (archivesmp.site, 135.181.212.169)  
+**Target Server**: Hetzner Debian 12 (archivesmp.site, 135.181.212.169)  
+**Access Method**: RDP from Developer PC  
+**Deployment Method**: Git pull  
 **Status**: Ready to deploy
 
 ---
 
-## ⚠️ IMPORTANT: Run These On Production Server
+## Deployment Overview
 
-These commands should be run **on the Hetzner server** via SSH, not on your local Windows PC.
+1. **On Developer PC**: Push code to GitHub ✅ (Already done: commit f4315fb)
+2. **RDP to Hetzner**: Connect to remote Debian server
+3. **Pull Latest Code**: `git pull` in `/opt/archivesmp-config-manager/`
+4. **Execute Deployment**: Run SQL scripts, restart services
 
 ---
 
-## Step 1: Upload Files to Production
-
-From your Windows PC, upload the new/modified files:
+## Step 1: Push Code to GitHub (On Developer PC)
 
 ```cmd
-REM Upload SQL files
-scp d:\homeamp.ampdata\homeamp.ampdata\scripts\add_tracking_history_tables.sql root@135.181.212.169:/tmp/
-scp d:\homeamp.ampdata\homeamp.ampdata\scripts\populate_known_migrations.py root@135.181.212.169:/tmp/
-scp d:\homeamp.ampdata\homeamp.ampdata\scripts\apply_config_migrations.py root@135.181.212.169:/tmp/
+REM Already completed! But for future reference:
+cd d:\homeamp.ampdata\homeamp.ampdata
+git push origin master
+```
 
-REM Upload updated code
-scp d:\homeamp.ampdata\homeamp.ampdata\software\homeamp-config-manager\src\database\db_access.py root@135.181.212.169:/opt/archivesmp-config-manager/src/database/
-scp d:\homeamp.ampdata\homeamp.ampdata\software\homeamp-config-manager\src\updaters\config_updater.py root@135.181.212.169:/opt/archivesmp-config-manager/src/updaters/
-scp d:\homeamp.ampdata\homeamp.ampdata\software\homeamp-config-manager\src\web\api.py root@135.181.212.169:/opt/archivesmp-config-manager/src/web/
+✅ **Current commit**: f4315fb - "Implement Option C: Complete tracking and history system"
+
+---
+
+## Step 2: Connect to Hetzner via RDP
+
+Use your RDP client to connect to **135.181.212.169**
+
+Once connected, open a terminal on the Debian desktop.
+
+---
+
+## Step 3: Pull Latest Code (On Hetzner)
+
+```bash
+# Navigate to production directory
+cd /opt/archivesmp-config-manager
+
+# Fix git permissions first (if you get "Permission denied" errors)
+sudo chown -R $USER:$USER .git/
+sudo chmod -R u+rwX .git/
+
+# Pull latest changes from GitHub
+git pull origin master
+
+# Verify the update
+git log -1 --oneline
+# Should show: f4315fb Implement Option C: Complete tracking and history system
 ```
 
 ---
 
-## Step 2: SSH to Production Server
-
-```cmd
-ssh root@135.181.212.169
-```
-
----
-
-## Step 3: Deploy Database Tables (5 minutes)
+## Step 4: Deploy Database Tables (5 minutes)
 
 ```bash
 # Execute SQL to create 11 new tables
-mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'2024!SQLdb' asmp_config < /tmp/add_tracking_history_tables.sql
+# Note: Database is on localhost for the Hetzner server
+mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'2024!SQLdb' asmp_config < scripts/add_tracking_history_tables.sql
 
 # Verify tables were created
 mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'2024!SQLdb' asmp_config -e "
@@ -86,19 +106,21 @@ ORDER BY table_name;
 11 rows in set
 ```
 
-✅ If you see all 11 tables, proceed to Step 4.
+✅ If you see all 11 tables, proceed to Step 5.
 
 ---
 
-## Step 4: Populate Known Migrations (2 minutes)
+## Step 5: Populate Known Migrations (2 minutes)
 
 ```bash
-# Install Python MySQL connector if not present
+# Still in /opt/archivesmp-config-manager
+# Install Python MySQL connector if not already installed
 pip3 install mysql-connector-python
 
 # Run migration population script
-cd /tmp
+cd scripts
 python3 populate_known_migrations.py
+cd ..
 ```
 
 **Expected Output**:
@@ -150,17 +172,17 @@ remove              1         1
 
 ---
 
-## Step 5: Restart Web API Service (1 minute)
+## Step 6: Restart Web API Service (1 minute)
 
 ```bash
 # Restart the web API to load new code
-systemctl restart archivesmp-webapi.service
+sudo systemctl restart archivesmp-webapi.service
 
 # Check status
-systemctl status archivesmp-webapi.service
+sudo systemctl status archivesmp-webapi.service
 
 # Check logs for startup errors
-journalctl -u archivesmp-webapi.service -n 50 --no-pager
+sudo journalctl -u archivesmp-webapi.service -n 50 --no-pager
 ```
 
 **Expected Output**:
@@ -184,7 +206,7 @@ Nov 18 14:23:46 hetzner-xeon python3[12345]: INFO:     Uvicorn running on http:/
 
 ---
 
-## Step 6: Test New API Endpoints (5 minutes)
+## Step 7: Test New API Endpoints (5 minutes)
 
 ```bash
 # Test change history endpoint
@@ -235,7 +257,7 @@ curl -s http://localhost:8000/api/migrations | jq
 
 ---
 
-## Step 7: Verify Database Logging (Test Run)
+## Step 8: Verify Database Logging (Test Run)
 
 ```bash
 # Create a test config rule change via API
@@ -265,15 +287,10 @@ LIMIT 5;
 
 ---
 
-## Step 8: Copy Migration Script to Production (Optional)
+## Step 9: Test Migration Script
 
 ```bash
-# Copy to system scripts directory
-cp /tmp/apply_config_migrations.py /opt/archivesmp-config-manager/scripts/
-
-# Make executable
-chmod +x /opt/archivesmp-config-manager/scripts/apply_config_migrations.py
-
+# Script is already in place from git pull
 # Test dry run
 cd /opt/archivesmp-config-manager
 python3 scripts/apply_config_migrations.py \
@@ -286,17 +303,6 @@ python3 scripts/apply_config_migrations.py \
 ```
 
 ✅ Migration script ready for use!
-
----
-
-## Step 9: Clean Up Temporary Files
-
-```bash
-# Remove temp files
-rm /tmp/add_tracking_history_tables.sql
-rm /tmp/populate_known_migrations.py
-rm /tmp/apply_config_migrations.py
-```
 
 ---
 
@@ -357,7 +363,7 @@ python3 -c "from src.database.db_access import ConfigDatabase; print('OK')"
 python3 -c "from src.web.api import app; print('OK')"
 
 # Check logs in detail
-journalctl -u archivesmp-webapi.service -f
+sudo journalctl -u archivesmp-webapi.service -f
 ```
 
 ### If database queries fail:
@@ -384,14 +390,13 @@ journalctl -u archivesmp-webapi.service -f
 If something goes wrong:
 
 ```bash
-# 1. Restore old code
+# 1. Revert to previous commit
 cd /opt/archivesmp-config-manager
-git checkout HEAD -- src/database/db_access.py
-git checkout HEAD -- src/updaters/config_updater.py
-git checkout HEAD -- src/web/api.py
+git log --oneline -5  # Find previous commit hash
+git checkout <previous-commit-hash>
 
 # 2. Restart service
-systemctl restart archivesmp-webapi.service
+sudo systemctl restart archivesmp-webapi.service
 
 # 3. Database tables can stay (they won't break anything)
 # Or drop them if needed:

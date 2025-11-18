@@ -37,9 +37,8 @@ CREATE TABLE IF NOT EXISTS config_key_migrations (
     INDEX idx_from_version (from_version),
     INDEX idx_migration_type (migration_type),
     INDEX idx_breaking (is_breaking)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE config_key_migrations IS 'Tracks config key changes between plugin versions for automatic migration';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Tracks config key changes between plugin versions for automatic migration';
 
 -- ============================================================================
 -- 2. CONFIG CHANGE HISTORY (Replaces file-based audit logs)
@@ -80,9 +79,8 @@ CREATE TABLE IF NOT EXISTS config_change_history (
     INDEX idx_deployment (deployment_id),
     INDEX idx_batch (batch_id),
     INDEX idx_reverted (is_reverted)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE config_change_history IS 'Complete audit trail of all configuration changes';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Complete audit trail of all configuration changes';
 
 -- ============================================================================
 -- 3. DEPLOYMENT HISTORY (Track deployments and their outcomes)
@@ -124,9 +122,8 @@ CREATE TABLE IF NOT EXISTS deployment_history (
     INDEX idx_status (deployment_status),
     INDEX idx_target_server (target_server),
     INDEX idx_is_rollback (is_rollback)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE deployment_history IS 'Tracks all deployments with success/failure outcomes';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Tracks all deployments with success/failure outcomes';
 
 -- ============================================================================
 -- 4. DEPLOYMENT CHANGES (Links changes to deployments)
@@ -149,9 +146,8 @@ CREATE TABLE IF NOT EXISTS deployment_changes (
     INDEX idx_deployment (deployment_id),
     INDEX idx_change (change_id),
     INDEX idx_status (change_status)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE deployment_changes IS 'Many-to-many link between deployments and changes';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Many-to-many link between deployments and changes';
 
 -- ============================================================================
 -- 5. CONFIG RULE HISTORY (Track changes to config rules themselves)
@@ -184,9 +180,8 @@ CREATE TABLE IF NOT EXISTS config_rule_history (
     INDEX idx_changed_at (changed_at),
     INDEX idx_changed_by (changed_by),
     INDEX idx_change_type (change_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE config_rule_history IS 'Audit trail for changes to config_rules table';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Audit trail for changes to config_rules table';
 
 -- Create trigger to auto-populate config_rule_history on UPDATE
 DELIMITER //
@@ -263,9 +258,8 @@ CREATE TABLE IF NOT EXISTS config_variance_history (
     INDEX idx_snapshot_time (snapshot_timestamp),
     INDEX idx_variance_type (variance_type),
     INDEX idx_drift_count (drift_count)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE config_variance_history IS 'Historical snapshots of config variance for trend analysis';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Historical snapshots of config variance for trend analysis';
 
 -- ============================================================================
 -- 7. PLUGIN INSTALLATION HISTORY (Track plugin adds/removes/updates)
@@ -302,9 +296,8 @@ CREATE TABLE IF NOT EXISTS plugin_installation_history (
     INDEX idx_action (action),
     INDEX idx_performed_at (performed_at),
     INDEX idx_performed_by (performed_by)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE plugin_installation_history IS 'Complete history of plugin lifecycle events';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Complete history of plugin lifecycle events';
 
 -- ============================================================================
 -- 8. APPROVAL WORKFLOW (For change requests requiring review)
@@ -346,9 +339,8 @@ CREATE TABLE IF NOT EXISTS change_approval_requests (
     INDEX idx_status (approval_status),
     INDEX idx_risk_level (risk_level),
     INDEX idx_requested_at (requested_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE change_approval_requests IS 'Workflow for changes requiring approval before deployment';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Workflow for changes requiring approval before deployment';
 
 -- ============================================================================
 -- 9. NOTIFICATION LOG (Track all notifications sent)
@@ -381,9 +373,8 @@ CREATE TABLE IF NOT EXISTS notification_log (
     INDEX idx_delivery_method (delivery_method),
     INDEX idx_status (delivery_status),
     INDEX idx_type (notification_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE notification_log IS 'Audit trail of all notifications sent by the system';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Audit trail of all notifications sent by the system';
 
 -- ============================================================================
 -- 10. SCHEDULED TASKS (Track automated operations)
@@ -415,9 +406,8 @@ CREATE TABLE IF NOT EXISTS scheduled_tasks (
     INDEX idx_task_type (task_type),
     INDEX idx_next_run (next_run_at),
     INDEX idx_enabled (is_enabled)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE scheduled_tasks IS 'Configuration and status of automated scheduled tasks';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Configuration and status of automated scheduled tasks';
 
 -- ============================================================================
 -- 11. SYSTEM HEALTH METRICS (Performance and health tracking)
@@ -442,9 +432,8 @@ CREATE TABLE IF NOT EXISTS system_health_metrics (
     INDEX idx_instance (instance_id),
     INDEX idx_type (metric_type),
     INDEX idx_recorded_at (recorded_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-COMMENT ON TABLE system_health_metrics IS 'Time-series metrics for monitoring system health';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT 'Time-series metrics for monitoring system health';
 
 -- ============================================================================
 -- COMPLETION MESSAGE
