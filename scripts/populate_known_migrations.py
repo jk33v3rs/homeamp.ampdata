@@ -11,7 +11,7 @@ Based on findings from:
 - Various documentation files
 """
 
-import mariadb
+import mysql.connector
 import sys
 from datetime import datetime
 
@@ -204,7 +204,7 @@ def populate_migrations():
                 
                 inserted += 1
                 
-            except mariadb.IntegrityError as e:
+            except mysql.connector.IntegrityError as e:
                 if 'Duplicate entry' in str(e):
                     print(f"  ⏭️  {mig['plugin_name']}: Already exists (skipped)")
                     skipped += 1
@@ -245,7 +245,7 @@ def populate_migrations():
         
         return True
         
-    except mariadb.Error as e:
+    except mysql.connector.Error as e:
         print(f"\n❌ Database error: {e}")
         return False
 
