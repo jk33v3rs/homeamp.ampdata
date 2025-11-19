@@ -1,8 +1,6 @@
 #!/bin/bash
 # Deploy all fixes to production server
 
-set -e  # Exit on error
-
 echo "🚀 Deploying fixes to Hetzner production server..."
 
 # Pull latest code
@@ -10,10 +8,7 @@ echo "📥 Pulling latest code..."
 cd /opt/archivesmp-config-manager
 sudo git pull origin master
 
-# Ensure database tables exist
-echo "🗄️  Creating/updating database tables..."
-mariadb -u root -p'2024!SQLdb' asmp_config < scripts/add_plugin_tracking_tables.sql
-mariadb -u root -p'2024!SQLdb' asmp_config < scripts/add_plugin_metadata_tables.sql
+# Database tables already exist - skip creation
 
 # Restart services
 echo "🔄 Restarting services..."

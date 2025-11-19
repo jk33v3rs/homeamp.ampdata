@@ -1,6 +1,7 @@
 -- ============================================================================
 -- Clear Duplicate/Spam Logs from Agent Logging Loop
 -- Run this to clean up tens of thousands of duplicate records before deploying fix
+-- Usage: mariadb -u root -p'2024!SQLdb' asmp_config < scripts/clear_duplicate_logs.sql
 -- ============================================================================
 
 USE asmp_config;
