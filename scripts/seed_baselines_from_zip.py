@@ -27,8 +27,8 @@ def get_db_connection():
         conn = mysql.connector.connect(
             host='135.181.212.169',
             port=3369,
-            user='root',
-            password='2024!SQLdb',
+            user='sqlworkerSMP',
+            password='SQLdb2024!',
             database='asmp_config'
         )
         if conn.is_connected():

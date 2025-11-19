@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchiveSMP Configuration Manager</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>ArchiveSMP Config Manager</h1>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" data-view="dashboard">Dashboard</a>
+                <a href="#" class="nav-link" data-view="plugin-configurator">Plugin Configurator</a>
+                <a href="#" class="nav-link" data-view="update-manager">Update Manager</a>
+                <a href="#" class="nav-link" data-view="variance-report">Variance Report</a>
+                <a href="#" class="nav-link" data-view="deployment-queue">Deployment Queue</a>
+                <a href="#" class="nav-link" data-view="instance-manager">Instance Manager</a>
+                <a href="#" class="nav-link" data-view="audit-log">Audit Log</a>
+                <a href="#" class="nav-link" data-view="settings">Settings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb-container">
+        <div id="breadcrumb-nav" class="breadcrumb-nav">
+            <span class="breadcrumb-current">Dashboard</span>
+        </div>
+        <div class="breadcrumb-actions">
+            <button id="back-btn" class="btn-icon" title="Go Back">←</button>
+            <button id="global-refresh-btn" class="btn-icon" title="Refresh">↻</button>
+        </div>
+    </div>
+
+    <!-- Global Notifications -->
+    <div id="global-error" class="notification error" style="display: none;"></div>
+    <div id="global-success" class="notification success" style="display: none;"></div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+        <!-- Dashboard View -->
+        <div id="dashboard-view" class="view-container active">
+            <div class="view-header">
+                <h2>Network Overview</h2>
+                <div class="view-actions">
+                    <span id="last-refresh-time" class="last-refresh"></span>
+                    <button id="dashboard-refresh-btn" class="btn btn-primary">Refresh</button>
+                </div>
+            </div>
+
+            <!-- Network Status Cards -->
+            <section class="dashboard-section">
+                <h3>Network Status</h3>
+                <div id="network-status-cards" class="status-cards-grid">
+                    <!-- Populated by dashboard.js -->
+                </div>
+                <div id="server-breakdown" class="server-breakdown">
+                    <!-- Populated by dashboard.js -->
+                </div>
+            </section>
+
+            <!-- Plugin Summary -->
+            <section class="dashboard-section">
+                <h3>Plugin Summary</h3>
+                <div id="plugin-summary-cards" class="plugin-summary-grid">
+                    <!-- Populated by dashboard.js -->
+                </div>
+            </section>
+
+            <!-- Approval Queue -->
+            <section class="dashboard-section">
+                <h3>Pending Approvals</h3>
+                <div class="approval-queue-header">
+                    <div class="batch-actions">
+                        <button id="approve-selected-btn" class="btn btn-success" disabled>Approve</button>
+                        <button id="reject-selected-btn" class="btn btn-danger" disabled>Reject</button>
+                    </div>
+                </div>
+                <div id="approval-queue-items">
+                    <!-- Populated by dashboard.js -->
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="dashboard-section">
+                <h3>Recent Activity</h3>
+                <div id="recent-activity-list">
+                    <!-- Populated by dashboard.js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Plugin Configurator View -->
+        <div id="plugin-configurator-view" class="view-container" style="display: none;">
+            <div class="view-header">
+                <h2>Plugin Configurator</h2>
+                <div class="view-actions">
+                    <button id="save-config-btn" class="btn btn-primary">Save Configuration</button>
+                    <button id="deploy-config-btn" class="btn btn-success">Deploy</button>
+                </div>
+            </div>
+
+            <!-- Plugin Selection Panel -->
+            <section class="configurator-section">
+                <div class="plugin-selector-panel">
+                    <div class="selector-header">
+                        <h3>Select Plugin</h3>
+                        <input type="text" id="plugin-search" placeholder="Search plugins..." class="search-input">
+                    </div>
+                    <div id="plugin-list" class="plugin-list">
+                        <!-- Populated by plugin_configurator.js -->
+                    </div>
+                </div>
+
+                <!-- Tag Management Panel -->
+                <div class="tag-management-panel">
+                    <h3>Meta Tags</h3>
+                    <div id="plugin-tags" class="tag-bubbles">
+                        <!-- Populated by plugin_configurator.js -->
+                    </div>
+                    <div class="add-tag-form">
+                        <input type="text" id="new-tag-input" placeholder="Add tag..." class="tag-input">
+                        <button id="add-tag-btn" class="btn btn-sm">Add</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- YAML Editor Section -->
+            <section class="configurator-section">
+                <div class="editor-header">
+                    <h3 id="current-plugin-name">No plugin selected</h3>
+                    <div class="editor-actions">
+                        <button id="validate-yaml-btn" class="btn btn-sm">Validate</button>
+                        <button id="format-yaml-btn" class="btn btn-sm">Format</button>
+                        <button id="revert-changes-btn" class="btn btn-sm btn-warning">Revert</button>
+                    </div>
+                </div>
+                <div id="yaml-editor-container" class="yaml-editor">
+                    <!-- CodeMirror/Monaco editor will be attached here -->
+                </div>
+                <div id="yaml-validation-errors" class="validation-errors" style="display: none;">
+                    <!-- Validation errors displayed here -->
+                </div>
+            </section>
+
+            <!-- Variance Detection Section -->
+            <section class="configurator-section">
+                <h3>Configuration Variances</h3>
+                <div id="variance-list" class="variance-list">
+                    <!-- Populated by plugin_configurator.js -->
+                </div>
+            </section>
+
+            <!-- Instance Deployment Targets -->
+            <section class="configurator-section">
+                <h3>Deployment Targets</h3>
+                <div class="deployment-filters">
+                    <label><input type="checkbox" id="filter-all-instances" checked> All Instances</label>
+                    <label><input type="checkbox" id="filter-by-server"> Filter by Server</label>
+                    <label><input type="checkbox" id="filter-by-group"> Filter by Group</label>
+                </div>
+                <div id="instance-targets" class="instance-targets-grid">
+                    <!-- Populated by plugin_configurator.js -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Update Manager View -->
+        <div id="update-manager-view" class="view-container" style="display: none;">
+            <h2>Update Manager</h2>
+            <p>Update manager view (to be implemented in next phase)</p>
+        </div>
+
+        <!-- Variance Report View -->
+        <div id="variance-report-view" class="view-container" style="display: none;">
+            <h2>Variance Report</h2>
+            <p>Variance report view (to be implemented in next phase)</p>
+        </div>
+
+        <!-- Deployment Queue View -->
+        <div id="deployment-queue-view" class="view-container" style="display: none;">
+            <h2>Deployment Queue</h2>
+            <p>Deployment queue view (to be implemented in next phase)</p>
+        </div>
+
+        <!-- Instance Manager View -->
+        <div id="instance-manager-view" class="view-container" style="display: none;">
+            <div class="view-header">
+                <h2>Instance Manager</h2>
+                <p>Manage all Minecraft server instances across both servers</p>
+            </div>
+
+            <div class="instance-filters">
+                <select id="instance-filter-server">
+                    <option value="">All Servers</option>
+                </select>
+                <select id="instance-filter-status">
+                    <option value="">All Status</option>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                    <option value="starting">Starting</option>
+                    <option value="stopping">Stopping</option>
+                </select>
+                <select id="instance-filter-tag">
+                    <option value="">All Tags</option>
+                </select>
+                <input type="text" id="instance-search-input" placeholder="Search instances..." />
+                <button id="refresh-instances-btn">Refresh</button>
+            </div>
+
+            <div class="instance-summary-cards">
+                <div class="summary-card">
+                    <h4>Total Instances</h4>
+                    <div class="summary-value" id="total-instances-count">-</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Online</h4>
+                    <div class="summary-value" id="online-instances-count">-</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Offline</h4>
+                    <div class="summary-value" id="offline-instances-count">-</div>
+                </div>
+                <div class="summary-card">
+                    <h4>Total Plugins</h4>
+                    <div class="summary-value" id="total-plugins-count">-</div>
+                </div>
+            </div>
+
+            <table id="instances-table">
+                <thead>
+                    <tr>
+                        <th>Instance Name</th>
+                        <th>Server</th>
+                        <th>Status</th>
+                        <th>Players</th>
+                        <th>Plugins</th>
+                        <th>Tags</th>
+                        <th>Last Synced</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="instances-table-body">
+                    <tr><td colspan="8" class="no-data">No instances found</td></tr>
+                </tbody>
+            </table>
+
+            <div id="instance-details-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h3>Instance Details</h3>
+                    <div id="instance-details-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Log View -->
+        <div id="audit-log-view" class="view-container" style="display: none;">
+            <div class="view-header">
+                <h2>Audit Log</h2>
+                <p>System events, changes, and activity history</p>
+            </div>
+
+            <div class="audit-filters">
+                <select id="audit-filter-event-type">
+                    <option value="">All Events</option>
+                    <option value="config_change">Config Changes</option>
+                    <option value="deployment">Deployments</option>
+                    <option value="plugin_update">Plugin Updates</option>
+                    <option value="sync">Sync Events</option>
+                    <option value="approval">Approvals</option>
+                    <option value="rejection">Rejections</option>
+                </select>
+                <select id="audit-filter-instance">
+                    <option value="">All Instances</option>
+                </select>
+                <select id="audit-filter-user">
+                    <option value="">All Users</option>
+                    <option value="system">System</option>
+                    <option value="agent">Agent</option>
+                </select>
+                <input type="date" id="audit-filter-start-date" />
+                <input type="date" id="audit-filter-end-date" />
+                <button id="apply-audit-filters-btn">Apply Filters</button>
+                <button id="export-audit-log-btn">Export to CSV</button>
+            </div>
+
+            <table id="audit-log-table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Event Type</th>
+                        <th>Instance</th>
+                        <th>User</th>
+                        <th>Description</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody id="audit-log-table-body">
+                    <tr><td colspan="6" class="no-data">No audit events found</td></tr>
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <button id="audit-prev-page-btn" disabled>Previous</button>
+                <span id="audit-page-info">Page 1</span>
+                <button id="audit-next-page-btn">Next</button>
+            </div>
+
+            <div id="audit-details-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h3>Event Details</h3>
+                    <div id="audit-details-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tag Manager View -->
+        <div id="tag-manager-view" class="view-container" style="display: none;">
+            <div class="view-header">
+                <h2>Tag Manager</h2>
+                <p>Manage meta-tags, categories, and instance assignments</p>
+            </div>
+
+            <div class="tag-manager-tabs">
+                <button id="tab-tag-list" class="tag-tab active">Tags</button>
+                <button id="tab-categories" class="tag-tab">Categories</button>
+                <button id="tab-assignments" class="tag-tab">Assignments</button>
+                <button id="tab-dependencies" class="tag-tab">Dependencies & Conflicts</button>
+            </div>
+
+            <!-- Tags Tab -->
+            <div id="tag-list-tab-content" class="tag-tab-content">
+                <div class="tag-actions">
+                    <button id="create-tag-btn" class="btn">+ Create Tag</button>
+                    <button id="refresh-tags-btn" class="btn">Refresh</button>
+                </div>
+                <table id="tags-table">
+                    <thead>
+                        <tr>
+                            <th>Tag</th>
+                            <th>Category</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Usage</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tags-table-body">
+                        <tr><td colspan="6">Loading tags...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Categories Tab -->
+            <div id="categories-tab-content" class="tag-tab-content" style="display: none;">
+                <div class="tag-actions">
+                    <button id="create-category-btn" class="btn">+ Create Category</button>
+                </div>
+                <table id="categories-table">
+                    <thead>
+                        <tr>
+                            <th>Display Name</th>
+                            <th>Internal Name</th>
+                            <th>Description</th>
+                            <th>Multiselect</th>
+                            <th>Order</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="categories-table-body">
+                        <tr><td colspan="6">Loading categories...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Assignments Tab -->
+            <div id="assignments-tab-content" class="tag-tab-content" style="display: none;">
+                <div class="assignment-help">
+                    <p><strong>Drag and drop</strong> tags from the left panel onto instances to assign them.</p>
+                    <p>Click the × button on a tag to remove it from an instance.</p>
+                </div>
+                <div id="instance-assignment-list" class="instance-assignment-grid">
+                    <!-- Instance cards populated by JS -->
+                </div>
+            </div>
+
+            <!-- Dependencies & Conflicts Tab -->
+            <div id="dependencies-tab-content" class="tag-tab-content" style="display: none;">
+                <h3>Tag Dependencies</h3>
+                <table id="dependencies-table">
+                    <thead>
+                        <tr>
+                            <th>Dependent Tag</th>
+                            <th>Requires Tag</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dependencies-table-body">
+                        <tr><td colspan="4">Loading dependencies...</td></tr>
+                    </tbody>
+                </table>
+
+                <h3 style="margin-top: 30px;">Tag Conflicts</h3>
+                <table id="conflicts-table">
+                    <thead>
+                        <tr>
+                            <th>Tag A</th>
+                            <th>Tag B</th>
+                            <th>Severity</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody id="conflicts-table-body">
+                        <tr><td colspan="4">Loading conflicts...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tag Modal -->
+            <div id="tag-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3 id="tag-modal-title">Create Tag</h3>
+                    <form id="tag-form">
+                        <input type="hidden" id="tag-id-hidden" value="">
+                        <label>Category:</label>
+                        <select id="tag-category-select" class="category-selector" required></select>
+                        
+                        <label>Internal Name (slug):</label>
+                        <input type="text" id="tag-name-input" placeholder="e.g., minigame-hub" required>
+                        
+                        <label>Display Name:</label>
+                        <input type="text" id="tag-display-name-input" placeholder="e.g., Minigame Hub" required>
+                        
+                        <label>Description:</label>
+                        <textarea id="tag-description-input" placeholder="What this tag means"></textarea>
+                        
+                        <label>Icon (emoji or symbol):</label>
+                        <input type="text" id="tag-icon-input" placeholder="e.g., 🎮">
+                        
+                        <label>Color (hex):</label>
+                        <input type="color" id="tag-color-input" value="#6c757d">
+                        
+                        <div class="modal-buttons">
+                            <button type="button" id="save-tag-btn" class="btn">Save</button>
+                            <button type="button" id="cancel-tag-modal" class="btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Category Modal -->
+            <div id="category-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <h3 id="category-modal-title">Create Category</h3>
+                    <form id="category-form">
+                        <input type="hidden" id="category-id-hidden" value="">
+                        
+                        <label>Internal Name (slug):</label>
+                        <input type="text" id="category-name-input" placeholder="e.g., server-role" required>
+                        
+                        <label>Display Name:</label>
+                        <input type="text" id="category-display-name-input" placeholder="e.g., Server Role" required>
+                        
+                        <label>Description:</label>
+                        <textarea id="category-description-input" placeholder="Purpose of this category"></textarea>
+                        
+                        <label>
+                            <input type="checkbox" id="category-multiselect" checked>
+                            Allow multiple tags from this category
+                        </label>
+                        
+                        <label>
+                            <input type="checkbox" id="category-required">
+                            Require at least one tag from this category
+                        </label>
+                        
+                        <label>Display Order:</label>
+                        <input type="number" id="category-order-input" value="999" min="1">
+                        
+                        <label>Icon:</label>
+                        <input type="text" id="category-icon-input" placeholder="📁">
+                        
+                        <label>Color:</label>
+                        <input type="color" id="category-color-input" value="#6c757d">
+                        
+                        <div class="modal-buttons">
+                            <button type="button" id="save-category-btn" class="btn">Save</button>
+                            <button type="button" id="cancel-category-modal" class="btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="settings-view" class="view-container" style="display: none;">
+            <h2>Settings</h2>
+            <p>Settings view (to be implemented in next phase)</p>
+        </div>
+
+        <!-- Deployment Queue View -->
+        <div id="deployment-queue-view" class="view-container" style="display: none;">
+            <div class="view-header">
+                <h2>Deployment Queue</h2>
+                <p>Active and historical config deployments</p>
+            </div>
+
+            <div class="deployment-filters">
+                <select id="deployment-filter-status" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="completed">Completed</option>
+                    <option value="failed">Failed</option>
+                    <option value="partial">Partial</option>
+                </select>
+                <button id="refresh-deployments-btn" class="btn">Refresh</button>
+            </div>
+
+            <div id="deployments-table-container">
+                <table id="deployments-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Plugin</th>
+                            <th>Instances</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Updated</th>
+                            <th>Progress</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deployments-table-body">
+                        <tr><td colspan="8" class="no-data">Loading deployments...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="deployment-details-modal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <h3>Deployment Details</h3>
+                    <div id="deployment-details-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Variance Report View -->
+        <div id="variance-report-view" class="view-container" style="display: none;">
+            <div class="view-header">
+                <h2>Variance Report</h2>
+                <p>Configuration variances across all instances</p>
+            </div>
+
+            <div class="variance-filters">
+                <select id="variance-filter-server" class="filter-select">
+                    <option value="">All Servers</option>
+                </select>
+                <select id="variance-filter-plugin" class="filter-select">
+                    <option value="">All Plugins</option>
+                </select>
+                <select id="variance-filter-status" class="filter-select">
+                    <option value="">All Status</option>
+                    <option value="unintentional">Unintentional Only</option>
+                    <option value="intentional">Intentional Only</option>
+                </select>
+                <button id="refresh-variances-btn" class="btn">Refresh</button>
+            </div>
+
+            <div id="variance-summary" class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-value" id="total-variances">0</div>
+                    <div class="summary-label">Total Variances</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" id="unintentional-variances">0</div>
+                    <div class="summary-label">Unintentional</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-value" id="plugins-with-variances">0</div>
+                    <div class="summary-label">Affected Plugins</div>
+                </div>
+            </div>
+
+            <div id="variances-table-container">
+                <table id="variances-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all-variances" /></th>
+                            <th>Plugin</th>
+                            <th>Instance</th>
+                            <th>Config Key</th>
+                            <th>Baseline Value</th>
+                            <th>Actual Value</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="variances-table-body">
+                        <tr><td colspan="8" class="no-data">Loading variances...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="variance-actions">
+                <button id="apply-defaults-btn" class="btn btn-primary">Apply Defaults to Selected</button>
+                <button id="mark-intentional-btn" class="btn">Mark as Intentional</button>
+                <button id="sync-configs-btn" class="btn">Sync Configs</button>
+            </div>
+        </div>
+
+        <!-- Update Manager View -->
+        <div id="update-manager-view" class="view-container" style="display: none;">
+            <div class="view-header">
+                <h2>Update Manager</h2>
+                <p>Manage plugin updates across the network</p>
+            </div>
+
+            <div class="updates-filters">
+                <button id="check-updates-btn" class="btn">Check for Updates</button>
+                <span id="last-check-time" class="info-text">Last checked: Never</span>
+            </div>
+
+            <div id="updates-available-section">
+                <h3>Available Updates</h3>
+                <table id="updates-available-table" class="data-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="select-all-updates" /></th>
+                            <th>Plugin</th>
+                            <th>Current Version</th>
+                            <th>Latest Version</th>
+                            <th>Source</th>
+                            <th>Affected Instances</th>
+                            <th>Released</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="updates-table-body">
+                        <tr><td colspan="8" class="no-data">No updates available</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="deployment-scope-section">
+                <h3>Deployment Scope</h3>
+                <div id="deployment-scope-selector">
+                    <label><input type="radio" name="deployment-scope" value="all" checked /> All Instances</label>
+                    <label><input type="radio" name="deployment-scope" value="server" /> By Server</label>
+                    <label><input type="radio" name="deployment-scope" value="tag" /> By Meta-Tag</label>
+                    <label><input type="radio" name="deployment-scope" value="individual" /> Individual Selection</label>
+                </div>
+            </div>
+
+            <div class="update-actions">
+                <button id="approve-deploy-btn" class="btn btn-primary">Approve & Deploy Selected</button>
+                <button id="update-selected-btn" class="btn">Update Selected</button>
+                <button id="reject-all-btn" class="btn btn-danger">Reject All</button>
+            </div>
+
+            <div id="update-status-section" style="display: none;">
+                <h3>Update Status</h3>
+                <div id="update-progress-container">
+                    <div class="progress-bar">
+                        <div id="update-progress-bar" class="progress-fill" style="width: 0%;"></div>
+                    </div>
+                    <p id="update-status-text">Preparing update...</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="stub_views.js"></script>
+    <script src="dashboard.js"></script>
+    <script src="plugin_configurator.js"></script>
+    <script src="update_manager.js"></script>
+    <script src="variance_report.js"></script>
+    <script src="deployment_queue.js"></script>
+    <script src="instance_manager.js"></script>
+    <script src="audit_log.js"></script>
+    <script src="tag_manager.js"></script>
+    <script src="app.js"></script>
+    <!-- Additional view modules will be loaded here -->
+</body>
+</html>

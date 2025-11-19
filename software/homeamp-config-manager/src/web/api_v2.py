@@ -13,12 +13,35 @@ from pydantic import BaseModel
 from pathlib import Path
 
 from ..database.db_access import ConfigDatabase
+from ..api.enhanced_endpoints import router as enhanced_router
+from ..api.dashboard_endpoints import router as dashboard_router
+from ..api.plugin_configurator_endpoints import router as plugin_configurator_router
+from ..api.deployment_endpoints import router as deployment_router
+from ..api.update_manager_endpoints import router as update_manager_router
+from ..api.variance_endpoints import router as variance_router
+from ..api.audit_log_endpoints import router as audit_log_router
+from ..api.tag_manager_endpoints import router as tag_manager_router
 
 app = FastAPI(
     title="ArchiveSMP Configuration Manager",
     description="Database-backed config management for ArchiveSMP",
     version="2.0.0"
 )
+
+# Include Phase 0 enhanced endpoints
+app.include_router(enhanced_router)
+# Include Phase 2 dashboard endpoints
+app.include_router(dashboard_router)
+# Include Phase 2 plugin configurator endpoints
+app.include_router(plugin_configurator_router)
+# Include deployment endpoints
+app.include_router(deployment_router)
+# Include update manager endpoints
+app.include_router(update_manager_router)
+# Include variance endpoints
+app.include_router(variance_router)
+app.include_router(audit_log_router)
+app.include_router(tag_manager_router)
 
 # CORS for development
 app.add_middleware(

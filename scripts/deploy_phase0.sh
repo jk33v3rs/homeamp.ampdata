@@ -61,6 +61,20 @@ if [ -f "$REPO_DIR/src/agent/datapack_discovery.py" ]; then
 else
     echo "  ⚠ datapack_discovery.py not found - ensure it's been committed to repo"
 fi
+
+# Enhanced Discovery Integration
+if [ -f "$REPO_DIR/src/agent/enhanced_discovery.py" ]; then
+    echo "  ✓ enhanced_discovery.py already in place"
+else
+    echo "  ⚠ enhanced_discovery.py not found - ensure it's been committed to repo"
+fi
+
+# Enhanced API Endpoints
+if [ -f "$REPO_DIR/src/api/enhanced_endpoints.py" ]; then
+    echo "  ✓ enhanced_endpoints.py already in place"
+else
+    echo "  ⚠ enhanced_endpoints.py not found - ensure it's been committed to repo"
+fi
 echo ""
 
 echo "[4/6] Restarting homeamp-agent service..."
