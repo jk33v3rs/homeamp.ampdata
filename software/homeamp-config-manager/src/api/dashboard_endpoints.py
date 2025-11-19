@@ -87,19 +87,16 @@ async def get_approval_queue():
         # Get pending plugin updates
         update_query = """
             SELECT 
-                pv.id,
+                pv.version_id as id,
                 'plugin_update' as type,
-                p.name as plugin_name,
-                pv.current_version,
+                pv.plugin_name,
+                pv.installed_version as current_version,
                 pv.latest_version as new_version,
-                GROUP_CONCAT(DISTINCT i.name) as instances,
-                pv.checked_at as timestamp
+                pv.instance_id,
+                pv.last_checked as timestamp
             FROM plugin_versions pv
-            JOIN plugins p ON pv.plugin_id = p.id
-            JOIN plugin_instances pi ON p.id = pi.plugin_id
-            JOIN instances i ON pi.instance_id = i.id
             WHERE pv.update_available = TRUE
-            GROUP BY pv.id, p.name, pv.current_version, pv.latest_version, pv.checked_at
+            ORDER BY pv.last_checked DESC
         """
         cursor.execute(update_query)
         plugin_updates = cursor.fetchall()
@@ -107,16 +104,17 @@ async def get_approval_queue():
         # Get pending deployments
         deployment_query = """
             SELECT 
-                id,
-                'config_change' as type,
-                plugin_name,
+                deployment_id as id,
+                'deployment' as type,
+                deployment_notes as plugin_name,
                 NULL as current_version,
                 NULL as new_version,
-                instance_ids as instances,
-                created_at as timestamp
-            FROM deployment_queue
-            WHERE status = 'pending'
-            ORDER BY created_at DESC
+                target_instances as instances_json,
+                deployed_at as timestamp
+            FROM deployment_history
+            WHERE deployment_status = 'pending'
+            ORDER BY deployed_at DESC
+            LIMIT 50
         """
         cursor.execute(deployment_query)
         deployments = cursor.fetchall()
@@ -125,30 +123,32 @@ async def get_approval_queue():
         items = []
         
         for update in plugin_updates:
-            instances_str = update.get('instances', '')
             items.append(ApprovalItem(
                 id=update['id'],
                 type=update['type'],
                 plugin_name=update['plugin_name'],
                 current_version=update['current_version'],
                 new_version=update['new_version'],
-                instances=instances_str.split(',') if instances_str else [],
+                instances=[update['instance_id']],
                 timestamp=update['timestamp']
             ))
         
         for deploy in deployments:
+            # Parse JSON instances if available
             import json
-            instance_ids = json.loads(deploy['instances']) if isinstance(deploy['instances'], str) else deploy['instances']
+            instances_str = deploy.get('instances_json', '')
+            try:
+                instances = json.loads(instances_str) if instances_str else []
+            except:
+                instances = []
+            
             items.append(ApprovalItem(
                 id=deploy['id'],
                 type=deploy['type'],
-                plugin_name=deploy['plugin_name'],
-                instances=instance_ids,
+                plugin_name=deploy['plugin_name'] or 'Deployment',
+                instances=instances,
                 timestamp=deploy['timestamp']
             ))
-        
-        # Sort by timestamp descending
-        items.sort(key=lambda x: x.timestamp, reverse=True)
         
         return ApprovalQueueSchema(items=items, count=len(items))
         
@@ -172,12 +172,12 @@ async def get_network_status():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        # Get overall stats
+        # Get overall stats (using actual schema - no online_status column yet)
         stats_query = """
             SELECT 
                 COUNT(*) as total,
-                SUM(CASE WHEN online_status = TRUE THEN 1 ELSE 0 END) as online,
-                SUM(CASE WHEN online_status = FALSE THEN 1 ELSE 0 END) as offline
+                SUM(CASE WHEN is_active = TRUE THEN 1 ELSE 0 END) as online,
+                SUM(CASE WHEN is_active = FALSE THEN 1 ELSE 0 END) as offline
             FROM instances
         """
         cursor.execute(stats_query)
@@ -188,18 +188,16 @@ async def get_network_status():
             SELECT 
                 server_name,
                 COUNT(*) as total,
-                SUM(CASE WHEN online_status = TRUE THEN 1 ELSE 0 END) as online,
-                SUM(CASE WHEN online_status = FALSE THEN 1 ELSE 0 END) as offline
+                SUM(CASE WHEN is_active = TRUE THEN 1 ELSE 0 END) as online,
+                SUM(CASE WHEN is_active = FALSE THEN 1 ELSE 0 END) as offline
             FROM instances
             GROUP BY server_name
         """
         cursor.execute(server_query)
         servers = cursor.fetchall()
         
-        # Get variance count
-        variance_query = "SELECT COUNT(*) as count FROM config_variances WHERE is_intentional = FALSE"
-        cursor.execute(variance_query)
-        variance_result = cursor.fetchone()
+        # Variance count - return 0 for now (table doesn't exist yet)
+        variance_count = 0
         
         server_statuses = [
             ServerStatus(
@@ -216,7 +214,7 @@ async def get_network_status():
             offline=int(overall['offline'] or 0),
             total=int(overall['total']),
             servers=server_statuses,
-            variance_count=int(variance_result['count'] or 0)
+            variance_count=0
         )
         
     except mysql.connector.Error as e:
@@ -241,13 +239,26 @@ async def get_plugin_summary():
         
         query = """
             SELECT 
-                COUNT(DISTINCT p.id) as total_plugins,
-                SUM(CASE WHEN pv.update_available = TRUE THEN 1 ELSE 0 END) as needs_update,
-                SUM(CASE WHEN pv.update_available = FALSE OR pv.id IS NULL THEN 1 ELSE 0 END) as up_to_date
-            FROM plugins p
-            LEFT JOIN plugin_versions pv ON p.id = pv.plugin_id
+                COUNT(DISTINCT plugin_name) as total_plugins,
+                SUM(CASE WHEN update_available = TRUE THEN 1 ELSE 0 END) as needs_update,
+                SUM(CASE WHEN update_available = FALSE OR update_available IS NULL THEN 1 ELSE 0 END) as up_to_date
+            FROM plugin_versions
         """
         cursor.execute(query)
+        result = cursor.fetchone()
+        
+        return PluginSummarySchema(
+            total_plugins=int(result['total_plugins'] or 0),
+            needs_update=int(result['needs_update'] or 0),
+            up_to_date=int(result['up_to_date'] or 0)
+        )
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
         result = cursor.fetchone()
         
         return PluginSummarySchema(
@@ -276,15 +287,16 @@ async def get_recent_activity(limit: int = 10):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
+        # Use config_change_history table which exists
         query = """
             SELECT 
-                timestamp,
-                action_type as event_type,
-                CONCAT(action_type, ' - ', resource_type, ' ID:', resource_id) as description,
-                resource_id as instance_id,
-                user_id as user
-            FROM audit_log
-            ORDER BY timestamp DESC
+                changed_at as timestamp,
+                change_type as event_type,
+                CONCAT(change_type, ' - ', plugin_name, ': ', config_key) as description,
+                instance_id,
+                changed_by as user
+            FROM config_change_history
+            ORDER BY changed_at DESC
             LIMIT %s
         """
         cursor.execute(query, (limit,))
