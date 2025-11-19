@@ -62,6 +62,30 @@ class ActivityLogEntry(BaseModel):
     instance_id: Optional[str] = None
     user: Optional[str] = None
 
+class DatapackInfo(BaseModel):
+    id: int
+    instance_id: int
+    instance_name: str
+    world_path: str
+    datapack_name: str
+    version: Optional[str] = None
+    file_hash: str
+    discovered_at: datetime
+
+class OutdatedPlugin(BaseModel):
+    plugin_name: str
+    current_version: str
+    latest_version: str
+    instances: List[str]
+    last_checked: datetime
+
+class CICDEndpoint(BaseModel):
+    id: int
+    name: str
+    url: str
+    type: str
+    is_active: bool
+
 
 # Router setup
 router = APIRouter(prefix="/api/dashboard", tags=["dashboard"])
@@ -307,3 +331,131 @@ async def get_recent_activity(limit: int = 10):
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
+
+
+@router.get("/datapacks", response_model=List[DatapackInfo])
+async def get_datapacks(instance_id: Optional[int] = None):
+    """
+    Get discovered datapacks
+    
+    **Semantic**: `DatapackService.getDatapacks(instanceId?)`
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        if instance_id is not None:
+            query = """
+                SELECT 
+                    d.id,
+                    d.instance_id,
+                    i.name as instance_name,
+                    d.world_path,
+                    d.datapack_name,
+                    d.version,
+                    d.file_hash,
+                    d.discovered_at
+                FROM instance_datapacks d
+                JOIN instances i ON d.instance_id = i.id
+                WHERE d.instance_id = %s
+                ORDER BY d.datapack_name, d.world_path
+            """
+            cursor.execute(query, (instance_id,))
+        else:
+            query = """
+                SELECT 
+                    d.id,
+                    d.instance_id,
+                    i.name as instance_name,
+                    d.world_path,
+                    d.datapack_name,
+                    d.version,
+                    d.file_hash,
+                    d.discovered_at
+                FROM instance_datapacks d
+                JOIN instances i ON d.instance_id = i.id
+                ORDER BY i.name, d.datapack_name
+            """
+            cursor.execute(query)
+        
+        results = cursor.fetchall()
+        
+        return [
+            DatapackInfo(
+                id=r['id'],
+                instance_id=r['instance_id'],
+                instance_name=r['instance_name'],
+                world_path=r['world_path'],
+                datapack_name=r['datapack_name'],
+                version=r['version'],
+                file_hash=r['file_hash'],
+                discovered_at=r['discovered_at']
+            )
+            for r in results
+        ]
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@router.get("/plugins/outdated", response_model=List[OutdatedPlugin])
+async def get_outdated_plugins():
+    """
+    Get plugins with available updates
+    
+    **Semantic**: `PluginService.getOutdatedPlugins()`
+    """
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        query = """
+            SELECT 
+                pv.plugin_name,
+                pv.installed_version as current_version,
+                pv.latest_version,
+                GROUP_CONCAT(i.name SEPARATOR ', ') as instances,
+                MAX(pv.last_checked) as last_checked
+            FROM plugin_versions pv
+            JOIN instances i ON pv.instance_id = i.id
+            WHERE pv.update_available = TRUE
+            GROUP BY pv.plugin_name, pv.installed_version, pv.latest_version
+            ORDER BY pv.plugin_name
+        """
+        cursor.execute(query)
+        results = cursor.fetchall()
+        
+        return [
+            OutdatedPlugin(
+                plugin_name=r['plugin_name'],
+                current_version=r['current_version'],
+                latest_version=r['latest_version'],
+                instances=r['instances'].split(', ') if r['instances'] else [],
+                last_checked=r['last_checked']
+            )
+            for r in results
+        ]
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@router.get("/cicd/endpoints", response_model=List[CICDEndpoint])
+async def get_cicd_endpoints():
+    """
+    Get CI/CD webhook endpoints (placeholder for future implementation)
+    
+    **Semantic**: `CICDService.getEndpoints()`
+    """
+    # Return empty list for now - this would query a cicd_endpoints table when implemented
+    return []

@@ -262,6 +262,69 @@ async def get_plugins():
     return []
 
 
+@app.get("/api/datapacks")
+async def get_datapacks(instance_id: Optional[int] = None):
+    """Get discovered datapacks"""
+    query = """
+        SELECT 
+            d.id,
+            d.instance_id,
+            i.name as instance_name,
+            d.world_path,
+            d.datapack_name,
+            d.version,
+            d.file_hash,
+            d.discovered_at
+        FROM instance_datapacks d
+        JOIN instances i ON d.instance_id = i.id
+    """
+    
+    if instance_id is not None:
+        query += " WHERE d.instance_id = %s ORDER BY d.datapack_name, d.world_path"
+        db.cursor.execute(query, (instance_id,))
+    else:
+        query += " ORDER BY i.name, d.datapack_name"
+        db.cursor.execute(query)
+    
+    results = db.cursor.fetchall()
+    return {"datapacks": results, "count": len(results)}
+
+
+@app.get("/api/plugins/outdated")
+async def get_outdated_plugins():
+    """Get plugins with available updates"""
+    db.cursor.execute("""
+        SELECT 
+            pv.plugin_name,
+            pv.installed_version as current_version,
+            pv.latest_version,
+            GROUP_CONCAT(i.name SEPARATOR ', ') as instances,
+            MAX(pv.last_checked) as last_checked
+        FROM plugin_versions pv
+        JOIN instances i ON pv.instance_id = i.id
+        WHERE pv.update_available = TRUE
+        GROUP BY pv.plugin_name, pv.installed_version, pv.latest_version
+        ORDER BY pv.plugin_name
+    """)
+    results = db.cursor.fetchall()
+    
+    # Split instances string into array
+    for r in results:
+        if r.get('instances'):
+            r['instances'] = r['instances'].split(', ')
+        else:
+            r['instances'] = []
+    
+    return {"outdated": results, "count": len(results)}
+
+
+@app.get("/api/cicd/endpoints")
+async def get_cicd_endpoints():
+    """Get CI/CD webhook endpoints (placeholder)"""
+    # Return empty list - this would query a cicd_endpoints table when implemented
+    return {"endpoints": [], "count": 0}
+
+
 # ============================================================================
 # CONFIG VARIANCE & DRIFT DETECTION ENDPOINTS
 # ============================================================================
