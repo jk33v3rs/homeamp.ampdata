@@ -100,6 +100,37 @@ class ConfigDatabase:
         """, (instance_id,))
         return self.cursor.fetchone()
     
+    def upsert_instance(self, instance_id: str, server_name: str, 
+                       instance_name: str = None, server_host: str = None,
+                       port: int = None, amp_instance_id: str = None,
+                       platform: str = 'paper', minecraft_version: str = None):
+        """
+        Register or update a discovered instance
+        Uses ON DUPLICATE KEY UPDATE to handle existing instances
+        """
+        try:
+            self.cursor.execute("""
+                INSERT INTO instances 
+                (instance_id, instance_name, server_name, server_host, port, 
+                 amp_instance_id, platform, minecraft_version, last_seen)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())
+                ON DUPLICATE KEY UPDATE
+                    instance_name = COALESCE(VALUES(instance_name), instance_name),
+                    server_host = COALESCE(VALUES(server_host), server_host),
+                    port = COALESCE(VALUES(port), port),
+                    amp_instance_id = COALESCE(VALUES(amp_instance_id), amp_instance_id),
+                    platform = COALESCE(VALUES(platform), platform),
+                    minecraft_version = COALESCE(VALUES(minecraft_version), minecraft_version),
+                    last_seen = NOW()
+            """, (instance_id, instance_name or instance_id, server_name, 
+                  server_host, port, amp_instance_id, platform, minecraft_version))
+            self.commit()
+            logger.info(f"Registered instance: {instance_id} on {server_name}")
+        except Error as e:
+            logger.error(f"Failed to upsert instance {instance_id}: {e}")
+            self.rollback()
+            raise
+    
     # ========================================================================
     # INSTANCE GROUP QUERIES
     # ========================================================================

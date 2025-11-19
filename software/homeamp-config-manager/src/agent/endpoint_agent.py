@@ -85,24 +85,34 @@ class EndpointAgent:
             discovered = self.scanner.discover_instances()
             self.logger.info(f"📡 Discovered {len(discovered)} instances")
             
-            # 2. Get expected instances from database
+            # 2. Register all discovered instances (upsert to database)
+            for instance in discovered:
+                try:
+                    self.db.upsert_instance(
+                        instance_id=instance['name'],
+                        server_name=self.server_name,
+                        instance_name=instance.get('friendly_name', instance['name']),
+                        amp_instance_id=instance.get('amp_id'),
+                        platform=instance.get('platform', 'paper'),
+                        minecraft_version=instance.get('mc_version')
+                    )
+                except Exception as e:
+                    self.logger.error(f"Failed to register {instance['name']}: {e}")
+            
+            # 3. Get expected instances from database (now includes newly registered)
             expected_instances = self.db.get_instances_by_server(self.server_name)
             expected_ids = {inst['instance_id'] for inst in expected_instances}
             
-            # 3. Check for missing instances
+            # 4. Check for missing instances (in DB but not on disk)
             discovered_ids = {inst['name'] for inst in discovered}
             missing = expected_ids - discovered_ids
-            unexpected = discovered_ids - expected_ids
             
             if missing:
-                self.logger.warning(f"⚠️  Missing instances: {missing}")
-            if unexpected:
-                self.logger.info(f"🆕 Unexpected instances: {unexpected}")
+                self.logger.warning(f"⚠️  Missing instances (in DB but not found): {missing}")
             
-            # 4. Scan each instance
+            # 5. Scan each instance
             for instance in discovered:
-                if instance['name'] in expected_ids:
-                    self._scan_instance_full(instance)
+                self._scan_instance_full(instance)
         
         except Exception as e:
             self.logger.error(f"❌ Error in agent cycle: {e}", exc_info=True)
@@ -272,12 +282,13 @@ class EndpointAgent:
                                 self.db.log_config_change(
                                     instance_id=instance_id,
                                     plugin_name=plugin_name,
-                                    config_key=f"{config_file}:{config_key}",
+                                    config_file=config_file,
+                                    config_key=config_key,
                                     old_value=str(expected_normalized),
                                     new_value=str(actual_normalized),
                                     change_type='automated',  # Agent detected
                                     changed_by=f'agent-{self.server_name}',
-                                    reason=f'Drift from {scope} expectation detected during scan'
+                                    change_reason=f'Drift from {scope} expectation detected during scan'
                                 )
                                 
                                 # Add to cache
@@ -365,12 +376,13 @@ class EndpointAgent:
             self.db.log_config_change(
                 instance_id=instance_id,
                 plugin_name=plugin_name,
+                config_file='config.yml',
                 config_key=migration['new_key_path'],
                 old_value=f"migrated from {migration['old_key_path']}",
                 new_value=migration['new_key_path'],
                 change_type='automated',
                 changed_by=f'agent-{self.server_name}',
-                reason=f"Auto-migration: {migration['notes']}"
+                change_reason=f"Auto-migration: {migration['notes']}"
             )
             self.logger.info(f"✅ Applied migration: {migration['old_key_path']} → {migration['new_key_path']}")
         except Exception as e:
