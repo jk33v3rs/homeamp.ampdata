@@ -259,20 +259,6 @@ async def get_plugin_summary():
         if conn and conn.is_connected():
             cursor.close()
             conn.close()
-        result = cursor.fetchone()
-        
-        return PluginSummarySchema(
-            total_plugins=int(result['total_plugins'] or 0),
-            needs_update=int(result['needs_update'] or 0),
-            up_to_date=int(result['up_to_date'] or 0)
-        )
-        
-    except mysql.connector.Error as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        if conn and conn.is_connected():
-            cursor.close()
-            conn.close()
 
 
 @router.get("/recent-activity", response_model=List[ActivityLogEntry])
