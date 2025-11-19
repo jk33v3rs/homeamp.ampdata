@@ -1,5 +1,4 @@
-#!/bin/bash
-# Deploy Aqua GUI for ArchiveSMP Configuration Manager
+y Aqua GUI for ArchiveSMP Configuration Manager
 # Run this on Hetzner server (checks for existing deployment)
 
 set -e
