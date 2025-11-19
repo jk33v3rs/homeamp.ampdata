@@ -15,6 +15,7 @@ import logging
 import sys
 import hashlib
 import re
+import yaml
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime
@@ -52,7 +53,9 @@ class EndpointAgent:
         
         # Tracking state
         self.current_deployment_id: Optional[int] = None
-        self.plugin_cache: Dict[str, Dict[str, str]] = {}  # {instance_id: {plugin: version}}
+        self.plugin_cache: Dict[str, Dict[str, Dict[str, str]]] = {}  # {instance_id: {plugin_name: {version, jar_file, jar_hash}}}
+        self.datapack_cache: Dict[str, Dict[str, Dict[str, str]]] = {}  # {instance_id: {world:datapack: {version, file_hash}}}
+        self.server_props_cache: Dict[str, Dict[str, Any]] = {}  # {instance_id: {property: value}}
         self.drift_cache: Dict[str, set] = {}  # {instance_id: set of drift signatures}
         
         self.running = False
@@ -117,6 +120,22 @@ class EndpointAgent:
         except Exception as e:
             self.logger.error(f"❌ Error in agent cycle: {e}", exc_info=True)
     
+    def _load_plugins_from_db(self, instance_id: str) -> Dict[str, Dict[str, str]]:
+        """Load existing plugin state from database to initialize cache"""
+        try:
+            plugins = self.db.get_instance_plugins(instance_id)
+            cache = {}
+            for plugin in plugins:
+                cache[plugin['plugin_name']] = {
+                    'version': plugin.get('installed_version', 'unknown'),
+                    'jar_file': plugin.get('jar_filename', ''),
+                    'jar_hash': plugin.get('jar_hash', '')
+                }
+            return cache
+        except Exception as e:
+            self.logger.debug(f"Could not load plugins from DB for {instance_id}: {e}")
+            return {}
+    
     def _scan_instance_full(self, instance: Dict[str, Any]):
         """Full instance scan: configs, plugins, drift detection"""
         instance_id = instance['name']
@@ -126,7 +145,13 @@ class EndpointAgent:
             # 1. Scan plugins and detect changes
             self._scan_plugin_changes(instance_id, instance_path)
             
-            # 2. Scan configs and check drift
+            # 2. Scan datapacks and detect changes
+            self._scan_datapack_changes(instance_id, instance_path, instance)
+            
+            # 3. Scan server.properties and detect changes
+            self._scan_server_properties(instance_id, instance_path)
+            
+            # 4. Scan configs and detect drift
             self._scan_instance_configs(instance_id, instance_path)
             
         except Exception as e:
@@ -158,6 +183,10 @@ class EndpointAgent:
                 'jar_file': jar_file.name,
                 'jar_hash': jar_hash
             }
+        
+        # Load cache from database if empty (first run)
+        if instance_id not in self.plugin_cache:
+            self.plugin_cache[instance_id] = self._load_plugins_from_db(instance_id)
         
         # Compare with cache to detect changes
         cached = self.plugin_cache.get(instance_id, {})
@@ -197,6 +226,210 @@ class EndpointAgent:
         
         # Update cache
         self.plugin_cache[instance_id] = current_plugins
+    
+    def _load_datapacks_from_db(self, instance_id: str) -> Dict[str, Dict[str, str]]:
+        """Load existing datapack state from database to initialize cache"""
+        try:
+            datapacks = self.db.get_instance_datapacks(instance_id)
+            cache = {}
+            for dp in datapacks:
+                key = f"{dp['world_name']}:{dp['datapack_name']}"
+                cache[key] = {
+                    'version': dp.get('version', 'unknown'),
+                    'file_name': dp.get('file_name', ''),
+                    'file_hash': dp.get('file_hash', '')
+                }
+            return cache
+        except Exception as e:
+            self.logger.debug(f"Could not load datapacks from DB for {instance_id}: {e}")
+            return {}
+    
+    def _scan_datapack_changes(self, instance_id: str, instance_path: Path, instance: Dict[str, Any]):
+        """Scan datapacks directory and detect changes"""
+        datapacks_path = instance.get('datapacks_path')
+        if not datapacks_path:
+            return
+        
+        datapacks_dir = Path(datapacks_path)
+        if not datapacks_dir.exists():
+            return
+        
+        world_name = instance.get('level_name', 'world')
+        current_datapacks = {}
+        
+        # Scan all .zip files in datapacks directory
+        for dp_file in datapacks_dir.glob('*.zip'):
+            if dp_file.name == 'vanilla.zip':
+                continue  # Skip vanilla datapack
+            
+            datapack_name = dp_file.stem
+            file_hash = self._calculate_file_hash(dp_file)
+            key = f"{world_name}:{datapack_name}"
+            
+            current_datapacks[key] = {
+                'version': 'unknown',  # Would need pack.mcmeta parsing for version
+                'file_name': dp_file.name,
+                'file_hash': file_hash,
+                'world_name': world_name,
+                'datapack_name': datapack_name
+            }
+        
+        # Load cache from database if empty (first run)
+        if instance_id not in self.datapack_cache:
+            self.datapack_cache[instance_id] = self._load_datapacks_from_db(instance_id)
+        
+        cached = self.datapack_cache.get(instance_id, {})
+        
+        # Detect new datapacks
+        for key, info in current_datapacks.items():
+            if key not in cached:
+                self.logger.info(f"🗂️  Datapack installed: {instance_id}/{info['world_name']}/{info['datapack_name']}")
+                self.db.upsert_datapack(
+                    instance_id=instance_id,
+                    datapack_name=info['datapack_name'],
+                    world_name=info['world_name'],
+                    version=info['version'],
+                    file_name=info['file_name'],
+                    file_hash=info['file_hash']
+                )
+                self.db.log_config_change(
+                    instance_id=instance_id,
+                    plugin_name='datapacks',
+                    config_file=info['world_name'],
+                    config_key='datapack_lifecycle',
+                    old_value='',
+                    new_value=info['datapack_name'],
+                    change_type='automated',
+                    changed_by=f'agent-{self.server_name}',
+                    change_reason=f"Datapack installed: {info['file_name']}"
+                )
+            elif cached[key]['file_hash'] != info['file_hash']:
+                self.logger.info(f"🔄 Datapack updated: {instance_id}/{info['world_name']}/{info['datapack_name']}")
+                self.db.upsert_datapack(
+                    instance_id=instance_id,
+                    datapack_name=info['datapack_name'],
+                    world_name=info['world_name'],
+                    version=info['version'],
+                    file_name=info['file_name'],
+                    file_hash=info['file_hash']
+                )
+                self.db.log_config_change(
+                    instance_id=instance_id,
+                    plugin_name='datapacks',
+                    config_file=info['world_name'],
+                    config_key='datapack_lifecycle',
+                    old_value=cached[key].get('file_name', ''),
+                    new_value=info['file_name'],
+                    change_type='automated',
+                    changed_by=f'agent-{self.server_name}',
+                    change_reason=f"Datapack updated"
+                )
+        
+        # Detect removed datapacks
+        for key in cached:
+            if key not in current_datapacks:
+                parts = key.split(':', 1)
+                world_name = parts[0]
+                datapack_name = parts[1]
+                self.logger.info(f"🗑️  Datapack removed: {instance_id}/{world_name}/{datapack_name}")
+                self.db.remove_datapack(instance_id, datapack_name, world_name)
+                self.db.log_config_change(
+                    instance_id=instance_id,
+                    plugin_name='datapacks',
+                    config_file=world_name,
+                    config_key='datapack_lifecycle',
+                    old_value=datapack_name,
+                    new_value='',
+                    change_type='automated',
+                    changed_by=f'agent-{self.server_name}',
+                    change_reason=f"Datapack removed"
+                )
+        
+        # Update cache
+        self.datapack_cache[instance_id] = current_datapacks
+    
+    def _scan_server_properties(self, instance_id: str, instance_path: Path):
+        """Scan server.properties and detect changes"""
+        minecraft_dir = instance_path / 'Minecraft'
+        server_props_file = minecraft_dir / 'server.properties'
+        
+        if not server_props_file.exists():
+            return
+        
+        try:
+            # Parse server.properties
+            properties = {}
+            content = server_props_file.read_text()
+            for line in content.splitlines():
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if '=' in line:
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+                    
+                    # Convert boolean strings
+                    if value.lower() in ('true', 'false'):
+                        value = value.lower() == 'true'
+                    # Convert numbers
+                    elif value.isdigit():
+                        value = int(value)
+                    
+                    properties[key] = value
+            
+            # Load cache from database if empty (first run)
+            if instance_id not in self.server_props_cache:
+                db_props = self.db.get_server_properties(instance_id)
+                if db_props:
+                    import json
+                    self.server_props_cache[instance_id] = json.loads(db_props.get('properties_json', '{}'))
+                else:
+                    self.server_props_cache[instance_id] = {}
+            
+            cached = self.server_props_cache.get(instance_id, {})
+            
+            # Detect changes in key properties
+            key_properties = ['level_name', 'gamemode', 'difficulty', 'max_players', 
+                            'view_distance', 'simulation_distance', 'pvp', 'spawn_protection']
+            
+            changes_detected = False
+            for prop in key_properties:
+                if prop in properties:
+                    old_val = cached.get(prop)
+                    new_val = properties.get(prop)
+                    if old_val != new_val and old_val is not None:
+                        self.logger.info(f"⚙️  Server property changed: {instance_id}/{prop}: {old_val} → {new_val}")
+                        self.db.log_config_change(
+                            instance_id=instance_id,
+                            plugin_name='server',
+                            config_file='server.properties',
+                            config_key=prop,
+                            old_value=str(old_val),
+                            new_value=str(new_val),
+                            change_type='automated',
+                            changed_by=f'agent-{self.server_name}',
+                            change_reason=f"Server property changed"
+                        )
+                        changes_detected = True
+            
+            # Update database with current properties
+            self.db.upsert_server_properties(instance_id, {
+                'level_name': properties.get('level-name'),
+                'gamemode': properties.get('gamemode'),
+                'difficulty': properties.get('difficulty'),
+                'max_players': properties.get('max-players'),
+                'view_distance': properties.get('view-distance'),
+                'simulation_distance': properties.get('simulation-distance'),
+                'pvp': properties.get('pvp'),
+                'spawn_protection': properties.get('spawn-protection')
+            })
+            
+            # Update cache
+            self.server_props_cache[instance_id] = properties
+            
+        except Exception as e:
+            self.logger.error(f"Failed to scan server.properties for {instance_id}: {e}")
     
     def _scan_instance_configs(self, instance_id: str, instance_path: Path):
         """Scan plugin configs and check for drift"""
@@ -310,8 +543,8 @@ class EndpointAgent:
             self._log_variance_snapshot(instance_id, drift_detected)
     
     def _log_plugin_event(self, instance_id: str, plugin_name: str, action: str,
-                          version_from: str = None, version_to: str = None,
-                          jar_file: str = None, jar_hash: str = None):
+                          version_from: Optional[str] = None, version_to: Optional[str] = None,
+                          jar_file: Optional[str] = None, jar_hash: Optional[str] = None):
         """
         Log to plugin_installation_history table
         Note: Would need new db_access.py method - using config_change_history for now
@@ -410,7 +643,6 @@ class EndpointAgent:
         Falls back to filename parsing if jar reading fails
         """
         import zipfile
-        import yaml
         
         # Try to read plugin.yml from jar
         try:

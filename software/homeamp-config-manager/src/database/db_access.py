@@ -101,9 +101,9 @@ class ConfigDatabase:
         return self.cursor.fetchone()
     
     def upsert_instance(self, instance_id: str, server_name: str, 
-                       instance_name: str = None, server_host: str = None,
-                       port: int = None, amp_instance_id: str = None,
-                       platform: str = 'paper', minecraft_version: str = None):
+                       instance_name: Optional[str] = None, server_host: Optional[str] = None,
+                       port: Optional[int] = None, amp_instance_id: Optional[str] = None,
+                       platform: str = 'paper', minecraft_version: Optional[str] = None):
         """
         Register or update a discovered instance
         Uses ON DUPLICATE KEY UPDATE to handle existing instances
@@ -130,6 +130,145 @@ class ConfigDatabase:
             logger.error(f"Failed to upsert instance {instance_id}: {e}")
             self.rollback()
             raise
+    
+    def get_instance_plugins(self, instance_id: str) -> List[Dict[str, Any]]:
+        """
+        Get all plugins currently installed on an instance from plugin_versions table
+        
+        Args:
+            instance_id: Instance to query
+            
+        Returns:
+            List of dicts with keys: plugin_name, installed_version, jar_filename, jar_hash
+        """
+        try:
+            self.cursor.execute("""
+                SELECT plugin_name, installed_version, jar_filename, jar_hash
+                FROM plugin_versions
+                WHERE instance_id = %s
+            """, (instance_id,))
+            return self.cursor.fetchall()
+        except Error as e:
+            logger.debug(f"Could not fetch plugins for {instance_id}: {e}")
+            return []
+    
+    def get_instance_datapacks(self, instance_id: str) -> List[Dict[str, Any]]:
+        """
+        Get all datapacks currently installed on an instance
+        
+        Args:
+            instance_id: Instance to query
+            
+        Returns:
+            List of dicts with keys: datapack_name, version, world_name, file_name, file_hash
+        """
+        try:
+            self.cursor.execute("""
+                SELECT datapack_name, version, world_name, file_name, file_hash
+                FROM instance_datapacks
+                WHERE instance_id = %s
+            """, (instance_id,))
+            return self.cursor.fetchall()
+        except Error as e:
+            logger.debug(f"Could not fetch datapacks for {instance_id}: {e}")
+            return []
+    
+    def upsert_datapack(self, instance_id: str, datapack_name: str, world_name: str,
+                       version: Optional[str] = None, file_name: Optional[str] = None,
+                       file_hash: Optional[str] = None, is_enabled: bool = True):
+        """
+        Register or update a datapack installation
+        """
+        try:
+            self.cursor.execute("""
+                INSERT INTO instance_datapacks
+                (instance_id, datapack_name, world_name, version, file_name, file_hash, is_enabled)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    version = COALESCE(VALUES(version), version),
+                    file_name = COALESCE(VALUES(file_name), file_name),
+                    file_hash = VALUES(file_hash),
+                    is_enabled = VALUES(is_enabled),
+                    last_checked_at = CURRENT_TIMESTAMP
+            """, (instance_id, datapack_name, world_name, version, file_name, file_hash, is_enabled))
+            self.commit()
+        except Error as e:
+            logger.error(f"Failed to upsert datapack {datapack_name} for {instance_id}: {e}")
+            self.rollback()
+    
+    def remove_datapack(self, instance_id: str, datapack_name: str, world_name: str):
+        """Remove a datapack record (when uninstalled)"""
+        try:
+            self.cursor.execute("""
+                DELETE FROM instance_datapacks
+                WHERE instance_id = %s AND datapack_name = %s AND world_name = %s
+            """, (instance_id, datapack_name, world_name))
+            self.commit()
+        except Error as e:
+            logger.error(f"Failed to remove datapack {datapack_name}: {e}")
+            self.rollback()
+    
+    def get_server_properties(self, instance_id: str) -> Optional[Dict[str, Any]]:
+        """
+        Get server.properties data for an instance
+        
+        Returns:
+            Dict with server property values or None
+        """
+        try:
+            self.cursor.execute("""
+                SELECT level_name, gamemode, difficulty, max_players, view_distance,
+                       simulation_distance, pvp, spawn_protection, properties_json
+                FROM instance_server_properties
+                WHERE instance_id = %s
+            """, (instance_id,))
+            return self.cursor.fetchone()
+        except Error as e:
+            logger.debug(f"Could not fetch server properties for {instance_id}: {e}")
+            return None
+    
+    def upsert_server_properties(self, instance_id: str, properties: Dict[str, Any]):
+        """
+        Update server.properties tracking for an instance
+        
+        Args:
+            instance_id: Instance ID
+            properties: Dict with keys: level_name, gamemode, difficulty, max_players, etc.
+        """
+        import json
+        try:
+            self.cursor.execute("""
+                INSERT INTO instance_server_properties
+                (instance_id, level_name, gamemode, difficulty, max_players, view_distance,
+                 simulation_distance, pvp, spawn_protection, properties_json)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE
+                    level_name = VALUES(level_name),
+                    gamemode = VALUES(gamemode),
+                    difficulty = VALUES(difficulty),
+                    max_players = VALUES(max_players),
+                    view_distance = VALUES(view_distance),
+                    simulation_distance = VALUES(simulation_distance),
+                    pvp = VALUES(pvp),
+                    spawn_protection = VALUES(spawn_protection),
+                    properties_json = VALUES(properties_json),
+                    last_updated_at = CURRENT_TIMESTAMP
+            """, (
+                instance_id,
+                properties.get('level_name'),
+                properties.get('gamemode'),
+                properties.get('difficulty'),
+                properties.get('max_players'),
+                properties.get('view_distance'),
+                properties.get('simulation_distance'),
+                properties.get('pvp'),
+                properties.get('spawn_protection'),
+                json.dumps(properties)
+            ))
+            self.commit()
+        except Error as e:
+            logger.error(f"Failed to upsert server properties for {instance_id}: {e}")
+            self.rollback()
     
     # ========================================================================
     # INSTANCE GROUP QUERIES
