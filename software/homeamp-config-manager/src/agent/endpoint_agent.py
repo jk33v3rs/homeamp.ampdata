@@ -309,12 +309,13 @@ class EndpointAgent:
             self.db.log_config_change(
                 instance_id=instance_id,
                 plugin_name=plugin_name,
+                config_file='plugins',
                 config_key='plugin_lifecycle',
                 old_value=version_from or '',
                 new_value=version_to or '',
                 change_type='automated',
                 changed_by=f'agent-{self.server_name}',
-                reason=f'Plugin {action}: {jar_file or plugin_name} (hash: {jar_hash[:8] if jar_hash else "unknown"})'
+                change_reason=f'Plugin {action}: {jar_file or plugin_name} (hash: {jar_hash[:8] if jar_hash else "unknown"})'
             )
         except Exception as e:
             self.logger.error(f"Failed to log plugin event: {e}")
