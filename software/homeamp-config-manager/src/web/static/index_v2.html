@@ -16,6 +16,11 @@
             <div class="nav-links">
                 <a href="#" class="nav-link active" data-view="dashboard">Dashboard</a>
                 <a href="#" class="nav-link" data-view="plugin-configurator">Plugin Configurator</a>
+                <a href="#" class="nav-link" data-view="update-manager">Update Manager</a>
+                <a href="#" class="nav-link" data-view="variance-report">Variance Report</a>
+                <a href="#" class="nav-link" data-view="deployment-queue">Deployment Queue</a>
+                <a href="#" class="nav-link" data-view="instance-manager">Instance Manager</a>
+                <a href="#" class="nav-link" data-view="audit-log">Audit Log</a>
                 <a href="#" class="nav-link" data-view="tag-manager">Tag Manager</a>
             </div>
         </div>
@@ -168,20 +173,219 @@
 
         <!-- Update Manager View -->
         <div id="update-manager-view" class="view-container" style="display: none;">
-            <h2>Update Manager</h2>
-            <p>Update manager view (to be implemented in next phase)</p>
+            <div class="view-header">
+                <h2>Plugin Update Manager</h2>
+                <div class="view-actions">
+                    <button id="check-all-updates-btn" class="btn btn-primary">Check for Updates</button>
+                    <button id="update-refresh-btn" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+
+            <!-- Update Summary Cards -->
+            <section class="dashboard-section">
+                <div class="status-cards-grid">
+                    <div class="status-card">
+                        <h3>Available Updates</h3>
+                        <div id="available-updates-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Pending Approval</h3>
+                        <div id="pending-updates-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Auto-Update Enabled</h3>
+                        <div id="auto-update-count" class="stat-value">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Update Filters -->
+            <section class="dashboard-section">
+                <div class="filter-bar">
+                    <select id="update-status-filter">
+                        <option value="">All Updates</option>
+                        <option value="available">Available</option>
+                        <option value="pending">Pending Approval</option>
+                        <option value="approved">Approved</option>
+                        <option value="deployed">Deployed</option>
+                    </select>
+                    <select id="update-plugin-filter">
+                        <option value="">All Plugins</option>
+                    </select>
+                    <button id="approve-all-updates-btn" class="btn btn-success">Approve All</button>
+                </div>
+            </section>
+
+            <!-- Updates Table -->
+            <section class="dashboard-section">
+                <div id="updates-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-updates"></th>
+                                <th>Plugin</th>
+                                <th>Current Version</th>
+                                <th>Latest Version</th>
+                                <th>Release Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="updates-table-body">
+                            <!-- Populated by update_manager.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
         <!-- Variance Report View -->
         <div id="variance-report-view" class="view-container" style="display: none;">
-            <h2>Variance Report</h2>
-            <p>Variance report view (to be implemented in next phase)</p>
+            <div class="view-header">
+                <h2>Configuration Variance Report</h2>
+                <div class="view-actions">
+                    <button id="variance-scan-btn" class="btn btn-primary">Scan for Variances</button>
+                    <button id="variance-refresh-btn" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+
+            <!-- Variance Summary -->
+            <section class="dashboard-section">
+                <div class="status-cards-grid">
+                    <div class="status-card">
+                        <h3>Total Variances</h3>
+                        <div id="total-variances-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card warning">
+                        <h3>Critical Drifts</h3>
+                        <div id="critical-drifts-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Plugins with Drift</h3>
+                        <div id="plugins-with-drift-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>Last Scan</h3>
+                        <div id="last-variance-scan" class="stat-value">Never</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Variance Filters -->
+            <section class="dashboard-section">
+                <div class="filter-bar">
+                    <select id="variance-server-filter">
+                        <option value="">All Servers</option>
+                    </select>
+                    <select id="variance-plugin-filter">
+                        <option value="">All Plugins</option>
+                    </select>
+                    <select id="variance-severity-filter">
+                        <option value="">All Severities</option>
+                        <option value="critical">Critical</option>
+                        <option value="warning">Warning</option>
+                        <option value="info">Info</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Variances Table -->
+            <section class="dashboard-section">
+                <div id="variances-table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Instance</th>
+                                <th>Plugin</th>
+                                <th>Config File</th>
+                                <th>Field</th>
+                                <th>Expected Value</th>
+                                <th>Actual Value</th>
+                                <th>Severity</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="variances-table-body">
+                            <!-- Populated by variance_report.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
         <!-- Deployment Queue View -->
         <div id="deployment-queue-view" class="view-container" style="display: none;">
-            <h2>Deployment Queue</h2>
-            <p>Deployment queue view (to be implemented in next phase)</p>
+            <div class="view-header">
+                <h2>Deployment Queue</h2>
+                <div class="view-actions">
+                    <button id="deploy-all-btn" class="btn btn-success">Deploy All</button>
+                    <button id="clear-queue-btn" class="btn btn-danger">Clear Queue</button>
+                    <button id="deployment-refresh-btn" class="btn btn-secondary">Refresh</button>
+                </div>
+            </div>
+
+            <!-- Queue Summary -->
+            <section class="dashboard-section">
+                <div class="status-cards-grid">
+                    <div class="status-card">
+                        <h3>Pending Deployments</h3>
+                        <div id="pending-deployments-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card">
+                        <h3>In Progress</h3>
+                        <div id="deploying-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card success">
+                        <h3>Completed Today</h3>
+                        <div id="completed-today-count" class="stat-value">0</div>
+                    </div>
+                    <div class="status-card error">
+                        <h3>Failed</h3>
+                        <div id="failed-deployments-count" class="stat-value">0</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Deployment Filters -->
+            <section class="dashboard-section">
+                <div class="filter-bar">
+                    <select id="deployment-status-filter">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                    <select id="deployment-type-filter">
+                        <option value="">All Types</option>
+                        <option value="config">Config Change</option>
+                        <option value="plugin">Plugin Update</option>
+                        <option value="variance">Variance Fix</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Deployment Queue Table -->
+            <section class="dashboard-section">
+                <div id="deployment-queue-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-deployments"></th>
+                                <th>Instance</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Queued At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="deployment-queue-body">
+                            <!-- Populated by deployment_queue.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
 
         <!-- Instance Manager View -->
@@ -496,189 +700,16 @@
             </div>
         </div>
 
-        <!-- Settings View -->
-        <div id="settings-view" class="view-container" style="display: none;">
-            <h2>Settings</h2>
-            <p>Settings view (to be implemented in next phase)</p>
-        </div>
-
-        <!-- Deployment Queue View -->
-        <div id="deployment-queue-view" class="view-container" style="display: none;">
-            <div class="view-header">
-                <h2>Deployment Queue</h2>
-                <p>Active and historical config deployments</p>
-            </div>
-
-            <div class="deployment-filters">
-                <select id="deployment-filter-status" class="filter-select">
-                    <option value="">All Status</option>
-                    <option value="pending">Pending</option>
-                    <option value="processing">Processing</option>
-                    <option value="completed">Completed</option>
-                    <option value="failed">Failed</option>
-                    <option value="partial">Partial</option>
-                </select>
-                <button id="refresh-deployments-btn" class="btn">Refresh</button>
-            </div>
-
-            <div id="deployments-table-container">
-                <table id="deployments-table" class="data-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Plugin</th>
-                            <th>Instances</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Updated</th>
-                            <th>Progress</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deployments-table-body">
-                        <tr><td colspan="8" class="no-data">Loading deployments...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div id="deployment-details-modal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <span class="close">&times;</span>
-                    <h3>Deployment Details</h3>
-                    <div id="deployment-details-content"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Variance Report View -->
-        <div id="variance-report-view" class="view-container" style="display: none;">
-            <div class="view-header">
-                <h2>Variance Report</h2>
-                <p>Configuration variances across all instances</p>
-            </div>
-
-            <div class="variance-filters">
-                <select id="variance-filter-server" class="filter-select">
-                    <option value="">All Servers</option>
-                </select>
-                <select id="variance-filter-plugin" class="filter-select">
-                    <option value="">All Plugins</option>
-                </select>
-                <select id="variance-filter-status" class="filter-select">
-                    <option value="">All Status</option>
-                    <option value="unintentional">Unintentional Only</option>
-                    <option value="intentional">Intentional Only</option>
-                </select>
-                <button id="refresh-variances-btn" class="btn">Refresh</button>
-            </div>
-
-            <div id="variance-summary" class="summary-cards">
-                <div class="summary-card">
-                    <div class="summary-value" id="total-variances">0</div>
-                    <div class="summary-label">Total Variances</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-value" id="unintentional-variances">0</div>
-                    <div class="summary-label">Unintentional</div>
-                </div>
-                <div class="summary-card">
-                    <div class="summary-value" id="plugins-with-variances">0</div>
-                    <div class="summary-label">Affected Plugins</div>
-                </div>
-            </div>
-
-            <div id="variances-table-container">
-                <table id="variances-table" class="data-table">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="select-all-variances" /></th>
-                            <th>Plugin</th>
-                            <th>Instance</th>
-                            <th>Config Key</th>
-                            <th>Baseline Value</th>
-                            <th>Actual Value</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="variances-table-body">
-                        <tr><td colspan="8" class="no-data">Loading variances...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="variance-actions">
-                <button id="apply-defaults-btn" class="btn btn-primary">Apply Defaults to Selected</button>
-                <button id="mark-intentional-btn" class="btn">Mark as Intentional</button>
-                <button id="sync-configs-btn" class="btn">Sync Configs</button>
-            </div>
-        </div>
-
-        <!-- Update Manager View -->
-        <div id="update-manager-view" class="view-container" style="display: none;">
-            <div class="view-header">
-                <h2>Update Manager</h2>
-                <p>Manage plugin updates across the network</p>
-            </div>
-
-            <div class="updates-filters">
-                <button id="check-updates-btn" class="btn">Check for Updates</button>
-                <span id="last-check-time" class="info-text">Last checked: Never</span>
-            </div>
-
-            <div id="updates-available-section">
-                <h3>Available Updates</h3>
-                <table id="updates-available-table" class="data-table">
-                    <thead>
-                        <tr>
-                            <th><input type="checkbox" id="select-all-updates" /></th>
-                            <th>Plugin</th>
-                            <th>Current Version</th>
-                            <th>Latest Version</th>
-                            <th>Source</th>
-                            <th>Affected Instances</th>
-                            <th>Released</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="updates-table-body">
-                        <tr><td colspan="8" class="no-data">No updates available</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="deployment-scope-section">
-                <h3>Deployment Scope</h3>
-                <div id="deployment-scope-selector">
-                    <label><input type="radio" name="deployment-scope" value="all" checked /> All Instances</label>
-                    <label><input type="radio" name="deployment-scope" value="server" /> By Server</label>
-                    <label><input type="radio" name="deployment-scope" value="tag" /> By Meta-Tag</label>
-                    <label><input type="radio" name="deployment-scope" value="individual" /> Individual Selection</label>
-                </div>
-            </div>
-
-            <div class="update-actions">
-                <button id="approve-deploy-btn" class="btn btn-primary">Approve & Deploy Selected</button>
-                <button id="update-selected-btn" class="btn">Update Selected</button>
-                <button id="reject-all-btn" class="btn btn-danger">Reject All</button>
-            </div>
-
-            <div id="update-status-section" style="display: none;">
-                <h3>Update Status</h3>
-                <div id="update-progress-container">
-                    <div class="progress-bar">
-                        <div id="update-progress-bar" class="progress-fill" style="width: 0%;"></div>
-                    </div>
-                    <p id="update-status-text">Preparing update...</p>
-                </div>
-            </div>
-        </div>
-
     </main>
 
     <!-- Scripts -->
     <script src="dashboard.js"></script>
     <script src="plugin_configurator.js"></script>
+    <script src="update_manager.js"></script>
+    <script src="variance_report.js"></script>
+    <script src="deployment_queue.js"></script>
+    <script src="instance_manager.js"></script>
+    <script src="audit_log.js"></script>
     <script src="tag_manager.js"></script>
     <script src="app.js"></script>
 </body>
