@@ -325,6 +325,96 @@ async def get_cicd_endpoints():
     return {"endpoints": [], "count": 0}
 
 
+@app.get("/dashboard/approval-queue")
+async def get_approval_queue():
+    """Get pending approvals (plugin updates and config changes)"""
+    db.cursor.execute("""
+        SELECT 
+            pv.version_id as id,
+            'plugin_update' as type,
+            pv.plugin_name,
+            pv.installed_version as current_version,
+            pv.latest_version as new_version,
+            pv.instance_id,
+            pv.last_checked as timestamp
+        FROM plugin_versions pv
+        WHERE pv.update_available = TRUE
+        ORDER BY pv.last_checked DESC
+    """)
+    results = db.cursor.fetchall()
+    return {"items": results, "count": len(results)}
+
+
+@app.get("/dashboard/network-status")
+async def get_network_status():
+    """Get network status across all servers"""
+    db.cursor.execute("""
+        SELECT 
+            SUM(CASE WHEN is_active = TRUE THEN 1 ELSE 0 END) as online,
+            SUM(CASE WHEN is_active = FALSE THEN 1 ELSE 0 END) as offline,
+            COUNT(*) as total
+        FROM instances
+    """)
+    overall = db.cursor.fetchone()
+    
+    db.cursor.execute("""
+        SELECT 
+            server_name,
+            SUM(CASE WHEN is_active = TRUE THEN 1 ELSE 0 END) as online,
+            SUM(CASE WHEN is_active = FALSE THEN 1 ELSE 0 END) as offline,
+            COUNT(*) as total
+        FROM instances
+        GROUP BY server_name
+    """)
+    servers = db.cursor.fetchall()
+    
+    return {
+        "online": int(overall['online'] or 0),
+        "offline": int(overall['offline'] or 0),
+        "total": int(overall['total']),
+        "servers": servers,
+        "variance_count": 0
+    }
+
+
+@app.get("/dashboard/plugin-summary")
+async def get_plugin_summary():
+    """Get plugin summary statistics"""
+    db.cursor.execute("""
+        SELECT 
+            COUNT(DISTINCT plugin_name) as total_plugins,
+            SUM(CASE WHEN update_available = TRUE THEN 1 ELSE 0 END) as needs_update,
+            SUM(CASE WHEN update_available = FALSE OR update_available IS NULL THEN 1 ELSE 0 END) as up_to_date
+        FROM plugin_versions
+    """)
+    result = db.cursor.fetchone()
+    
+    return {
+        "total_plugins": int(result['total_plugins'] or 0),
+        "needs_update": int(result['needs_update'] or 0),
+        "up_to_date": int(result['up_to_date'] or 0)
+    }
+
+
+@app.get("/dashboard/recent-activity")
+async def get_recent_activity(limit: int = 10):
+    """Get recent activity log entries"""
+    db.cursor.execute("""
+        SELECT 
+            changed_at as timestamp,
+            change_type as event_type,
+            CONCAT(change_type, ' - ', plugin_name, ': ', config_key) as description,
+            instance_id,
+            changed_by as user
+        FROM config_change_history
+        ORDER BY changed_at DESC
+        LIMIT %s
+    """, (limit,))
+    results = db.cursor.fetchall()
+    
+    return {"activities": results, "count": len(results)}
+
+
 # ============================================================================
 # CONFIG VARIANCE & DRIFT DETECTION ENDPOINTS
 # ============================================================================

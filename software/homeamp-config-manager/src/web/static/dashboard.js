@@ -26,7 +26,7 @@ let dashboardState = {
  */
 async function fetchApprovalQueue() {
     try {
-        const response = await fetch('/api/dashboard/approval-queue');
+        const response = await fetch('/dashboard/approval-queue');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         dashboardState.approvalQueue = data.items;
@@ -44,7 +44,7 @@ async function fetchApprovalQueue() {
  */
 async function fetchNetworkStatus() {
     try {
-        const response = await fetch('/api/dashboard/network-status');
+        const response = await fetch('/dashboard/network-status');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         dashboardState.networkStatus = data;
@@ -61,7 +61,7 @@ async function fetchNetworkStatus() {
  */
 async function fetchPluginSummary() {
     try {
-        const response = await fetch('/api/dashboard/plugin-summary');
+        const response = await fetch('/dashboard/plugin-summary');
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         dashboardState.pluginSummary = data;
@@ -78,7 +78,7 @@ async function fetchPluginSummary() {
  */
 async function fetchRecentActivity(limit = 10) {
     try {
-        const response = await fetch(`/api/dashboard/recent-activity?limit=${limit}`);
+        const response = await fetch(`/dashboard/recent-activity?limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         dashboardState.recentActivity = data;
