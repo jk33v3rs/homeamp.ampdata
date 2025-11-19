@@ -719,8 +719,8 @@ if static_dir.exists():
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    """Serve main web UI - redirect to variance dashboard"""
-    html_file = static_dir / "variance.html"
+    """Serve main web UI - redirect to dashboard"""
+    html_file = static_dir / "index.html"
     if html_file.exists():
         return html_file.read_text()
     return """
@@ -740,6 +740,14 @@ async def root():
         </body>
     </html>
     """
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_ui():
+    """Serve dashboard UI"""
+    html_file = static_dir / "index.html"
+    if html_file.exists():
+        return html_file.read_text()
+    raise HTTPException(status_code=404, detail="Dashboard UI not found")
 
 @app.get("/variance", response_class=HTMLResponse)
 async def variance_ui():
