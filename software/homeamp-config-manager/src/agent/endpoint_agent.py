@@ -406,16 +406,50 @@ class EndpointAgent:
     
     def _extract_plugin_version(self, jar_file: Path) -> str:
         """
-        Extract version from plugin jar filename (simplified)
-        Real implementation would read plugin.yml from jar
+        Extract version from plugin.yml inside jar file
+        Falls back to filename parsing if jar reading fails
         """
+        import zipfile
+        import yaml
+        
+        # Try to read plugin.yml from jar
+        try:
+            with zipfile.ZipFile(jar_file, 'r') as jar:
+                # Try plugin.yml (Bukkit/Spigot/Paper)
+                if 'plugin.yml' in jar.namelist():
+                    with jar.open('plugin.yml') as yml_file:
+                        plugin_data = yaml.safe_load(yml_file)
+                        version = plugin_data.get('version')
+                        if version:
+                            return str(version)
+                
+                # Try bungee.yml (BungeeCord)
+                if 'bungee.yml' in jar.namelist():
+                    with jar.open('bungee.yml') as yml_file:
+                        plugin_data = yaml.safe_load(yml_file)
+                        version = plugin_data.get('version')
+                        if version:
+                            return str(version)
+                
+                # Try velocity-plugin.json (Velocity)
+                if 'velocity-plugin.json' in jar.namelist():
+                    import json
+                    with jar.open('velocity-plugin.json') as json_file:
+                        plugin_data = json.load(json_file)
+                        version = plugin_data.get('version')
+                        if version:
+                            return str(version)
+        
+        except Exception as e:
+            self.logger.debug(f"Failed to read version from jar {jar_file.name}: {e}")
+        
+        # Fallback: parse filename
         import re
         name = jar_file.stem
-        
-        # Common patterns: PluginName-1.2.3.jar, PluginName_v1.2.3.jar
-        version_match = re.search(r'[-_]v?(\d+\.\d+(?:\.\d+)?)', name)
+        version_match = re.search(r'[-_]v?(\d+\.\d+(?:\.\d+)?(?:-[a-zA-Z0-9]+)?)', name)
         if version_match:
             return version_match.group(1)
+        
         return 'unknown'
 
 
