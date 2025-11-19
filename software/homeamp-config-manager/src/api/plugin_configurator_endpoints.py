@@ -10,8 +10,17 @@ from datetime import datetime
 import mysql.connector
 import yaml
 import json
+import os
 
-from ..core.settings import get_settings
+# Database connection helper
+def get_db():
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "asmp_admin"),
+        password=os.getenv("DB_PASSWORD", ""),
+        database=os.getenv("DB_NAME", "asmp_config"),
+        port=int(os.getenv("DB_PORT", "3306"))
+    )
 
 router = APIRouter(prefix="/api/plugin-configurator", tags=["plugin-configurator"])
 
@@ -111,14 +120,7 @@ class MarkVarianceRequest(BaseModel):
 
 def get_db_connection():
     """Get MySQL database connection"""
-    settings = get_settings()
-    return mysql.connector.connect(
-        host=settings.db_host,
-        port=settings.db_port,
-        user=settings.db_user,
-        password=settings.db_password,
-        database=settings.db_name
-    )
+    return get_db()
 
 # ====================
 # Endpoints

@@ -18,8 +18,17 @@ from datetime import datetime
 from pydantic import BaseModel
 import mysql.connector
 from mysql.connector import Error
+import os
 
-from ..core.settings import get_settings
+# Database connection helper
+def get_db():
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "asmp_admin"),
+        password=os.getenv("DB_PASSWORD", ""),
+        database=os.getenv("DB_NAME", "asmp_config"),
+        port=int(os.getenv("DB_PORT", "3306"))
+    )
 
 
 # Pydantic models for request/response
@@ -54,18 +63,7 @@ router = APIRouter(prefix="/api", tags=["enhanced"])
 
 def get_db_connection():
     """Get database connection"""
-    settings = get_settings()
-    try:
-        conn = mysql.connector.connect(
-            host=settings.database.host,
-            port=settings.database.port,
-            user=settings.database.user,
-            password=settings.database.password,
-            database=settings.database.database
-        )
-        return conn
-    except Error as e:
-        raise HTTPException(status_code=500, detail=f"Database connection failed: {e}")
+    return get_db()
 
 
 # ============================================

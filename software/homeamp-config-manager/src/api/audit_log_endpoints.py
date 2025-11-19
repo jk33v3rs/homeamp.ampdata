@@ -11,7 +11,17 @@ from datetime import datetime, date
 import mysql.connector
 import csv
 import io
-from ..config import DB_CONFIG
+import os
+
+# Database connection helper
+def get_db():
+    return mysql.connector.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "asmp_admin"),
+        password=os.getenv("DB_PASSWORD", ""),
+        database=os.getenv("DB_NAME", "asmp_config"),
+        port=int(os.getenv("DB_PORT", "3306"))
+    )
 
 router = APIRouter(prefix="/api/audit-log", tags=["audit-log"])
 
