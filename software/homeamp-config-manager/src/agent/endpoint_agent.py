@@ -446,7 +446,8 @@ class EndpointAgent:
         # Fallback: parse filename
         import re
         name = jar_file.stem
-        version_match = re.search(r'[-_]v?(\d+\.\d+(?:\.\d+)?(?:-[a-zA-Z0-9]+)?)', name)
+        # Match semantic versions (1.2.3), build numbers (1641), or mixed (2.10.0-SNAPSHOT-761)
+        version_match = re.search(r'[-_]v?(\d+(?:\.\d+)*(?:-[a-zA-Z0-9.-]+)?)', name)
         if version_match:
             return version_match.group(1)
         
