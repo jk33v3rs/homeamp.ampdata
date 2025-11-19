@@ -63,7 +63,7 @@ async def startup():
         host='135.181.212.169',
         port=3369,
         user='sqlworkerSMP',
-        password='SQLdb2024!'
+        password='2024!SQLdb'
     )
     db.connect()
 
