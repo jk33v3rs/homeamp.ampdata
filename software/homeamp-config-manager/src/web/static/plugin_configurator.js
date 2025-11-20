@@ -714,20 +714,8 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-function showError(message) {
-    console.error(message);
-    // TODO: Implement toast notification
-}
+// Use global notification functions from app.js (no local overrides)
 
-function showSuccess(message) {
-    console.log(message);
-    // TODO: Implement toast notification
-}
-
-function showWarning(message) {
-    console.warn(message);
-    // TODO: Implement toast notification
-}
 
 // Export for use by app.js
 window.pluginConfiguratorModule = {

@@ -98,9 +98,9 @@ async function fetchAllCategories() {
     }
 }
 
-async function fetchInstances() {
+async function fetchAllInstances() {
     try {
-        const response = await fetch('/api/dashboard/instances');
+        const response = await fetch('/api/instances');
         if (!response.ok) throw new Error('Failed to fetch instances');
         
         const data = await response.json();

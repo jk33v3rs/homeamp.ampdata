@@ -958,7 +958,14 @@ async def get_recent_activity(limit: int = 10):
         SELECT 
             changed_at as timestamp,
             change_type as event_type,
-            CONCAT(change_type, ' - ', plugin_name, ': ', config_key) as description,
+            CASE 
+                WHEN change_type = 'plugin_lifecycle' THEN 
+                    CONCAT(instance_id, ': ', plugin_name, ' lifecycle event')
+                WHEN config_key IS NOT NULL AND config_key != '' THEN 
+                    CONCAT(instance_id, ': ', change_type, ' - ', plugin_name, '.', config_key)
+                ELSE 
+                    CONCAT(instance_id, ': ', change_type, ' - ', plugin_name)
+            END as description,
             instance_id,
             changed_by as user
         FROM config_change_history

@@ -49,7 +49,7 @@ function loadInstanceManager() {
 
 async function fetchAllInstances() {
     try {
-        const response = await fetch('/api/dashboard/instances');
+        const response = await fetch('/api/instances');
         if (!response.ok) throw new Error('Failed to fetch instances');
         
         allInstances = await response.json();
@@ -64,7 +64,7 @@ async function fetchAllInstances() {
 
 async function fetchAllTags() {
     try {
-        const response = await fetch('/api/dashboard/tags');
+        const response = await fetch('/api/tags');
         if (!response.ok) throw new Error('Failed to fetch tags');
         
         allTags = await response.json();
@@ -77,7 +77,7 @@ async function fetchAllTags() {
 
 async function fetchInstanceDetails(instanceId) {
     try {
-        const response = await fetch(`/api/dashboard/instances/${instanceId}`);
+        const response = await fetch(`/api/instances/${instanceId}`);
         if (!response.ok) throw new Error('Failed to fetch instance details');
         
         return await response.json();

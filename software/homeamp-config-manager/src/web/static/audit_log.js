@@ -87,7 +87,7 @@ async function fetchAuditEvents(filters = {}) {
 
 async function fetchAllInstances() {
     try {
-        const response = await fetch('/api/dashboard/instances');
+        const response = await fetch('/api/instances');
         if (!response.ok) throw new Error('Failed to fetch instances');
         
         auditLogInstances = await response.json();

@@ -512,20 +512,7 @@ function formatTimestamp(timestamp) {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
 }
 
-function showError(message) {
-    console.error(message);
-    // TODO: Implement toast notification system
-}
-
-function showWarning(message) {
-    console.warn(message);
-    // TODO: Implement toast notification system
-}
-
-function showSuccess(message) {
-    console.log(message);
-    // TODO: Implement toast notification system
-}
+// Use global notification functions from app.js (no local overrides)
 
 // Export for use by app.js
 window.dashboardModule = {
