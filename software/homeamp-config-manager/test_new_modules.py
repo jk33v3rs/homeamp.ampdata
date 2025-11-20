@@ -40,17 +40,17 @@ gold_ingot: 10
     parser = BaselineParser()
     configs = parser.parse_baseline_content(sample_baseline, "EssentialsX")
     
-    print(f"✓ Parsed {len(configs)} config entries from sample baseline")
+    print(f" Parsed {len(configs)} config entries from sample baseline")
     for config in configs[:3]:
         print(f"  - {config.plugin_id}/{config.config_file} -> {config.config_key} = {config.config_value}")
     
     assert len(configs) > 0, "Should parse at least one config"
     assert configs[0].plugin_id == "EssentialsX", "Plugin ID should match"
     
-    print("✓ Baseline parser validation PASSED\n")
+    print(" Baseline parser validation PASSED\n")
 
 except Exception as e:
-    print(f"✗ Baseline parser validation FAILED: {e}\n")
+    print(f" Baseline parser validation FAILED: {e}\n")
     sys.exit(1)
 
 
@@ -86,7 +86,7 @@ try:
         server_name='test'
     )
     
-    print(f"✓ Parsed rank: {rank.rank_name}")
+    print(f" Parsed rank: {rank.rank_name}")
     print(f"  Display: {rank.display_name}")
     print(f"  Priority: {rank.priority}")
     print(f"  Prefix: {rank.prefix}")
@@ -98,10 +98,10 @@ try:
     assert len(rank.inherits_from) == 2, "Should inherit from 2 groups"
     assert rank.permission_count == 3, "Should have 3 permissions"
     
-    print("✓ Rank parser validation PASSED\n")
+    print(" Rank parser validation PASSED\n")
 
 except Exception as e:
-    print(f"✗ Rank parser validation FAILED: {e}\n")
+    print(f" Rank parser validation FAILED: {e}\n")
     sys.exit(1)
 
 
@@ -125,7 +125,7 @@ try:
         region_count=10
     )
     
-    print(f"✓ Created WorldInfo:")
+    print(f" Created WorldInfo:")
     print(f"  Instance: {world.instance_id}")
     print(f"  Name: {world.world_name}")
     print(f"  Type: {world.world_type}")
@@ -136,10 +136,10 @@ try:
     assert world.discovered_at is not None, "Should auto-set discovered_at"
     assert isinstance(world.discovered_at, datetime), "discovered_at should be datetime"
     
-    print("✓ World scanner structure validation PASSED\n")
+    print(" World scanner structure validation PASSED\n")
 
 except Exception as e:
-    print(f"✗ World scanner validation FAILED: {e}\n")
+    print(f" World scanner validation FAILED: {e}\n")
     sys.exit(1)
 
 
@@ -161,7 +161,7 @@ try:
         world_name='world'
     )
     
-    print(f"✓ Created ConfigContext:")
+    print(f" Created ConfigContext:")
     print(f"  Plugin: {context.plugin_id}")
     print(f"  File: {context.config_file}")
     print(f"  Key: {context.config_key}")
@@ -174,16 +174,16 @@ try:
     assert ScopeLevel.PLAYER.value == 6, "PLAYER should be highest priority"
     assert ScopeLevel.INSTANCE.value > ScopeLevel.META_TAG.value, "INSTANCE > META_TAG"
     
-    print("✓ Hierarchy resolver structure validation PASSED\n")
+    print(" Hierarchy resolver structure validation PASSED\n")
 
 except Exception as e:
-    print(f"✗ Hierarchy resolver validation FAILED: {e}\n")
+    print(f" Hierarchy resolver validation FAILED: {e}\n")
     sys.exit(1)
 
 
 # Summary
 print("=" * 60)
-print("ALL TESTS PASSED ✓")
+print("ALL TESTS PASSED ")
 print("=" * 60)
 print("\nAll new modules are functioning correctly!")
 print("Ready to commit and deploy to production server.")

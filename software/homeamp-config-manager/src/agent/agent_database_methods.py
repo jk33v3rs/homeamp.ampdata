@@ -18,7 +18,7 @@ class AgentDatabaseMethods:
     
     def _load_plugin_registry(self):
         """Load plugin registry from database into memory"""
-        self.logger.info("📚 Loading plugin registry from database")
+        self.logger.info("[LOAD] Loading plugin registry from database")
         try:
             # Query all plugins
             cursor = self.db.execute_query(
@@ -30,13 +30,13 @@ class AgentDatabaseMethods:
                 plugin_id = row['plugin_id']
                 self.plugin_registry[plugin_id] = dict(row)
             
-            self.logger.info(f"✅ Loaded {len(self.plugin_registry)} plugins from registry")
+            self.logger.info(f"[OK] Loaded {len(self.plugin_registry)} plugins from registry")
         except Exception as e:
-            self.logger.warning(f"⚠️  Failed to load plugin registry: {e}")
+            self.logger.warning(f"[WARN]  Failed to load plugin registry: {e}")
     
     def _load_datapack_registry(self):
         """Load datapack registry from database"""
-        self.logger.info("📚 Loading datapack registry from database")
+        self.logger.info("[LOAD] Loading datapack registry from database")
         try:
             cursor = self.db.execute_query(
                 "SELECT * FROM datapacks",
@@ -47,9 +47,9 @@ class AgentDatabaseMethods:
                 datapack_id = row['datapack_id']
                 self.datapack_registry[datapack_id] = dict(row)
             
-            self.logger.info(f"✅ Loaded {len(self.datapack_registry)} datapacks from registry")
+            self.logger.info(f"[OK] Loaded {len(self.datapack_registry)} datapacks from registry")
         except Exception as e:
-            self.logger.warning(f"⚠️  Failed to load datapack registry: {e}")
+            self.logger.warning(f"[WARN]  Failed to load datapack registry: {e}")
     
     def _register_instance(self, instance_info: Dict):
         """Register or update instance in database"""
@@ -97,7 +97,7 @@ class AgentDatabaseMethods:
                 """, plugin_info)
                 
                 self.plugin_registry[plugin_id] = plugin_info
-                self.logger.info(f"🆕 Registered new plugin: {plugin_id}")
+                self.logger.info(f"[NEW] Registered new plugin: {plugin_id}")
             except Exception as e:
                 self.logger.error(f"Failed to register plugin {plugin_id}: {e}")
     
@@ -156,7 +156,7 @@ class AgentDatabaseMethods:
                 """, datapack_info)
                 
                 self.datapack_registry[datapack_id] = datapack_info
-                self.logger.info(f"🆕 Registered new datapack: {datapack_id}")
+                self.logger.info(f"[NEW] Registered new datapack: {datapack_id}")
             except Exception as e:
                 self.logger.error(f"Failed to register datapack {datapack_id}: {e}")
     
@@ -439,7 +439,7 @@ class AgentDatabaseMethods:
                 'confidence': confidence
             })
             
-            self.logger.info(f"🏷️  Auto-tagged {instance_id} with '{tag_name}' (confidence: {confidence:.2f})")
+            self.logger.info(f"  Auto-tagged {instance_id} with '{tag_name}' (confidence: {confidence:.2f})")
         
         except Exception as e:
             self.logger.warning(f"Failed to apply auto-tag {tag_name} to {instance_id}: {e}")

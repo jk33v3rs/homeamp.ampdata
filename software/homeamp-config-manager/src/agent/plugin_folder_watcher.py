@@ -143,7 +143,7 @@ class PluginFolderWatcher:
         self.handlers[instance_name] = event_handler
         self.watched_instances[instance_name] = instance_id
         
-        logger.info(f"✓ Started watching plugins for {instance_name} (ID: {instance_id}) at {plugins_dir}")
+        logger.info(f" Started watching plugins for {instance_name} (ID: {instance_id}) at {plugins_dir}")
     
     def stop_watching(self, instance_name: str):
         """

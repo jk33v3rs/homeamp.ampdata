@@ -1,8 +1,11 @@
 """
 YunoHost Map Tile Sync Service
 
-Downloads map tiles from MinIO and organizes them for LiveAtlas.
+FUTURE FEATURE: Downloads map tiles from MinIO and organizes them for LiveAtlas.
 Separates public (maps.archivesmp.com) and private (admaps.archivesmp.com) maps.
+
+STATUS: Not currently deployed - YunoHost server not yet set up.
+This code is ready for future deployment when third server (YunoHost) is added.
 """
 
 import os
@@ -208,7 +211,7 @@ class MapSyncService:
             title_suffix = ''
         else:
             domain = 'admaps.archivesmp.com'
-            title_suffix = ' 🔒'
+            title_suffix = ' '
         
         # Build server list
         servers = []

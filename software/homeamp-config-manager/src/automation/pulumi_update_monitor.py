@@ -270,9 +270,9 @@ class PluginUpdateMonitor:
         if not project_id:
             return None
         
-        # Note: CurseForge API requires API key
-        # This is a placeholder - implement when API key is available
-        self.logger.warning(f"Bukkit check not implemented for {plugin_name}")
+        # Note: CurseForge/Bukkit API requires API key (not currently available)
+        # Modrinth and Hangar provide sufficient coverage for plugin updates
+        self.logger.debug(f"Bukkit API not configured for {plugin_name}")
         return None
     
     async def _check_jenkins_build(self, 

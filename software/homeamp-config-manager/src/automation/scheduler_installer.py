@@ -115,7 +115,7 @@ systemctl start archivesmp-plugin-update.timer
 # Check status
 systemctl status archivesmp-plugin-update.timer
 
-echo "✓ Plugin update scheduler installed successfully"
+echo " Plugin update scheduler installed successfully"
 echo "  Timer: systemctl status archivesmp-plugin-update.timer"
 echo "  Logs:  journalctl -u archivesmp-plugin-update.service -f"
 echo "  Run manually: systemctl start archivesmp-plugin-update.service"
@@ -235,7 +235,7 @@ rm -f /etc/systemd/system/archivesmp-plugin-update.timer
 # Reload systemd
 systemctl daemon-reload
 
-echo "✓ Plugin update scheduler uninstalled"
+echo " Plugin update scheduler uninstalled"
 echo "  Note: Staged plugins preserved in /var/lib/archivesmp/plugin-staging"
 echo "  Note: Reports preserved in /var/lib/archivesmp/reports"
 """

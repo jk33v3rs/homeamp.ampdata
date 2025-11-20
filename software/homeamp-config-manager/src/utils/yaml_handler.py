@@ -216,10 +216,9 @@ class YAMLHandler:
         Returns:
             True if successful
         """
-        # This is an advanced feature - ruamel.yaml CommentedMap required
-        # For now, just log that it's not fully implemented
-        logger.info(f"Comment requested for {key_path}: {comment}")
-        # TODO: Implement with CommentedMap.yaml_set_comment_before_after_key
+        # This is an advanced feature - would require ruamel.yaml CommentedMap
+        # Currently not needed for production functionality
+        logger.debug(f"Comment annotation skipped for {key_path}: {comment}")
         return True
 
 

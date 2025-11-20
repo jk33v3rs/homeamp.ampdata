@@ -83,7 +83,7 @@ def _register_endpoint_config_file(self, config_file_id: int = None, instance_id
             return None
             
     except Exception as e:
-        self.logger.error(f"❌ Failed to register config file {file_path}: {e}")
+        self.logger.error(f"[ERROR] Failed to register config file {file_path}: {e}")
         return None
 
 
@@ -135,13 +135,13 @@ def _create_config_backup(self, config_file_id: int, instance_id: int,
             last_id = self.db.execute_query("SELECT LAST_INSERT_ID() as id", fetch=True)
             if last_id:
                 backup_id = last_id[0]['id']
-                self.logger.info(f"✅ Created backup {backup_id} for config {config_file_id}")
+                self.logger.info(f"[OK] Created backup {backup_id} for config {config_file_id}")
                 return backup_id
         
         return None
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to create backup for {file_path}: {e}")
+        self.logger.error(f"[ERROR] Failed to create backup for {file_path}: {e}")
         return None
 
 
@@ -165,7 +165,7 @@ def _restore_config_from_backup(self, backup_id: int, restore_to_path: str) -> b
         """, {'backup_id': backup_id}, fetch=True)
         
         if not result:
-            self.logger.error(f"❌ Backup {backup_id} not found")
+            self.logger.error(f"[ERROR] Backup {backup_id} not found")
             return False
         
         content = result[0]['backup_content']
@@ -182,14 +182,14 @@ def _restore_config_from_backup(self, backup_id: int, restore_to_path: str) -> b
         actual_hash = hashlib.sha256(restored_content.encode('utf-8')).hexdigest()
         
         if actual_hash != expected_hash:
-            self.logger.error(f"❌ Hash mismatch after restore! Expected: {expected_hash}, Got: {actual_hash}")
+            self.logger.error(f"[ERROR] Hash mismatch after restore! Expected: {expected_hash}, Got: {actual_hash}")
             return False
         
-        self.logger.info(f"✅ Restored backup {backup_id} to {restore_to_path}")
+        self.logger.info(f"[OK] Restored backup {backup_id} to {restore_to_path}")
         return True
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to restore backup {backup_id}: {e}")
+        self.logger.error(f"[ERROR] Failed to restore backup {backup_id}: {e}")
         return False
 
 
@@ -232,11 +232,11 @@ def _log_config_change(self, config_file_id: int, instance_id: int,
             'backup_id': backup_id
         })
         
-        self.logger.debug(f"📝 Logged {change_type} for config {config_file_id}")
+        self.logger.debug(f" Logged {change_type} for config {config_file_id}")
         return True
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to log config change: {e}")
+        self.logger.error(f"[ERROR] Failed to log config change: {e}")
         return False
 
 
@@ -282,7 +282,7 @@ def _get_config_file_info(self, config_file_id: int) -> Optional[Dict]:
         return None
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to get config file info: {e}")
+        self.logger.error(f"[ERROR] Failed to get config file info: {e}")
         return None
 
 
@@ -311,7 +311,7 @@ def _get_config_files_by_instance(self, instance_id: int) -> List[Dict]:
         return [dict(row) for row in result] if result else []
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to get config files for instance {instance_id}: {e}")
+        self.logger.error(f"[ERROR] Failed to get config files for instance {instance_id}: {e}")
         return []
 
 
@@ -340,7 +340,7 @@ def _get_config_files_by_plugin(self, instance_id: int, plugin_id: str) -> List[
         return [dict(row) for row in result] if result else []
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to get config files for {plugin_id}: {e}")
+        self.logger.error(f"[ERROR] Failed to get config files for {plugin_id}: {e}")
         return []
 
 
@@ -377,11 +377,11 @@ def _mark_config_outdated(self, config_file_id: int, old_hash: str, new_hash: st
             change_details={'old_hash': old_hash, 'new_hash': new_hash}
         )
         
-        self.logger.info(f"⚠️  Config {config_file_id} changed (hash mismatch)")
+        self.logger.info(f"[WARN]  Config {config_file_id} changed (hash mismatch)")
         return True
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to mark config as outdated: {e}")
+        self.logger.error(f"[ERROR] Failed to mark config as outdated: {e}")
         return False
 
 
@@ -412,7 +412,7 @@ def _get_latest_backup(self, config_file_id: int) -> Optional[Dict]:
         return None
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to get latest backup: {e}")
+        self.logger.error(f"[ERROR] Failed to get latest backup: {e}")
         return None
 
 
@@ -448,7 +448,7 @@ def _list_backups(self, config_file_id: int, limit: int = 10) -> List[Dict]:
         return [dict(row) for row in result] if result else []
         
     except Exception as e:
-        self.logger.error(f"❌ Failed to list backups: {e}")
+        self.logger.error(f"[ERROR] Failed to list backups: {e}")
         return []
 
 

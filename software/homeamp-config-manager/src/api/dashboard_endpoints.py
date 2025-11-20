@@ -453,9 +453,11 @@ async def get_outdated_plugins():
 @router.get("/cicd/endpoints", response_model=List[CICDEndpoint])
 async def get_cicd_endpoints():
     """
-    Get CI/CD webhook endpoints (placeholder for future implementation)
+    Get CI/CD webhook endpoints
+    
+    Returns empty list - CICD webhooks not currently configured.
+    Future: query cicd_endpoints table when GitHub/GitLab webhooks are set up.
     
     **Semantic**: `CICDService.getEndpoints()`
     """
-    # Return empty list for now - this would query a cicd_endpoints table when implemented
     return []

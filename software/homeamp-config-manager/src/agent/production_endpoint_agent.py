@@ -29,9 +29,12 @@ import yaml
 from ..database.db_access import ConfigDatabase
 from ..amp_integration.instance_scanner import AMPInstanceScanner
 from ..analyzers.config_reader import PluginConfigReader
+from .agent_database_methods import AgentDatabaseMethods
+from .agent_update_methods import AgentUpdateMethods
+from .agent_cicd_methods import AgentCICDMethods
 
 
-class ProductionEndpointAgent:
+class ProductionEndpointAgent(AgentDatabaseMethods, AgentUpdateMethods, AgentCICDMethods):
     """
     Fully self-discovering, production-ready agent.
     Runs on physical servers to maintain central database state.
@@ -106,23 +109,23 @@ class ProductionEndpointAgent:
     
     def start(self):
         """Start agent main loop"""
-        self.logger.info(f"🚀 Starting production endpoint agent for {self.server_name}")
-        self.logger.info(f"📁 AMP Base Dir: {self.amp_base_dir}")
-        self.logger.info(f"⚙️  Features: discovery={self.enable_auto_discovery}, "
+        self.logger.info(f"[START] Starting production endpoint agent for {self.server_name}")
+        self.logger.info(f"[DIR] AMP Base Dir: {self.amp_base_dir}")
+        self.logger.info(f"[CONFIG]  Features: discovery={self.enable_auto_discovery}, "
                         f"updates={self.enable_plugin_updates}, "
                         f"datapacks={self.enable_datapack_deployment}, "
                         f"drift={self.enable_drift_detection}")
-        self.logger.info(f"⏱️  Intervals: scan={self.full_scan_interval}s, "
+        self.logger.info(f"[TIME]  Intervals: scan={self.full_scan_interval}s, "
                         f"updates={self.update_check_interval}s, "
                         f"drift={self.drift_check_interval}s, "
                         f"queue={self.queue_process_interval}s")
-        self.logger.info(f"🔍 Drift: compare_first={self.drift_compare_before_log}, "
+        self.logger.info(f"[SCAN] Drift: compare_first={self.drift_compare_before_log}, "
                         f"ignore_timestamps={self.drift_ignore_timestamps}")
         
         self.db.connect()
         self.running = True
         
-        # Initial load of registries
+        # Load plugin and datapack registries from database
         self._load_plugin_registry()
         self._load_datapack_registry()
         
@@ -131,13 +134,13 @@ class ProductionEndpointAgent:
                 self._run_cycle()
                 time.sleep(10)  # Check every 10 seconds
         except KeyboardInterrupt:
-            self.logger.info("🛑 Received shutdown signal")
+            self.logger.info("[SHUTDOWN] Received shutdown signal")
         finally:
             self.shutdown()
     
     def shutdown(self):
         """Graceful shutdown"""
-        self.logger.info("👋 Shutting down agent")
+        self.logger.info("[STOP] Shutting down agent")
         self.running = False
         if self.current_run_id:
             self._end_discovery_run('partial')
@@ -150,7 +153,7 @@ class ProductionEndpointAgent:
         try:
             # 0. Check for manual scan trigger
             if self._check_manual_scan_trigger():
-                self.logger.info("🔄 Manual scan triggered")
+                self.logger.info("[UPDATE] Manual scan triggered")
                 self._run_full_discovery()
                 self.last_full_scan = now
                 return  # Skip normal cycle after manual scan
@@ -178,7 +181,7 @@ class ProductionEndpointAgent:
                 self._process_webhook_events()
         
         except Exception as e:
-            self.logger.error(f"❌ Error in agent cycle: {e}", exc_info=True)
+            self.logger.error(f"[ERROR] Error in agent cycle: {e}", exc_info=True)
     
     def _check_manual_scan_trigger(self) -> bool:
         """Check if manual scan was triggered via signal file"""
@@ -215,7 +218,7 @@ class ProductionEndpointAgent:
     
     def _run_full_discovery(self):
         """Run complete discovery: instances, plugins, datapacks, configs"""
-        self.logger.info("🔍 Starting full discovery scan")
+        self.logger.info("[SCAN] Starting full discovery scan")
         self.current_run_id = self._start_discovery_run('full_scan')
         
         stats = {
@@ -237,7 +240,7 @@ class ProductionEndpointAgent:
                 instance_id = instance['name']
                 instance_path = Path(instance['path'])
                 
-                self.logger.info(f"📦 Scanning instance: {instance_id}")
+                self.logger.info(f"[INSTANCE] Scanning instance: {instance_id}")
                 
                 # Ensure instance exists in DB
                 self._register_instance(instance)
@@ -263,10 +266,10 @@ class ProductionEndpointAgent:
                     self._auto_tag_instance(instance_id)
             
             self._end_discovery_run('completed', stats)
-            self.logger.info(f"✅ Discovery complete: {stats}")
+            self.logger.info(f"[OK] Discovery complete: {stats}")
         
         except Exception as e:
-            self.logger.error(f"❌ Discovery failed: {e}", exc_info=True)
+            self.logger.error(f"[ERROR] Discovery failed: {e}", exc_info=True)
             self._end_discovery_run('failed')
     
     def _discover_instances(self) -> List[Dict]:
@@ -275,7 +278,7 @@ class ProductionEndpointAgent:
         NO HARDCODING - dynamically scans folder
         """
         if not self.amp_base_dir.exists():
-            self.logger.warning(f"⚠️  AMP base dir not found: {self.amp_base_dir}")
+            self.logger.warning(f"[WARN]  AMP base dir not found: {self.amp_base_dir}")
             return []
         
         discovered = []
@@ -426,7 +429,7 @@ class ProductionEndpointAgent:
                     }
         
         except Exception as e:
-            self.logger.warning(f"⚠️  Failed to analyze {jar_path.name}: {e}")
+            self.logger.warning(f"[WARN]  Failed to analyze {jar_path.name}: {e}")
             return None
     
     def _scan_instance_configs(self, instance_id: str, instance_path: Path):
@@ -486,7 +489,7 @@ class ProductionEndpointAgent:
                             change_source='agent_drift_detection'
                         )
                         
-                        self.logger.debug(f"📝 {instance_id} | {plugin_name}.{config_file} | {key}: {old_value} → {new_value}")
+                        self.logger.debug(f" {instance_id} | {plugin_name}.{config_file} | {key}: {old_value} → {new_value}")
                 
                 else:
                     # Legacy mode: log all configs (not recommended)
@@ -564,7 +567,7 @@ class ProductionEndpointAgent:
             return None
         
         except Exception as e:
-            self.logger.warning(f"⚠️  Failed to analyze datapack {datapack_path.name}: {e}")
+            self.logger.warning(f"[WARN]  Failed to analyze datapack {datapack_path.name}: {e}")
             return None
     
     def _normalize_plugin_id(self, name: str) -> str:
@@ -606,13 +609,13 @@ class ProductionEndpointAgent:
     
     def trigger_manual_scan(self):
         """Trigger immediate full scan (called via API)"""
-        self.logger.info("🔄 Manual scan triggered via API")
+        self.logger.info("[UPDATE] Manual scan triggered via API")
         try:
             self._run_full_discovery()
             self.last_full_scan = datetime.now()
             return {"status": "success", "message": "Manual scan completed"}
         except Exception as e:
-            self.logger.error(f"❌ Manual scan failed: {e}", exc_info=True)
+            self.logger.error(f"[ERROR] Manual scan failed: {e}", exc_info=True)
             return {"status": "error", "message": str(e)}
 
 

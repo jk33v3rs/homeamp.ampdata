@@ -99,8 +99,8 @@ async def get_available_updates():
                 GROUP_CONCAT(DISTINCT i.instance_name) as affected_instances
             FROM plugins p
             INNER JOIN plugin_versions pv ON p.plugin_id = pv.plugin_id
-            INNER JOIN plugin_instances pi ON p.plugin_id = pi.plugin_id
-            INNER JOIN instances i ON pi.instance_id = i.instance_id
+            INNER JOIN instance_plugins ip ON p.name = ip.plugin_name
+            INNER JOIN instances i ON ip.instance_id = i.instance_id
             WHERE pv.update_available = TRUE
             GROUP BY p.plugin_id, p.name, pv.current_version, pv.latest_version, 
                      p.source, pv.latest_release_date, pv.changelog_url
@@ -196,27 +196,30 @@ async def approve_updates(approval: UpdateApprovalRequest):
             
             if approval.deployment_scope == 'all':
                 cursor.execute("""
-                    SELECT instance_id 
-                    FROM plugin_instances 
-                    WHERE plugin_id = %s
+                    SELECT ip.instance_id 
+                    FROM instance_plugins ip
+                    INNER JOIN plugins p ON ip.plugin_name = p.name
+                    WHERE p.plugin_id = %s
                 """, (plugin_id,))
                 target_instances = [row[0] for row in cursor.fetchall()]
             
             elif approval.deployment_scope == 'server' and approval.target_server:
                 cursor.execute("""
-                    SELECT pi.instance_id
-                    FROM plugin_instances pi
-                    INNER JOIN instances i ON pi.instance_id = i.instance_id
-                    WHERE pi.plugin_id = %s AND i.server_name = %s
+                    SELECT ip.instance_id
+                    FROM instance_plugins ip
+                    INNER JOIN instances i ON ip.instance_id = i.instance_id
+                    INNER JOIN plugins p ON ip.plugin_name = p.name
+                    WHERE p.plugin_id = %s AND i.server_name = %s
                 """, (plugin_id, approval.target_server))
                 target_instances = [row[0] for row in cursor.fetchall()]
             
             elif approval.deployment_scope == 'tag' and approval.target_tag:
                 cursor.execute("""
-                    SELECT pi.instance_id
-                    FROM plugin_instances pi
-                    INNER JOIN tag_instances ti ON pi.instance_id = ti.instance_id
-                    WHERE pi.plugin_id = %s AND ti.tag_id = %s
+                    SELECT ip.instance_id
+                    FROM instance_plugins ip
+                    INNER JOIN tag_instances ti ON ip.instance_id = ti.instance_id
+                    INNER JOIN plugins p ON ip.plugin_name = p.name
+                    WHERE p.plugin_id = %s AND ti.tag_id = %s
                 """, (plugin_id, approval.target_tag))
                 target_instances = [row[0] for row in cursor.fetchall()]
             

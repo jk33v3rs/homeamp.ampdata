@@ -40,7 +40,7 @@ def _discover_instance_folders(self) -> List[Dict]:
         ]
     """
     if not self.amp_base_dir.exists():
-        self.logger.warning(f"⚠️  AMP base dir not found: {self.amp_base_dir}")
+        self.logger.warning(f"[WARN]  AMP base dir not found: {self.amp_base_dir}")
         return []
     
     discovered = []
@@ -68,7 +68,7 @@ def _discover_instance_folders(self) -> List[Dict]:
         }
         
         discovered.append(folder_info)
-        self.logger.info(f"📁 Discovered folder: {folder_info['folder_name']} (UUID: {folder_info['amp_uuid']})")
+        self.logger.info(f"[DIR] Discovered folder: {folder_info['folder_name']} (UUID: {folder_info['amp_uuid']})")
     
     return discovered
 
@@ -86,14 +86,14 @@ def _parse_instance_conf_for_folder(self, folder_name: str) -> Optional[Dict]:
     conf_path = self.amp_base_dir / folder_name / 'Instance.conf'
     
     if not conf_path.exists():
-        self.logger.warning(f"⚠️  Instance.conf not found for {folder_name}")
+        self.logger.warning(f"[WARN]  Instance.conf not found for {folder_name}")
         return None
     
     try:
         conf_data = parse_instance_conf(str(conf_path))
         return conf_data
     except Exception as e:
-        self.logger.error(f"❌ Failed to parse Instance.conf for {folder_name}: {e}")
+        self.logger.error(f"[ERROR] Failed to parse Instance.conf for {folder_name}: {e}")
         return None
 
 
@@ -125,7 +125,7 @@ def _map_folder_to_instance_id(self, folder_name: str, amp_uuid: Optional[str]) 
     if result:
         return result[0]['instance_id']
     
-    self.logger.warning(f"⚠️  No database match for folder {folder_name} (UUID: {amp_uuid})")
+    self.logger.warning(f"[WARN]  No database match for folder {folder_name} (UUID: {amp_uuid})")
     return None
 
 
@@ -155,9 +155,9 @@ def _update_instance_paths(self, instance_id: int, folder_name: str, base_path: 
     
     try:
         self.db.execute(query, values)
-        self.logger.info(f"✅ Updated paths for instance {instance_id}: {folder_name} -> {base_path}")
+        self.logger.info(f"[OK] Updated paths for instance {instance_id}: {folder_name} -> {base_path}")
     except Exception as e:
-        self.logger.error(f"❌ Failed to update instance paths: {e}")
+        self.logger.error(f"[ERROR] Failed to update instance paths: {e}")
 
 
 # ========================================================================
@@ -246,9 +246,9 @@ def _register_config_file(self, config_info: Dict):
             config_info['file_hash'],
             config_info['file_size']
         ))
-        self.logger.debug(f"📄 Registered config: {config_info['file_path']}")
+        self.logger.debug(f" Registered config: {config_info['file_path']}")
     except Exception as e:
-        self.logger.error(f"❌ Failed to register config file: {e}")
+        self.logger.error(f"[ERROR] Failed to register config file: {e}")
 
 
 def _detect_config_file_type(self, file_path: Path) -> Optional[str]:
@@ -299,7 +299,7 @@ def _calculate_config_file_hash(self, file_path: Path) -> str:
         
         return sha256.hexdigest()
     except Exception as e:
-        self.logger.error(f"❌ Failed to hash {file_path}: {e}")
+        self.logger.error(f"[ERROR] Failed to hash {file_path}: {e}")
         return ''
 
 
@@ -353,7 +353,7 @@ def _scan_all_plugin_configs(self):
                 self._register_config_file(config_info)
                 total_configs += 1
     
-    self.logger.info(f"✅ Discovered {total_configs} config files across all instances")
+    self.logger.info(f"[OK] Discovered {total_configs} config files across all instances")
 
 
 # ========================================================================

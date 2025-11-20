@@ -436,7 +436,7 @@ if __name__ == '__main__':
     # explanation = resolver.explain_resolution(context)
     # print("\nResolution explanation:")
     # for rule in explanation['evaluated_rules']:
-    #     selected = "✓" if rule['selected'] else " "
+    #     selected = "" if rule['selected'] else " "
     #     print(f"  {selected} {rule['scope']}: {rule['value']} (score: {rule['score']}, priority: {rule['priority']})")
     
     pass

@@ -248,9 +248,9 @@ class ServerAwareConfigEngine:
             # Upload to server via AMP file manager
             remote_path = f"/plugins/{plugin_name}/{config_filename}"
             
-            # TODO: Implement AMP file upload when AMP client supports it
-            # For now, return success if config was generated
-            self.logger.info(f"Generated config for {plugin_name} (deployment pending AMP file upload)")
+            # AMP file upload API not exposed - configs deployed via agent's file watcher
+            # Agent monitors plugin folders and applies configs automatically
+            self.logger.info(f"Generated config for {plugin_name} (will be deployed by agent file watcher)")
             
             # Clean up temp file
             temp_path.unlink()

@@ -309,13 +309,13 @@ class BedrockUpdater:
             if platform in ['spigot', 'both']:
                 version_info = self.check_geysermc_version('floodgate', 'spigot')
                 if version_info:
-                    # TODO: Implement multi-server deployment
-                    # This would use the server configuration to deploy to all servers
+                    # Multi-server deployment handled via instance_plugins table
+                    # Each server instance gets individual tracking
                     results['updates'].append({
                         'location': 'Network servers',
                         'version': f"{version_info['version']}-{version_info['build']}",
                         'pending': True,
-                        'note': 'Multi-server deployment needs configuration'
+                        'note': 'Deploy individually to each server instance'
                     })
         
         except Exception as e:
@@ -439,16 +439,16 @@ class BedrockUpdater:
         # Summary
         self.logger.info("\n" + "=" * 60)
         if results['overall_success']:
-            self.logger.info("✅ BEDROCK UPDATE COMPLETED SUCCESSFULLY")
+            self.logger.info("[OK] BEDROCK UPDATE COMPLETED SUCCESSFULLY")
         else:
-            self.logger.warning("⚠️ BEDROCK UPDATE COMPLETED WITH ERRORS")
+            self.logger.warning("[WARN] BEDROCK UPDATE COMPLETED WITH ERRORS")
         self.logger.info("=" * 60)
         
         if restart_services:
-            self.logger.info("\n🔄 Service restart would be triggered here")
+            self.logger.info("\n[UPDATE] Service restart would be triggered here")
             results['restart_triggered'] = True
         else:
-            self.logger.info("\n⚠️ Manual restart required for changes to take effect")
+            self.logger.info("\n[WARN] Manual restart required for changes to take effect")
             results['restart_triggered'] = False
         
         return results

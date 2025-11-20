@@ -598,7 +598,7 @@ class ConfigUpdater:
                         deployment_id=change.get('deployment_id')
                     )
                     
-                    self.logger.info(f"✅ Logged change {change_id} to database")
+                    self.logger.info(f"[OK] Logged change {change_id} to database")
                     
                 except Exception as e:
                     self.logger.warning(f"Failed to log individual change: {e}")

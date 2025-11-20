@@ -1,6 +1,6 @@
 /**
- * Dashboard and Application Styling
- * Phase 2 implementation
+ * Dashboard - Modern Light Theme
+ * Enhanced design with improved visual hierarchy
  */
 
 /* ====================
@@ -8,25 +8,57 @@
    ==================== */
 
 :root {
-    --primary-color: #00d4ff;
-    --primary-dark: #0099cc;
-    --primary-darker: #006b8f;
-    --success-color: #00cc99;
-    --warning-color: #ffaa00;
-    --danger-color: #ff4444;
-    --text-primary: #2d3748;
-    --text-secondary: #718096;
-    --text-muted: #a0aec0;
+    /* Brand Colors */
+    --primary-color: #0969da;
+    --primary-hover: #0550ae;
+    --primary-light: #ddf4ff;
+    
+    /* Semantic Colors */
+    --success-color: #1a7f37;
+    --success-light: #dafbe1;
+    --warning-color: #bf8700;
+    --warning-light: #fff8c5;
+    --danger-color: #cf222e;
+    --danger-light: #ffebe9;
+    --info-color: #0969da;
+    --info-light: #ddf4ff;
+    
+    /* Text Colors */
+    --text-primary: #1f2328;
+    --text-secondary: #57606a;
+    --text-muted: #818b98;
+    --text-white: #ffffff;
+    
+    /* Background Colors */
     --bg-primary: #ffffff;
-    --bg-secondary: #f7fafc;
-    --bg-hover: #edf2f7;
-    --border-color: #e2e8f0;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-    --radius-sm: 4px;
+    --bg-secondary: #f6f8fa;
+    --bg-tertiary: #eaeef2;
+    --bg-hover: #f3f4f6;
+    --bg-overlay: rgba(0, 0, 0, 0.05);
+    
+    /* Border Colors */
+    --border-default: #d1d9e0;
+    --border-muted: #e7ecf0;
+    --border-strong: #8c959f;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(31, 35, 40, 0.08);
+    --shadow-md: 0 4px 12px rgba(31, 35, 40, 0.12);
+    --shadow-lg: 0 16px 32px rgba(31, 35, 40, 0.16);
+    --shadow-focus: 0 0 0 3px rgba(9, 105, 218, 0.15);
+    
+    /* Radius */
+    --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 12px;
+    --radius-xl: 16px;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
 }
 
 /* ====================
@@ -40,10 +72,13 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: var(--bg-secondary);
     color: var(--text-primary);
     line-height: 1.6;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* ====================

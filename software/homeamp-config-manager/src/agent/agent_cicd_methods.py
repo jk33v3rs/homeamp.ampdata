@@ -18,7 +18,7 @@ class AgentCICDMethods:
         Check for plugin updates from all configured sources
         NO HARDCODING - iterates through registry
         """
-        self.logger.info("🔄 Checking for plugin updates")
+        self.logger.info("[UPDATE] Checking for plugin updates")
         
         for plugin_id, plugin_data in self.plugin_registry.items():
             try:
@@ -44,7 +44,7 @@ class AgentCICDMethods:
                     self._handle_new_version(plugin_id, update_info)
             
             except Exception as e:
-                self.logger.warning(f"⚠️  Failed to check updates for {plugin_id}: {e}")
+                self.logger.warning(f"[WARN]  Failed to check updates for {plugin_id}: {e}")
     
     def _check_modrinth_update(self, plugin_data: Dict) -> Optional[Dict]:
         """Check Modrinth API for latest version"""
@@ -175,7 +175,7 @@ class AgentCICDMethods:
     
     def _handle_new_version(self, plugin_id: str, update_info: Dict):
         """Handle discovery of new plugin version"""
-        self.logger.info(f"🆕 New version available for {plugin_id}: {update_info['version']}")
+        self.logger.info(f"[NEW] New version available for {plugin_id}: {update_info['version']}")
         
         # Update plugin registry
         try:
@@ -248,7 +248,7 @@ class AgentCICDMethods:
                 'priority': priority
             })
             
-            self.logger.info(f"✅ Queued update for {plugin_id}: {from_version} → {update_info['version']}")
+            self.logger.info(f"[OK] Queued update for {plugin_id}: {from_version} → {update_info['version']}")
         
         except Exception as e:
             self.logger.error(f"Failed to queue update for {plugin_id}: {e}")
@@ -276,7 +276,7 @@ class AgentCICDMethods:
         task_id = update_task['id']
         plugin_id = update_task['plugin_id']
         
-        self.logger.info(f"🔄 Executing update: {plugin_id} → {update_task['to_version']}")
+        self.logger.info(f"[UPDATE] Executing update: {plugin_id} → {update_task['to_version']}")
         
         try:
             # Mark as in progress
@@ -324,10 +324,10 @@ class AgentCICDMethods:
                 'failure': failure_count
             })
             
-            self.logger.info(f"✅ Update complete: {success_count} success, {failure_count} failed")
+            self.logger.info(f"[OK] Update complete: {success_count} success, {failure_count} failed")
         
         except Exception as e:
-            self.logger.error(f"❌ Update failed for {plugin_id}: {e}")
+            self.logger.error(f"[ERROR] Update failed for {plugin_id}: {e}")
             self.db.execute_query("""
                 UPDATE plugin_update_queue
                 SET status = 'failed',
@@ -346,7 +346,7 @@ class AgentCICDMethods:
         
         jar_path = temp_dir / f"{plugin_id}-{version}.jar"
         
-        self.logger.info(f"⬇️  Downloading {url}")
+        self.logger.info(f"  Downloading {url}")
         
         response = requests.get(url, stream=True, timeout=60)
         response.raise_for_status()
@@ -355,7 +355,7 @@ class AgentCICDMethods:
             for chunk in response.iter_content(chunk_size=8192):
                 f.write(chunk)
         
-        self.logger.info(f"✅ Downloaded to {jar_path}")
+        self.logger.info(f"[OK] Downloaded to {jar_path}")
         return jar_path
     
     def _deploy_plugin_to_instance(self, instance_id: str, plugin_id: str, 
@@ -377,7 +377,7 @@ class AgentCICDMethods:
             old_jars = list(plugins_dir.glob(f"{plugin_id}*.jar"))
             for old_jar in old_jars:
                 old_jar.unlink()
-                self.logger.info(f"🗑️  Removed old version: {old_jar.name}")
+                self.logger.info(f"  Removed old version: {old_jar.name}")
             
             # Copy new version
             import shutil
@@ -402,11 +402,11 @@ class AgentCICDMethods:
                 'file_hash': self._calculate_file_hash(new_jar_path)
             })
             
-            self.logger.info(f"✅ Deployed {plugin_id} v{version} to {instance_id}")
+            self.logger.info(f"[OK] Deployed {plugin_id} v{version} to {instance_id}")
             return True
         
         except Exception as e:
-            self.logger.error(f"❌ Failed to deploy to {instance_id}: {e}")
+            self.logger.error(f"[ERROR] Failed to deploy to {instance_id}: {e}")
             return False
     
     def _process_datapack_deployment_queue(self):

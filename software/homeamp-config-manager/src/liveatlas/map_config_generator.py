@@ -6,6 +6,7 @@ Separates public and private (BTS) maps with proper reverse proxy URLs.
 """
 
 import json
+import yaml
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -47,6 +48,7 @@ class LiveAtlasConfigGenerator:
     def get_pl3xmap_instances(self) -> List[Dict]:
         """
         Query database for all instances with Pl3xMap installed.
+        Reads actual port from each instance's Pl3xMap config.yml file.
         
         Returns:
             List of instance dicts with server, instance_id, folder_name, internal port
@@ -58,9 +60,7 @@ class LiveAtlasConfigGenerator:
                 i.folder_name,
                 i.server_name,
                 i.internal_ip,
-                ip.version as pl3xmap_version,
-                -- Pl3xMap internal web server port (from config)
-                8080 as internal_port  -- TODO: Read from Pl3xMap config.yml
+                ip.version as pl3xmap_version
             FROM instances i
             JOIN instance_plugins ip ON i.instance_id = ip.instance_id
             WHERE ip.plugin_id = 'pl3xmap'
@@ -70,7 +70,21 @@ class LiveAtlasConfigGenerator:
         """
         
         results = self.db.execute_query(query, fetch=True)
-        return [dict(row) for row in results]
+        instances = []
+        
+        for row in results:
+            instance = dict(row)
+            
+            # Read actual port from Pl3xMap config.yml
+            config_path = self.get_pl3xmap_config_path(
+                instance['server_name'],
+                instance['folder_name']
+            )
+            instance['internal_port'] = self.get_internal_webserver_port(config_path)
+            
+            instances.append(instance)
+        
+        return instances
     
     def get_pl3xmap_config_path(self, server_name: str, folder_name: str) -> Path:
         """
@@ -96,12 +110,47 @@ class LiveAtlasConfigGenerator:
         """
         Read Pl3xMap config.yml to get internal web server port.
         
+        Args:
+            config_path: Path to Pl3xMap config.yml
+        
         Returns:
-            Port number (default 8080)
+            Port number (default 8080 if not found or file doesn't exist)
         """
-        # TODO: Parse YAML to get settings.internal-webserver.port
-        # For now, assume default
-        return 8080
+        if not config_path.exists():
+            logger.warning(f"Pl3xMap config not found: {config_path}, using default port 8080")
+            return 8080
+        
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+            
+            # Pl3xMap config structure:
+            # settings:
+            #   internal-webserver:
+            #     enabled: true
+            #     bind: 0.0.0.0
+            #     port: 8080
+            
+            if config and 'settings' in config:
+                webserver = config['settings'].get('internal-webserver', {})
+                port = webserver.get('port', 8080)
+                
+                if webserver.get('enabled', True):
+                    logger.debug(f"Read Pl3xMap port from config: {port}")
+                    return port
+                else:
+                    logger.warning(f"Pl3xMap internal webserver disabled in {config_path}")
+                    return 8080
+            
+            logger.warning(f"No settings.internal-webserver in {config_path}, using default")
+            return 8080
+            
+        except yaml.YAMLError as e:
+            logger.error(f"Failed to parse Pl3xMap config {config_path}: {e}")
+            return 8080
+        except Exception as e:
+            logger.error(f"Error reading Pl3xMap config {config_path}: {e}")
+            return 8080
     
     def is_bts_instance(self, folder_name: str) -> bool:
         """Check if instance should be on BTS (private) map"""
@@ -142,7 +191,7 @@ class LiveAtlasConfigGenerator:
         # Human-readable label
         label = f"{folder_name} - {instance_name}"
         if is_bts:
-            label += " 🔒"  # Indicate private/restricted
+            label += " "  # Indicate private/restricted
         
         # Pl3xMap URL (reverse proxy will route to internal server)
         pl3xmap_url = f"{base_url}/{server_key}/"
@@ -319,7 +368,7 @@ def main():
             Path('/tmp/nginx-bts-pl3xmap.conf')
         )
         
-        print("✅ Generated LiveAtlas configs:")
+        print("[OK] Generated LiveAtlas configs:")
         print(f"   Public: {len(public_config['servers'])} servers")
         print(f"   BTS: {len(bts_config['servers'])} servers")
         

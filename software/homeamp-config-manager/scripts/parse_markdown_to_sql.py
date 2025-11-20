@@ -321,7 +321,7 @@ class MarkdownConfigParser:
             
             self.parse_markdown_file(md_file, plugin_name)
         
-        logger.info("✓ All baselines parsed into database")
+        logger.info(" All baselines parsed into database")
     
     def close(self):
         """Close database connection"""

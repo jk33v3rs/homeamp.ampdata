@@ -201,7 +201,7 @@ class DatapackFolderWatcher:
         self.handlers[watch_key] = event_handler
         self.watched_worlds[watch_key] = (instance_id, instance_name, world_name)
         
-        logger.info(f"✓ Started watching datapacks for {watch_key} at {datapacks_dir}")
+        logger.info(f" Started watching datapacks for {watch_key} at {datapacks_dir}")
     
     def watch_all_worlds(self, instance_name: str, instance_id: int):
         """

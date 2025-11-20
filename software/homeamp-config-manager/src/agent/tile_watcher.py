@@ -146,7 +146,7 @@ class TileWatcher:
         self.observers[instance_name] = observer
         self.watched_instances.add(instance_name)
         
-        logger.info(f"✓ Started watching tiles for {instance_name} ({self.get_instance_access_level(instance_name)})")
+        logger.info(f" Started watching tiles for {instance_name} ({self.get_instance_access_level(instance_name)})")
     
     def stop_watching(self, instance_name: str):
         """Stop watching an instance"""
@@ -278,7 +278,7 @@ class TileSyncService:
             self.watcher.start_watching(instance_name)
         
         self.running = True
-        logger.info(f"✓ Tile sync service started - watching {len(instances)} instances")
+        logger.info(f" Tile sync service started - watching {len(instances)} instances")
         
         # Keep service running
         try:

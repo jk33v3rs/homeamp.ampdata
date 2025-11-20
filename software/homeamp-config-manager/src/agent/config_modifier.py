@@ -79,10 +79,10 @@ class ConfigModifier:
             success = modify_yaml_key(file_path, key_path, value)
             
             if success:
-                logger.info(f"✅ Modified {key_path} = {value} in {file_path}")
+                logger.info(f"[OK] Modified {key_path} = {value} in {file_path}")
                 return True
             else:
-                logger.error(f"❌ Failed to modify {key_path} in {file_path}")
+                logger.error(f"[ERROR] Failed to modify {key_path} in {file_path}")
                 if create_backup and Path(f"{file_path}.backup").exists():
                     # Restore from backup
                     import shutil
@@ -91,7 +91,7 @@ class ConfigModifier:
                 return False
                 
         except Exception as e:
-            logger.error(f"❌ Error modifying YAML: {e}")
+            logger.error(f"[ERROR] Error modifying YAML: {e}")
             return False
     
     def modify_json_key(self, file_path: str, key_path: str, value: Any,
@@ -140,11 +140,11 @@ class ConfigModifier:
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
             
-            logger.info(f"✅ Modified {key_path} = {value} in {file_path}")
+            logger.info(f"[OK] Modified {key_path} = {value} in {file_path}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error modifying JSON: {e}")
+            logger.error(f"[ERROR] Error modifying JSON: {e}")
             if create_backup and Path(f"{file_path}.backup").exists():
                 import shutil
                 shutil.copy2(f"{file_path}.backup", file_path)
@@ -209,11 +209,11 @@ class ConfigModifier:
             with open(file_path, 'w', encoding='utf-8') as f:
                 f.writelines(lines)
             
-            logger.info(f"✅ Modified {key} = {value} in {file_path}")
+            logger.info(f"[OK] Modified {key} = {value} in {file_path}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Error modifying properties: {e}")
+            logger.error(f"[ERROR] Error modifying properties: {e}")
             if create_backup and Path(f"{file_path}.backup").exists():
                 import shutil
                 shutil.copy2(f"{file_path}.backup", file_path)
@@ -298,11 +298,11 @@ class ConfigModifier:
             
             import shutil
             shutil.copy2(backup_path, file_path)
-            logger.info(f"✅ Rolled back {file_path} from {backup_path}")
+            logger.info(f"[OK] Rolled back {file_path} from {backup_path}")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Rollback failed: {e}")
+            logger.error(f"[ERROR] Rollback failed: {e}")
             return False
     
     def batch_modify(self, modifications: List[Dict]) -> Dict[str, Any]:
@@ -397,7 +397,7 @@ if __name__ == '__main__':
         'settings.economy.enabled',
         True
     )
-    print(f"YAML modification: {'✅' if success else '❌'} {error or ''}")
+    print(f"YAML modification: {'[OK]' if success else '[ERROR]'} {error or ''}")
     
     # Example: Modify JSON
     success, error = modifier.safe_modify(
@@ -405,7 +405,7 @@ if __name__ == '__main__':
         'server.port',
         8080
     )
-    print(f"JSON modification: {'✅' if success else '❌'} {error or ''}")
+    print(f"JSON modification: {'[OK]' if success else '[ERROR]'} {error or ''}")
     
     # Example: Batch modifications
     results = modifier.batch_modify([

@@ -22,7 +22,7 @@ def fix_drift_detector():
     
     # Check if already fixed
     if 'isinstance(baseline_plugin, dict)' in content:
-        print("✓ drift_detector.py already has type checks - no changes needed")
+        print(" drift_detector.py already has type checks - no changes needed")
         return 0
     
     # Apply fixes
@@ -65,7 +65,7 @@ def fix_drift_detector():
     with open(file_path, 'w') as f:
         f.write('\n'.join(output))
     
-    print("✓ Fixed drift_detector.py")
+    print(" Fixed drift_detector.py")
     print("\nRestart the agent:")
     print("  sudo systemctl restart homeamp-agent")
     return 0

@@ -282,7 +282,7 @@ class HierarchyResolver:
         # Player substitution
         if player_uuid:
             value = value.replace('{PLAYER_UUID}', player_uuid)
-            # TODO: Look up player name from UUID
+            # Player name lookup would require external API (Mojang/player database)
         
         return value
     

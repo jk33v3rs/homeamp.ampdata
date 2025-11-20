@@ -21,7 +21,7 @@ class AgentUpdateMethods:
         Check for updates for all plugins via CI/CD APIs
         Supports: Modrinth, Hangar, GitHub Releases, SpigotMC
         """
-        self.logger.info("🔄 Checking for plugin updates")
+        self.logger.info("[UPDATE] Checking for plugin updates")
         
         checked_count = 0
         updates_found = 0
@@ -45,16 +45,16 @@ class AgentUpdateMethods:
                 
                 # Update registry if new version found
                 if latest_version and latest_version != plugin_info.get('current_stable_version'):
-                    self.logger.info(f"🆕 Update available: {plugin_id} {plugin_info.get('current_stable_version')} → {latest_version}")
+                    self.logger.info(f"[NEW] Update available: {plugin_id} {plugin_info.get('current_stable_version')} → {latest_version}")
                     self._record_available_update(plugin_id, latest_version, download_url)
                     updates_found += 1
                 
                 checked_count += 1
             
             except Exception as e:
-                self.logger.warning(f"⚠️  Failed to check updates for {plugin_id}: {e}")
+                self.logger.warning(f"[WARN]  Failed to check updates for {plugin_id}: {e}")
         
-        self.logger.info(f"✅ Update check complete: {checked_count} plugins checked, {updates_found} updates found")
+        self.logger.info(f"[OK] Update check complete: {checked_count} plugins checked, {updates_found} updates found")
     
     def _check_modrinth_update(self, modrinth_id: str) -> tuple[Optional[str], Optional[str]]:
         """Check Modrinth API for latest version"""
@@ -209,7 +209,7 @@ class AgentUpdateMethods:
                 'created_by': f'agent-{self.server_name}' if auto else 'user'
             })
             
-            self.logger.info(f"📥 Queued update for {plugin_id} → {to_version} ({len(instance_ids)} instances)")
+            self.logger.info(f" Queued update for {plugin_id} → {to_version} ({len(instance_ids)} instances)")
         
         except Exception as e:
             self.logger.error(f"Failed to queue update for {plugin_id}: {e}")
@@ -244,7 +244,7 @@ class AgentUpdateMethods:
         download_url = update['download_url']
         target_instances = json.loads(update['target_instances'])
         
-        self.logger.info(f"🔄 Executing update: {plugin_id} → {to_version}")
+        self.logger.info(f"[UPDATE] Executing update: {plugin_id} → {to_version}")
         
         # Mark as in progress
         self.db.execute_query("""
@@ -277,7 +277,7 @@ class AgentUpdateMethods:
                     """, {'instance_id': instance_id, 'plugin_id': plugin_id}, fetch=True)
                     
                     if cursor.rowcount == 0:
-                        deployment_log.append(f"❌ {instance_id}: Plugin not installed")
+                        deployment_log.append(f"[ERROR] {instance_id}: Plugin not installed")
                         failure_count += 1
                         continue
                     
@@ -312,11 +312,11 @@ class AgentUpdateMethods:
                         'file_hash': file_hash
                     })
                     
-                    deployment_log.append(f"✅ {instance_id}: Updated successfully")
+                    deployment_log.append(f"[OK] {instance_id}: Updated successfully")
                     success_count += 1
                 
                 except Exception as e:
-                    deployment_log.append(f"❌ {instance_id}: {str(e)}")
+                    deployment_log.append(f"[ERROR] {instance_id}: {str(e)}")
                     failure_count += 1
                     self.logger.error(f"Failed to update {plugin_id} on {instance_id}: {e}")
             
@@ -336,7 +336,7 @@ class AgentUpdateMethods:
                 'deployment_log': '\n'.join(deployment_log)
             })
             
-            self.logger.info(f"✅ Update complete: {success_count} succeeded, {failure_count} failed")
+            self.logger.info(f"[OK] Update complete: {success_count} succeeded, {failure_count} failed")
         
         except Exception as e:
             # Mark as failed
@@ -351,7 +351,7 @@ class AgentUpdateMethods:
                 'error': str(e)
             })
             
-            self.logger.error(f"❌ Update failed: {e}")
+            self.logger.error(f"[ERROR] Update failed: {e}")
     
     def _download_plugin(self, url: str) -> Optional[bytes]:
         """Download plugin jar from URL"""
@@ -435,7 +435,7 @@ class AgentUpdateMethods:
         is_prerelease = event['is_prerelease']
         
         try:
-            self.logger.info(f"📨 Processing webhook: {provider} {plugin_id} {version}")
+            self.logger.info(f" Processing webhook: {provider} {plugin_id} {version}")
             
             # Get plugin auto-update settings
             plugin = self.plugin_registry.get(plugin_id)
@@ -464,7 +464,7 @@ class AgentUpdateMethods:
                 'action': action_taken
             })
             
-            self.logger.info(f"✅ Webhook processed: {action_taken}")
+            self.logger.info(f"[OK] Webhook processed: {action_taken}")
         
         except Exception as e:
             self.db.execute_query("""

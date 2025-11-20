@@ -62,7 +62,7 @@ class EndpointAgent:
     
     def start(self):
         """Start agent main loop"""
-        self.logger.info(f"🚀 Starting endpoint agent for {self.server_name}")
+        self.logger.info(f"[START] Starting endpoint agent for {self.server_name}")
         self.db.connect()
         self.running = True
         
@@ -86,7 +86,7 @@ class EndpointAgent:
         try:
             # 1. Discover instances
             discovered = self.scanner.discover_instances()
-            self.logger.info(f"📡 Discovered {len(discovered)} instances")
+            self.logger.info(f"[DISC] Discovered {len(discovered)} instances")
             
             # 2. Register all discovered instances (upsert to database)
             for instance in discovered:
@@ -111,14 +111,14 @@ class EndpointAgent:
             missing = expected_ids - discovered_ids
             
             if missing:
-                self.logger.warning(f"⚠️  Missing instances (in DB but not found): {missing}")
+                self.logger.warning(f"[WARN]  Missing instances (in DB but not found): {missing}")
             
             # 5. Scan each instance
             for instance in discovered:
                 self._scan_instance_full(instance)
         
         except Exception as e:
-            self.logger.error(f"❌ Error in agent cycle: {e}", exc_info=True)
+            self.logger.error(f"[ERROR] Error in agent cycle: {e}", exc_info=True)
     
     def _load_plugins_from_db(self, instance_id: str) -> Dict[str, Dict[str, str]]:
         """Load existing plugin state from database to initialize cache"""
@@ -155,7 +155,7 @@ class EndpointAgent:
             self._scan_instance_configs(instance_id, instance_path)
             
         except Exception as e:
-            self.logger.error(f"❌ Error scanning {instance_id}: {e}", exc_info=True)
+            self.logger.error(f"[ERROR] Error scanning {instance_id}: {e}", exc_info=True)
     
     def _scan_plugin_changes(self, instance_id: str, instance_path: Path):
         """
@@ -194,7 +194,7 @@ class EndpointAgent:
         # Detect new plugins
         for plugin_name, info in current_plugins.items():
             if plugin_name not in cached:
-                self.logger.info(f"🆕 Plugin installed: {instance_id}/{plugin_name} v{info['version']}")
+                self.logger.info(f"[NEW] Plugin installed: {instance_id}/{plugin_name} v{info['version']}")
                 self._log_plugin_event(
                     instance_id, plugin_name, 'install',
                     version_to=info['version'],
@@ -203,7 +203,7 @@ class EndpointAgent:
                 )
             elif cached[plugin_name]['jar_hash'] != info['jar_hash']:
                 old_ver = cached[plugin_name]['version']
-                self.logger.info(f"🔄 Plugin updated: {instance_id}/{plugin_name} {old_ver} → {info['version']}")
+                self.logger.info(f"[UPDATE] Plugin updated: {instance_id}/{plugin_name} {old_ver} → {info['version']}")
                 self._log_plugin_event(
                     instance_id, plugin_name, 'update',
                     version_from=old_ver,
@@ -218,7 +218,7 @@ class EndpointAgent:
         # Detect removed plugins
         for plugin_name in cached:
             if plugin_name not in current_plugins:
-                self.logger.info(f"🗑️  Plugin removed: {instance_id}/{plugin_name}")
+                self.logger.info(f"  Plugin removed: {instance_id}/{plugin_name}")
                 self._log_plugin_event(
                     instance_id, plugin_name, 'remove',
                     version_from=cached[plugin_name]['version']
@@ -283,7 +283,7 @@ class EndpointAgent:
         # Detect new datapacks
         for key, info in current_datapacks.items():
             if key not in cached:
-                self.logger.info(f"🗂️  Datapack installed: {instance_id}/{info['world_name']}/{info['datapack_name']}")
+                self.logger.info(f"  Datapack installed: {instance_id}/{info['world_name']}/{info['datapack_name']}")
                 self.db.upsert_datapack(
                     instance_id=instance_id,
                     datapack_name=info['datapack_name'],
@@ -304,7 +304,7 @@ class EndpointAgent:
                     change_reason=f"Datapack installed: {info['file_name']}"
                 )
             elif cached[key]['file_hash'] != info['file_hash']:
-                self.logger.info(f"🔄 Datapack updated: {instance_id}/{info['world_name']}/{info['datapack_name']}")
+                self.logger.info(f"[UPDATE] Datapack updated: {instance_id}/{info['world_name']}/{info['datapack_name']}")
                 self.db.upsert_datapack(
                     instance_id=instance_id,
                     datapack_name=info['datapack_name'],
@@ -331,7 +331,7 @@ class EndpointAgent:
                 parts = key.split(':', 1)
                 world_name = parts[0]
                 datapack_name = parts[1]
-                self.logger.info(f"🗑️  Datapack removed: {instance_id}/{world_name}/{datapack_name}")
+                self.logger.info(f"  Datapack removed: {instance_id}/{world_name}/{datapack_name}")
                 self.db.remove_datapack(instance_id, datapack_name, world_name)
                 self.db.log_config_change(
                     instance_id=instance_id,
@@ -399,7 +399,7 @@ class EndpointAgent:
                     old_val = cached.get(prop)
                     new_val = properties.get(prop)
                     if old_val != new_val and old_val is not None:
-                        self.logger.info(f"⚙️  Server property changed: {instance_id}/{prop}: {old_val} → {new_val}")
+                        self.logger.info(f"[CONFIG]  Server property changed: {instance_id}/{prop}: {old_val} → {new_val}")
                         self.db.log_config_change(
                             instance_id=instance_id,
                             plugin_name='server',
@@ -505,7 +505,7 @@ class EndpointAgent:
                             drift_detected.append(drift_info)
                             
                             self.logger.warning(
-                                f"🔔 NEW DRIFT {instance_id}/{plugin_name}/{config_file}:{config_key} "
+                                f" NEW DRIFT {instance_id}/{plugin_name}/{config_file}:{config_key} "
                                 f"- Expected: {expected_normalized} (from {scope}), "
                                 f"Got: {actual_normalized}"
                             )
@@ -582,14 +582,14 @@ class EndpointAgent:
             
             if applicable:
                 self.logger.info(
-                    f"🔄 Found {len(applicable)} auto-migrations for {plugin_name} "
+                    f"[UPDATE] Found {len(applicable)} auto-migrations for {plugin_name} "
                     f"{from_version} → {to_version}"
                 )
                 
                 for migration in applicable:
                     if migration['is_breaking']:
                         self.logger.warning(
-                            f"⚠️  BREAKING CHANGE: {migration['old_key_path']} → "
+                            f"[WARN]  BREAKING CHANGE: {migration['old_key_path']} → "
                             f"{migration['new_key_path']}"
                         )
                     
@@ -617,7 +617,7 @@ class EndpointAgent:
                 changed_by=f'agent-{self.server_name}',
                 change_reason=f"Auto-migration: {migration['notes']}"
             )
-            self.logger.info(f"✅ Applied migration: {migration['old_key_path']} → {migration['new_key_path']}")
+            self.logger.info(f"[OK] Applied migration: {migration['old_key_path']} → {migration['new_key_path']}")
         except Exception as e:
             self.logger.error(f"Failed to apply migration: {e}")
     
@@ -626,7 +626,7 @@ class EndpointAgent:
         Log to config_variance_history for trend analysis
         Would need new db_access.py method
         """
-        self.logger.info(f"📊 Variance snapshot: {instance_id} has {len(drift_info)} drift items")
+        self.logger.info(f" Variance snapshot: {instance_id} has {len(drift_info)} drift items")
         # TODO: Implement actual variance history logging
     
     def _calculate_file_hash(self, file_path: Path) -> str:

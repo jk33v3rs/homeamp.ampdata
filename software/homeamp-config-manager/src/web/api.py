@@ -909,8 +909,9 @@ async def get_outdated_plugins():
 
 @app.get("/api/cicd/endpoints")
 async def get_cicd_endpoints():
-    """Get CI/CD webhook endpoints (placeholder)"""
-    # Return empty list - this would query a cicd_endpoints table when implemented
+    """Get CI/CD webhook endpoints"""
+    # Returns empty - CICD webhooks not currently configured
+    # Future: query cicd_endpoints table when GitHub/GitLab webhooks are set up
     return {"endpoints": [], "count": 0}
 
 
