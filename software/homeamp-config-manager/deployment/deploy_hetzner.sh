@@ -99,9 +99,9 @@ User=amp
 Group=amp
 WorkingDirectory=$INSTALL_DIR/software/homeamp-config-manager
 Environment="PYTHONPATH=$INSTALL_DIR/software/homeamp-config-manager"
-ExecStart=$INSTALL_DIR/software/homeamp-config-manager/.venv/bin/uvicorn src.web.api_v2:app \\
-    --host 0.0.0.0 \\
-    --port 8000 \\
+ExecStart=$INSTALL_DIR/software/homeamp-config-manager/.venv/bin/uvicorn src.web.api:app \
+    --host 0.0.0.0 \
+    --port 8000 \
     --workers 4
 
 Restart=on-failure

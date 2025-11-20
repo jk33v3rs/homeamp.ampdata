@@ -13,13 +13,35 @@ from pydantic import BaseModel
 from pathlib import Path
 
 from ..database.db_access import ConfigDatabase
-from .api_config_endpoints import get_config_router
+from ..api.enhanced_endpoints import router as enhanced_router
+from ..api.dashboard_endpoints import router as dashboard_router
+from ..api.plugin_configurator_endpoints import router as plugin_configurator_router
+from ..api.deployment_endpoints import router as deployment_router
+from ..api.update_manager_endpoints import router as update_manager_router
+from ..api.variance_endpoints import router as variance_router
+from ..api.audit_log_endpoints import router as audit_log_router
+from ..api.tag_manager_endpoints import router as tag_manager_router
 
 app = FastAPI(
     title="ArchiveSMP Configuration Manager",
     description="Database-backed config management for ArchiveSMP",
     version="2.0.0"
 )
+
+# Include Phase 0 enhanced endpoints
+app.include_router(enhanced_router)
+# Include Phase 2 dashboard endpoints
+app.include_router(dashboard_router)
+# Include Phase 2 plugin configurator endpoints
+app.include_router(plugin_configurator_router)
+# Include deployment endpoints
+app.include_router(deployment_router)
+# Include update manager endpoints
+app.include_router(update_manager_router)
+# Include variance endpoints
+app.include_router(variance_router)
+app.include_router(audit_log_router)
+app.include_router(tag_manager_router)
 
 # CORS for development
 app.add_middleware(
@@ -33,26 +55,17 @@ app.add_middleware(
 # Database connection (configured on startup)
 db = None
 
-# Include config management router
-app.include_router(get_config_router(), prefix="", tags=["config"])
-
 @app.on_event("startup")
 async def startup():
     """Initialize database connection"""
     global db
-    try:
-        db = ConfigDatabase(
-            host='135.181.212.169',
-            port=3369,
-            user='sqlworkerSMP',
-            password='SQLdb2024!'
-        )
-        db.connect()
-        print("✓ Database connection established")
-    except Exception as e:
-        print(f"✗ Database connection failed: {e}")
-        print("API will run but database endpoints will not work")
-        db = None
+    db = ConfigDatabase(
+        host='135.181.212.169',
+        port=3369,
+        user='sqlworkerSMP',
+        password='2024!SQLdb'
+    )
+    db.connect()
 
 @app.on_event("shutdown")
 async def shutdown():
@@ -62,29 +75,12 @@ async def shutdown():
 
 
 # ============================================================================
-# HEALTH CHECK
-# ============================================================================
-
-@app.get("/health")
-async def health_check():
-    """Check API and database health"""
-    db_status = "connected" if db and db.conn else "disconnected"
-    return {
-        "status": "running",
-        "database": db_status,
-        "version": "2.0.0"
-    }
-
-
-# ============================================================================
 # INSTANCE ENDPOINTS
 # ============================================================================
 
 @app.get("/api/instances")
 async def get_instances(server: Optional[str] = None):
     """Get all instances, optionally filtered by server"""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
     if server:
         instances = db.get_instances_by_server(server)
     else:
@@ -261,7 +257,7 @@ async def get_deviations():
 
 @app.get("/api/plugins")
 async def get_plugins():
-    """Get all plugins with metadata"""
+    """Get all plugins with metadata and install counts"""
     db.cursor.execute("""
         SELECT plugin_id, plugin_name, platform, current_version, latest_version,
                github_repo, modrinth_id, hangar_slug, spigot_id,
@@ -287,9 +283,42 @@ async def get_plugins():
     return {"plugins": plugins, "total": len(plugins)}
 
 
+@app.get("/api/plugins/discovered")
+async def get_discovered_plugins():
+    """
+    Get all dynamically discovered plugins from agent scans
+    NO HARDCODING - returns whatever the agent found
+    """
+    db.cursor.execute("""
+        SELECT 
+            p.plugin_id,
+            p.plugin_name,
+            p.platform,
+            p.description,
+            p.author,
+            p.current_version,
+            p.latest_version,
+            COUNT(DISTINCT ip.instance_id) as instance_count,
+            COUNT(DISTINCT cr.rule_id) as config_key_count
+        FROM plugins p
+        LEFT JOIN instance_plugins ip ON p.plugin_id = ip.plugin_id
+        LEFT JOIN config_rules cr ON p.plugin_name = cr.plugin_name
+        GROUP BY p.plugin_id
+        ORDER BY instance_count DESC, p.plugin_name
+    """)
+    
+    plugins = db.cursor.fetchall()
+    
+    return {
+        'plugins': plugins,
+        'total': len(plugins),
+        'discovery_note': 'Auto-discovered from agent scans - no hardcoded plugin list'
+    }
+
+
 @app.get("/api/plugins/{plugin_id}")
 async def get_plugin_details(plugin_id: str):
-    """Get detailed plugin information"""
+    """Get detailed plugin information including all installations"""
     db.cursor.execute("""
         SELECT * FROM plugins WHERE plugin_id = %s
     """, (plugin_id,))
@@ -378,6 +407,567 @@ async def delete_plugin(plugin_id: str):
     db.commit()
     
     return {'success': True, 'plugin_id': plugin_id}
+
+
+@app.get("/api/datapacks")
+async def get_datapacks(instance_id: Optional[int] = None):
+    """Get discovered datapacks"""
+    query = """
+        SELECT 
+            d.id,
+            d.instance_id,
+            i.instance_name,
+            d.world_name,
+            d.datapack_name,
+            d.version,
+            d.file_hash,
+            d.installed_at
+        FROM instance_datapacks d
+        JOIN instances i ON d.instance_id = i.instance_id
+    """
+    
+    if instance_id is not None:
+        query += " WHERE d.instance_id = %s ORDER BY d.datapack_name, d.world_name"
+        db.cursor.execute(query, (instance_id,))
+    else:
+        query += " ORDER BY i.instance_name, d.datapack_name"
+        db.cursor.execute(query)
+    
+    results = db.cursor.fetchall()
+    return {"datapacks": results, "count": len(results)}
+
+
+# ============================================================================
+# HISTORY & AUDIT TRAIL ENDPOINTS
+# ============================================================================
+
+@app.get("/api/history/changes")
+async def get_change_history(
+    instance_id: Optional[str] = None,
+    plugin_name: Optional[str] = None,
+    changed_by: Optional[str] = None,
+    change_type: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0
+):
+    """
+    Get config change history with filters
+    
+    Query Parameters:
+    - instance_id: Filter by instance
+    - plugin_name: Filter by plugin
+    - changed_by: Filter by user
+    - change_type: Filter by type (manual, automated, drift_fix, rule_based)
+    - limit: Max results (default 100)
+    - offset: Pagination offset
+    """
+    try:
+        changes = db.get_change_history(
+            instance_id=instance_id,
+            plugin_name=plugin_name,
+            changed_by=changed_by,
+            change_type=change_type,
+            limit=limit,
+            offset=offset
+        )
+        
+        # Get total count
+        count_query = "SELECT COUNT(*) as total FROM config_change_history WHERE 1=1"
+        params = []
+        
+        if instance_id:
+            count_query += " AND instance_id = %s"
+            params.append(instance_id)
+        if plugin_name:
+            count_query += " AND plugin_name = %s"
+            params.append(plugin_name)
+        if changed_by:
+            count_query += " AND changed_by = %s"
+            params.append(changed_by)
+        if change_type:
+            count_query += " AND change_type = %s"
+            params.append(change_type)
+        
+        db.cursor.execute(count_query, params)
+        total = db.cursor.fetchone()['total']
+        
+        return {
+            'changes': changes,
+            'total': total,
+            'limit': limit,
+            'offset': offset,
+            'has_more': (offset + len(changes)) < total
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.get("/api/history/changes/{change_id}")
+async def get_change_detail(change_id: int):
+    """Get detailed information about a specific change"""
+    try:
+        db.cursor.execute("""
+            SELECT * FROM config_change_history
+            WHERE change_id = %s
+        """, (change_id,))
+        
+        change = db.cursor.fetchone()
+        
+        if not change:
+            raise HTTPException(status_code=404, detail=f"Change {change_id} not found")
+        
+        return change
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.get("/api/stats/changes")
+async def get_change_statistics():
+    """Get statistics about config changes"""
+    try:
+        # Changes by type
+        db.cursor.execute("""
+            SELECT change_type, COUNT(*) as count
+            FROM config_change_history
+            GROUP BY change_type
+            ORDER BY count DESC
+        """)
+        by_type = db.cursor.fetchall()
+        
+        # Changes by user
+        db.cursor.execute("""
+            SELECT changed_by, COUNT(*) as count
+            FROM config_change_history
+            GROUP BY changed_by
+            ORDER BY count DESC
+            LIMIT 10
+        """)
+        by_user = db.cursor.fetchall()
+        
+        # Recent changes (last 7 days)
+        db.cursor.execute("""
+            SELECT DATE(changed_at) as date, COUNT(*) as count
+            FROM config_change_history
+            WHERE changed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY DATE(changed_at)
+            ORDER BY date DESC
+        """)
+        recent = db.cursor.fetchall()
+        
+        # Total counts
+        db.cursor.execute("SELECT COUNT(*) as total FROM config_change_history")
+        total = db.cursor.fetchone()['total']
+        
+        return {
+            'total_changes': total,
+            'by_type': by_type,
+            'by_user': by_user,
+            'last_7_days': recent
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+# ============================================================================
+# MIGRATIONS TRACKING ENDPOINTS
+# ============================================================================
+
+@app.get("/api/migrations")
+async def list_all_migrations():
+    """List all known config key migrations"""
+    try:
+        db.cursor.execute("""
+            SELECT plugin_name, COUNT(*) as migration_count,
+                   SUM(is_breaking) as breaking_count
+            FROM config_key_migrations
+            GROUP BY plugin_name
+            ORDER BY plugin_name
+        """)
+        
+        summary = db.cursor.fetchall()
+        
+        return {
+            'plugins': summary,
+            'total_plugins': len(summary)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.get("/api/migrations/{plugin_name}")
+async def get_plugin_migrations(plugin_name: str):
+    """Get known config key migrations for a specific plugin"""
+    try:
+        migrations = db.get_plugin_migrations(plugin_name)
+        
+        if not migrations:
+            # Not an error - plugin just has no migrations
+            return {
+                'plugin': plugin_name,
+                'migrations': [],
+                'total': 0
+            }
+        
+        return {
+            'plugin': plugin_name,
+            'migrations': migrations,
+            'total': len(migrations),
+            'breaking_count': sum(1 for m in migrations if m.get('is_breaking')),
+            'automatic_count': sum(1 for m in migrations if m.get('is_automatic'))
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+# ============================================================================
+# UNIVERSAL CONFIG MANAGEMENT ENDPOINTS
+# ============================================================================
+
+@app.get("/api/config/plugin/{plugin_id}")
+async def get_plugin_config(plugin_id: str, scope: str = 'universal'):
+    """
+    Get all config keys for a plugin at specified scope
+    Returns current values, hierarchy source, and metadata
+    
+    Args:
+        plugin_id: Plugin identifier
+        scope: universal|server|group|instance
+    """
+    try:
+        # Get plugin name from ID
+        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
+        plugin = db.cursor.fetchone()
+        
+        if not plugin:
+            raise HTTPException(status_code=404, detail="Plugin not found")
+        
+        plugin_name = plugin['plugin_name']
+        
+        # Get all config keys for this plugin
+        db.cursor.execute("""
+            SELECT DISTINCT
+                cr.config_file,
+                cr.config_key,
+                cr.scope_type,
+                cr.scope_selector,
+                cr.config_value,
+                cr.value_type,
+                cr.priority,
+                cr.notes
+            FROM config_rules cr
+            WHERE cr.plugin_name = %s
+            AND cr.is_active = true
+            ORDER BY cr.config_file, cr.config_key, cr.priority
+        """, (plugin_name,))
+        
+        rules = db.cursor.fetchall()
+        
+        # Organize by file and key
+        config_structure = {}
+        
+        for rule in rules:
+            file = rule['config_file']
+            key = rule['config_key']
+            full_key = f"{file}:{key}"
+            
+            if full_key not in config_structure:
+                config_structure[full_key] = {
+                    'file': file,
+                    'key': key,
+                    'value': None,
+                    'source': 'default',
+                    'source_description': 'No value set',
+                    'hierarchy': []
+                }
+            
+            # Add to hierarchy
+            config_structure[full_key]['hierarchy'].append({
+                'scope': rule['scope_type'],
+                'selector': rule['scope_selector'],
+                'value': rule['config_value'],
+                'priority': rule['priority']
+            })
+            
+            # Determine effective value based on scope filter
+            if scope == 'universal' and rule['scope_type'] == 'GLOBAL':
+                config_structure[full_key]['value'] = rule['config_value']
+                config_structure[full_key]['source'] = 'universal'
+                config_structure[full_key]['source_description'] = 'Universal default (applies to all)'
+            elif rule['scope_type'] in ['SERVER', 'META_TAG', 'INSTANCE']:
+                # Higher priority override
+                if config_structure[full_key]['value'] is None or rule['priority'] < config_structure[full_key].get('effective_priority', 999):
+                    config_structure[full_key]['value'] = rule['config_value']
+                    config_structure[full_key]['source'] = rule['scope_type'].lower()
+                    config_structure[full_key]['effective_priority'] = rule['priority']
+                    
+                    if rule['scope_selector']:
+                        config_structure[full_key]['source_description'] = f"Override: {rule['scope_type']} = {rule['scope_selector']}"
+        
+        return {
+            'plugin_id': plugin_id,
+            'plugin_name': plugin_name,
+            'scope': scope,
+            'keys': config_structure,
+            'total_keys': len(config_structure)
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.post("/api/config/universal")
+async def set_universal_config(config: Dict[str, Any]):
+    """
+    Set a universal config value (applies to ALL instances)
+    Creates or updates a GLOBAL scope rule
+    
+    Body:
+        plugin_id: Plugin identifier
+        config_key: Full key path (e.g., "config.yml:server.max-players")
+        value: The value to set
+        notes: Optional notes about why this was set
+    """
+    try:
+        plugin_id = config['plugin_id']
+        config_key = config['config_key']
+        value = config['value']
+        notes = config.get('notes', 'Set via Universal Config UI')
+        
+        # Get plugin name
+        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
+        plugin = db.cursor.fetchone()
+        
+        if not plugin:
+            raise HTTPException(status_code=404, detail="Plugin not found")
+        
+        plugin_name = plugin['plugin_name']
+        
+        # Parse file and key from full key
+        if ':' in config_key:
+            file, key = config_key.split(':', 1)
+        else:
+            file = 'config.yml'
+            key = config_key
+        
+        # Check if universal rule already exists
+        db.cursor.execute("""
+            SELECT rule_id FROM config_rules
+            WHERE plugin_name = %s
+            AND config_file = %s
+            AND config_key = %s
+            AND scope_type = 'GLOBAL'
+        """, (plugin_name, file, key))
+        
+        existing = db.cursor.fetchone()
+        
+        if existing:
+            # Update existing
+            db.cursor.execute("""
+                UPDATE config_rules
+                SET config_value = %s,
+                    notes = %s,
+                    updated_at = NOW()
+                WHERE rule_id = %s
+            """, (value, notes, existing['rule_id']))
+            
+            rule_id = existing['rule_id']
+            action = 'updated'
+        else:
+            # Create new
+            db.cursor.execute("""
+                INSERT INTO config_rules 
+                (plugin_name, config_file, config_key, scope_type, scope_selector, 
+                 config_value, value_type, priority, created_by, notes)
+                VALUES (%s, %s, %s, 'GLOBAL', NULL, %s, 'string', 4, 'web_ui', %s)
+            """, (plugin_name, file, key, value, notes))
+            
+            rule_id = db.cursor.lastrowid
+            action = 'created'
+        
+        db.commit()
+        
+        return {
+            'success': True,
+            'action': action,
+            'rule_id': rule_id,
+            'plugin_name': plugin_name,
+            'config_key': f"{file}:{key}",
+            'value': value
+        }
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+@app.post("/api/config/bulk-update")
+async def bulk_update_configs(updates: Dict[str, Any]):
+    """
+    Bulk update multiple config values at once
+    
+    Body:
+        scope: universal|server|group|instance
+        changes: {plugin_id: {config_key: value}}
+    """
+    try:
+        scope = updates.get('scope', 'universal')
+        changes = updates.get('changes', {})
+        
+        results = []
+        errors = []
+        
+        for plugin_id, config_changes in changes.items():
+            for config_key, value in config_changes.items():
+                try:
+                    # Use the set_universal_config logic
+                    result = await set_universal_config({
+                        'plugin_id': plugin_id,
+                        'config_key': config_key,
+                        'value': value,
+                        'notes': f'Bulk update via API (scope: {scope})'
+                    })
+                    results.append(result)
+                except Exception as e:
+                    errors.append({
+                        'plugin_id': plugin_id,
+                        'config_key': config_key,
+                        'error': str(e)
+                    })
+        
+        return {
+            'success': len(errors) == 0,
+            'total_changes': len(results),
+            'successful': results,
+            'errors': errors
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+
+async def get_outdated_plugins():
+    """Get plugins with available updates"""
+    db.cursor.execute("""
+        SELECT 
+            pv.plugin_name,
+            pv.installed_version as current_version,
+            pv.latest_version,
+            GROUP_CONCAT(i.name SEPARATOR ', ') as instances,
+            MAX(pv.last_checked) as last_checked
+        FROM plugin_versions pv
+        JOIN instances i ON pv.instance_id = i.id
+        WHERE pv.update_available = TRUE
+        GROUP BY pv.plugin_name, pv.installed_version, pv.latest_version
+        ORDER BY pv.plugin_name
+    """)
+    results = db.cursor.fetchall()
+    
+    # Split instances string into array
+    for r in results:
+        if r.get('instances'):
+            r['instances'] = r['instances'].split(', ')
+        else:
+            r['instances'] = []
+    
+    return {"outdated": results, "count": len(results)}
+
+
+@app.get("/api/cicd/endpoints")
+async def get_cicd_endpoints():
+    """Get CI/CD webhook endpoints (placeholder)"""
+    # Return empty list - this would query a cicd_endpoints table when implemented
+    return {"endpoints": [], "count": 0}
+
+
+@app.get("/dashboard/approval-queue")
+async def get_approval_queue():
+    """Get pending approvals (plugin updates and config changes)"""
+    db.cursor.execute("""
+        SELECT 
+            pv.version_id as id,
+            'plugin_update' as type,
+            pv.plugin_name,
+            pv.installed_version as current_version,
+            pv.latest_version as new_version,
+            pv.instance_id,
+            pv.last_checked as timestamp
+        FROM plugin_versions pv
+        WHERE pv.update_available = TRUE
+        ORDER BY pv.last_checked DESC
+    """)
+    results = db.cursor.fetchall()
+    return {"items": results, "count": len(results)}
+
+
+@app.get("/dashboard/network-status")
+async def get_network_status():
+    """Get network status across all servers"""
+    db.cursor.execute("""
+        SELECT 
+            SUM(CASE WHEN is_active = TRUE THEN 1 ELSE 0 END) as online,
+            SUM(CASE WHEN is_active = FALSE THEN 1 ELSE 0 END) as offline,
+            COUNT(*) as total
+        FROM instances
+    """)
+    overall = db.cursor.fetchone()
+    
+    db.cursor.execute("""
+        SELECT 
+            server_name,
+            SUM(CASE WHEN is_active = TRUE THEN 1 ELSE 0 END) as online,
+            SUM(CASE WHEN is_active = FALSE THEN 1 ELSE 0 END) as offline,
+            COUNT(*) as total
+        FROM instances
+        GROUP BY server_name
+    """)
+    servers = db.cursor.fetchall()
+    
+    return {
+        "online": int(overall['online'] or 0),
+        "offline": int(overall['offline'] or 0),
+        "total": int(overall['total']),
+        "servers": servers,
+        "variance_count": 0
+    }
+
+
+@app.get("/dashboard/plugin-summary")
+async def get_plugin_summary():
+    """Get plugin summary statistics"""
+    db.cursor.execute("""
+        SELECT 
+            COUNT(DISTINCT plugin_name) as total_plugins,
+            SUM(CASE WHEN update_available = TRUE THEN 1 ELSE 0 END) as needs_update,
+            SUM(CASE WHEN update_available = FALSE OR update_available IS NULL THEN 1 ELSE 0 END) as up_to_date
+        FROM plugin_versions
+    """)
+    result = db.cursor.fetchone()
+    
+    return {
+        "total_plugins": int(result['total_plugins'] or 0),
+        "needs_update": int(result['needs_update'] or 0),
+        "up_to_date": int(result['up_to_date'] or 0)
+    }
+
+
+@app.get("/dashboard/recent-activity")
+async def get_recent_activity(limit: int = 10):
+    """Get recent activity log entries"""
+    db.cursor.execute("""
+        SELECT 
+            changed_at as timestamp,
+            change_type as event_type,
+            CONCAT(change_type, ' - ', plugin_name, ': ', config_key) as description,
+            instance_id,
+            changed_by as user
+        FROM config_change_history
+        ORDER BY changed_at DESC
+        LIMIT %s
+    """, (limit,))
+    results = db.cursor.fetchall()
+    
+    return {"activities": results, "count": len(results)}
 
 
 # ============================================================================
@@ -675,40 +1265,6 @@ async def delete_config_rule(rule_id: int):
     return {'success': True, 'rule_id': rule_id}
 
 
-@app.get("/api/rules")
-async def get_all_config_rules(plugin: str = None, scope: str = None):
-    """Get all config rules with optional filters"""
-    query = "SELECT * FROM config_rules WHERE is_active = true"
-    params = []
-    
-    if plugin:
-        query += " AND plugin_name = %s"
-        params.append(plugin)
-    
-    if scope:
-        query += " AND scope_type = %s"
-        params.append(scope)
-    
-    query += " ORDER BY priority ASC, plugin_name, config_key"
-    
-    db.cursor.execute(query, params)
-    rules = db.cursor.fetchall()
-    
-    return {'rules': rules, 'total': len(rules)}
-
-
-@app.get("/api/rules/{rule_id}")
-async def get_config_rule(rule_id: int):
-    """Get a specific config rule"""
-    db.cursor.execute("SELECT * FROM config_rules WHERE rule_id = %s", (rule_id,))
-    rule = db.cursor.fetchone()
-    
-    if not rule:
-        raise HTTPException(status_code=404, detail="Config rule not found")
-    
-    return rule
-
-
 # ============================================================================
 # TAG MANAGEMENT ENDPOINTS
 # ============================================================================
@@ -796,19 +1352,17 @@ async def unassign_tag_from_instance(instance_id: str, tag_id: int):
 
 
 @app.post("/api/tags")
-async def create_meta_tag(tag: Dict[str, Any]):
+async def create_tag(tag: Dict[str, Any]):
     """Create a new meta tag"""
     db.cursor.execute("""
         INSERT INTO meta_tags 
-        (tag_name, category_id, display_name, description, color_code, icon)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        (tag_name, tag_description, category_id, created_by)
+        VALUES (%s, %s, %s, %s)
     """, (
         tag['tag_name'],
-        tag['category_id'],
-        tag.get('display_name', tag['tag_name']),
-        tag.get('description', ''),
-        tag.get('color_code', '#3498db'),
-        tag.get('icon', '')
+        tag.get('tag_description', ''),
+        tag.get('category_id', 1),  # Default to first category
+        tag.get('created_by', 'admin')
     ))
     db.commit()
     
@@ -816,9 +1370,10 @@ async def create_meta_tag(tag: Dict[str, Any]):
 
 
 @app.put("/api/tags/{tag_id}")
-async def update_meta_tag(tag_id: int, updates: Dict[str, Any]):
-    """Update a meta tag"""
-    allowed_fields = ['display_name', 'description', 'color_code', 'icon', 'is_active']
+async def update_tag(tag_id: int, updates: Dict[str, Any]):
+    """Update tag metadata"""
+    allowed_fields = ['tag_name', 'tag_description', 'category_id']
+    
     set_clauses = []
     values = []
     
@@ -843,33 +1398,32 @@ async def update_meta_tag(tag_id: int, updates: Dict[str, Any]):
 
 
 @app.delete("/api/tags/{tag_id}")
-async def delete_meta_tag(tag_id: int, force: bool = False):
-    """Delete a meta tag (soft delete by default, hard delete if force=True)"""
+async def delete_tag(tag_id: int):
+    """Soft-delete a tag"""
     # Check if tag exists
-    db.cursor.execute("SELECT tag_id, is_system_tag FROM meta_tags WHERE tag_id = %s", (tag_id,))
-    tag = db.cursor.fetchone()
-    
-    if not tag:
+    db.cursor.execute("SELECT tag_id FROM meta_tags WHERE tag_id = %s", (tag_id,))
+    if not db.cursor.fetchone():
         raise HTTPException(status_code=404, detail="Tag not found")
     
-    if tag['is_system_tag'] and not force:
-        raise HTTPException(status_code=403, detail="Cannot delete system tag without force=True")
-    
-    if force:
-        # Hard delete - will cascade to instance_tags
-        db.cursor.execute("DELETE FROM meta_tags WHERE tag_id = %s", (tag_id,))
-    else:
-        # Soft delete
-        db.cursor.execute("UPDATE meta_tags SET is_active = false WHERE tag_id = %s", (tag_id,))
-    
+    # Soft delete
+    db.cursor.execute("""
+        UPDATE meta_tags
+        SET is_active = false
+        WHERE tag_id = %s
+    """, (tag_id,))
     db.commit()
     
-    return {'success': True, 'tag_id': tag_id, 'deleted': force}
+    return {'success': True, 'tag_id': tag_id}
 
 
 @app.post("/api/tags/categories")
 async def create_tag_category(category: Dict[str, Any]):
     """Create a new tag category"""
+    # Get max display_order
+    db.cursor.execute("SELECT MAX(display_order) as max_order FROM meta_tag_categories")
+    result = db.cursor.fetchone()
+    next_order = (result['max_order'] or 0) + 1
+    
     db.cursor.execute("""
         INSERT INTO meta_tag_categories 
         (category_name, description, display_order)
@@ -877,7 +1431,7 @@ async def create_tag_category(category: Dict[str, Any]):
     """, (
         category['category_name'],
         category.get('description', ''),
-        category.get('display_order', 0)
+        category.get('display_order', next_order)
     ))
     db.commit()
     
@@ -897,7 +1451,7 @@ if static_dir.exists():
 
 @app.get("/", response_class=HTMLResponse)
 async def root():
-    """Serve main dashboard UI"""
+    """Serve main web UI - redirect to dashboard"""
     html_file = static_dir / "index.html"
     if html_file.exists():
         return html_file.read_text()
@@ -906,7 +1460,7 @@ async def root():
         <head><title>ArchiveSMP Config Manager</title></head>
         <body>
             <h1>ArchiveSMP Configuration Manager</h1>
-            <p>Web GUI not deployed. API is running.</p>
+            <p>Web GUI not yet deployed. API is running.</p>
             <h2>API Endpoints:</h2>
             <ul>
                 <li><a href="/docs">/docs</a> - Interactive API documentation</li>
@@ -918,6 +1472,14 @@ async def root():
         </body>
     </html>
     """
+
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard_ui():
+    """Serve dashboard UI"""
+    html_file = static_dir / "index.html"
+    if html_file.exists():
+        return html_file.read_text()
+    raise HTTPException(status_code=404, detail="Dashboard UI not found")
 
 @app.get("/variance", response_class=HTMLResponse)
 async def variance_ui():
@@ -934,717 +1496,6 @@ async def deploy_ui():
     if html_file.exists():
         return html_file.read_text()
     raise HTTPException(status_code=404, detail="Deploy UI not found")
-
-@app.get("/history", response_class=HTMLResponse)
-async def history_ui():
-    """Serve change history UI"""
-    html_file = static_dir / "history.html"
-    if html_file.exists():
-        return html_file.read_text()
-    raise HTTPException(status_code=404, detail="History UI not found")
-
-@app.get("/migrations", response_class=HTMLResponse)
-async def migrations_ui():
-    """Serve migrations UI"""
-    html_file = static_dir / "migrations.html"
-    if html_file.exists():
-        return html_file.read_text()
-    raise HTTPException(status_code=404, detail="Migrations UI not found")
-
-
-# ============================================================================
-# HISTORY & TRACKING ENDPOINTS (NEW - Option C Implementation)
-# ============================================================================
-
-@app.get("/api/history/changes")
-async def get_change_history(
-    instance_id: Optional[str] = None,
-    plugin_name: Optional[str] = None,
-    changed_by: Optional[str] = None,
-    change_type: Optional[str] = None,
-    limit: int = 100,
-    offset: int = 0
-):
-    """
-    Get config change history with filters
-    
-    Query Parameters:
-    - instance_id: Filter by instance
-    - plugin_name: Filter by plugin
-    - changed_by: Filter by user
-    - change_type: Filter by type (manual, automated, drift_fix, rule_based)
-    - limit: Max results (default 100)
-    - offset: Pagination offset
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        changes = db.get_change_history(
-            instance_id=instance_id,
-            plugin_name=plugin_name,
-            changed_by=changed_by,
-            change_type=change_type,
-            limit=limit,
-            offset=offset
-        )
-        
-        # Get total count
-        count_query = "SELECT COUNT(*) as total FROM config_change_history WHERE 1=1"
-        params = []
-        
-        if instance_id:
-            count_query += " AND instance_id = %s"
-            params.append(instance_id)
-        if plugin_name:
-            count_query += " AND plugin_name = %s"
-            params.append(plugin_name)
-        if changed_by:
-            count_query += " AND changed_by = %s"
-            params.append(changed_by)
-        if change_type:
-            count_query += " AND change_type = %s"
-            params.append(change_type)
-        
-        db.cursor.execute(count_query, params)
-        total = db.cursor.fetchone()['total']
-        
-        return {
-            'changes': changes,
-            'total': total,
-            'limit': limit,
-            'offset': offset,
-            'has_more': (offset + len(changes)) < total
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/history/changes/{change_id}")
-async def get_change_detail(change_id: int):
-    """Get detailed information about a specific change"""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        db.cursor.execute("""
-            SELECT * FROM config_change_history
-            WHERE change_id = %s
-        """, (change_id,))
-        
-        change = db.cursor.fetchone()
-        
-        if not change:
-            raise HTTPException(status_code=404, detail=f"Change {change_id} not found")
-        
-        return change
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/history/deployments")
-async def get_deployment_history(
-    deployed_by: Optional[str] = None,
-    deployment_status: Optional[str] = None,
-    limit: int = 50
-):
-    """
-    Get deployment history
-    
-    Query Parameters:
-    - deployed_by: Filter by user
-    - deployment_status: Filter by status (pending, in_progress, completed, failed, rolled_back)
-    - limit: Max results (default 50)
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        query = "SELECT * FROM deployment_history WHERE 1=1"
-        params = []
-        
-        if deployed_by:
-            query += " AND deployed_by = %s"
-            params.append(deployed_by)
-        
-        if deployment_status:
-            query += " AND deployment_status = %s"
-            params.append(deployment_status)
-        
-        query += " ORDER BY deployed_at DESC LIMIT %s"
-        params.append(limit)
-        
-        db.cursor.execute(query, params)
-        deployments = db.cursor.fetchall()
-        
-        return {
-            'deployments': deployments,
-            'total': len(deployments)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/history/deployments/{deployment_id}")
-async def get_deployment_detail(deployment_id: int):
-    """Get detailed deployment information including all changes"""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        # Get deployment record
-        db.cursor.execute("""
-            SELECT * FROM deployment_history
-            WHERE deployment_id = %s
-        """, (deployment_id,))
-        
-        deployment = db.cursor.fetchone()
-        
-        if not deployment:
-            raise HTTPException(status_code=404, detail=f"Deployment {deployment_id} not found")
-        
-        # Get associated changes
-        db.cursor.execute("""
-            SELECT dc.*, cch.*
-            FROM deployment_changes dc
-            JOIN config_change_history cch ON dc.change_id = cch.change_id
-            WHERE dc.deployment_id = %s
-            ORDER BY cch.changed_at
-        """, (deployment_id,))
-        
-        changes = db.cursor.fetchall()
-        
-        deployment['changes'] = changes
-        deployment['changes_count'] = len(changes)
-        
-        return deployment
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/migrations")
-async def list_all_migrations():
-    """List all known config key migrations"""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        db.cursor.execute("""
-            SELECT plugin_name, COUNT(*) as migration_count,
-                   SUM(is_breaking) as breaking_count
-            FROM config_key_migrations
-            GROUP BY plugin_name
-            ORDER BY plugin_name
-        """)
-        
-        summary = db.cursor.fetchall()
-        
-        return {
-            'plugins': summary,
-            'total_plugins': len(summary)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/migrations/{plugin_name}")
-async def get_plugin_migrations(plugin_name: str):
-    """Get known config key migrations for a specific plugin"""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        migrations = db.get_plugin_migrations(plugin_name)
-        
-        if not migrations:
-            # Not an error - plugin just has no migrations
-            return {
-                'plugin': plugin_name,
-                'migrations': [],
-                'total': 0
-            }
-        
-        return {
-            'plugin': plugin_name,
-            'migrations': migrations,
-            'total': len(migrations),
-            'breaking_count': sum(1 for m in migrations if m.get('is_breaking')),
-            'automatic_count': sum(1 for m in migrations if m.get('is_automatic'))
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/history/variance")
-async def get_variance_history(
-    plugin_name: Optional[str] = None,
-    config_key: Optional[str] = None,
-    limit: int = 100
-):
-    """
-    Get historical variance snapshots
-    
-    Query Parameters:
-    - plugin_name: Filter by plugin
-    - config_key: Filter by config key
-    - limit: Max results (default 100)
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        query = "SELECT * FROM config_variance_history WHERE 1=1"
-        params = []
-        
-        if plugin_name:
-            query += " AND plugin_name = %s"
-            params.append(plugin_name)
-        
-        if config_key:
-            query += " AND config_key = %s"
-            params.append(config_key)
-        
-        query += " ORDER BY snapshot_time DESC LIMIT %s"
-        params.append(limit)
-        
-        db.cursor.execute(query, params)
-        history = db.cursor.fetchall()
-        
-        return {
-            'variance_history': history,
-            'total': len(history)
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/stats/changes")
-async def get_change_statistics():
-    """Get statistics about config changes"""
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        # Changes by type
-        db.cursor.execute("""
-            SELECT change_type, COUNT(*) as count
-            FROM config_change_history
-            GROUP BY change_type
-            ORDER BY count DESC
-        """)
-        by_type = db.cursor.fetchall()
-        
-        # Changes by user
-        db.cursor.execute("""
-            SELECT changed_by, COUNT(*) as count
-            FROM config_change_history
-            GROUP BY changed_by
-            ORDER BY count DESC
-            LIMIT 10
-        """)
-        by_user = db.cursor.fetchall()
-        
-        # Recent changes (last 7 days)
-        db.cursor.execute("""
-            SELECT DATE(changed_at) as date, COUNT(*) as count
-            FROM config_change_history
-            WHERE changed_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            GROUP BY DATE(changed_at)
-            ORDER BY date DESC
-        """)
-        recent = db.cursor.fetchall()
-        
-        # Total counts
-        db.cursor.execute("SELECT COUNT(*) as total FROM config_change_history")
-        total = db.cursor.fetchone()['total']
-        
-        return {
-            'total_changes': total,
-            'by_type': by_type,
-            'by_user': by_user,
-            'last_7_days': recent
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-# ============================================================================
-# DYNAMIC CONFIG MANAGEMENT - UNIVERSAL SETTINGS
-# ============================================================================
-
-@app.get("/api/plugins/discovered")
-async def get_discovered_plugins():
-    """
-    Get all dynamically discovered plugins from agent scans
-    NO HARDCODING - returns whatever the agent found
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        db.cursor.execute("""
-            SELECT 
-                p.plugin_id,
-                p.plugin_name,
-                p.display_name,
-                p.platform,
-                p.description,
-                p.author,
-                p.current_stable_version,
-                p.latest_version,
-                COUNT(DISTINCT ip.instance_id) as instance_count,
-                COUNT(DISTINCT cr.rule_id) as config_key_count
-            FROM plugins p
-            LEFT JOIN instance_plugins ip ON p.plugin_id = ip.plugin_id
-            LEFT JOIN config_rules cr ON p.plugin_name = cr.plugin_name
-            GROUP BY p.plugin_id
-            ORDER BY instance_count DESC, p.plugin_name
-        """)
-        
-        plugins = db.cursor.fetchall()
-        
-        return {
-            'plugins': plugins,
-            'total': len(plugins),
-            'discovery_note': 'Auto-discovered from agent scans - no hardcoded plugin list'
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/api/config/plugin/{plugin_id}")
-async def get_plugin_config(plugin_id: str, scope: str = 'universal'):
-    """
-    Get all config keys for a plugin at specified scope
-    Returns current values, hierarchy source, and metadata
-    
-    Args:
-        plugin_id: Plugin identifier
-        scope: universal|server|group|instance
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        # Get plugin name from ID
-        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
-        plugin = db.cursor.fetchone()
-        
-        if not plugin:
-            raise HTTPException(status_code=404, detail="Plugin not found")
-        
-        plugin_name = plugin['plugin_name']
-        
-        # Get all config keys for this plugin
-        db.cursor.execute("""
-            SELECT DISTINCT
-                cr.config_file,
-                cr.config_key,
-                cr.scope_type,
-                cr.scope_selector,
-                cr.config_value,
-                cr.value_type,
-                cr.priority,
-                cr.notes
-            FROM config_rules cr
-            WHERE cr.plugin_name = %s
-            AND cr.is_active = true
-            ORDER BY cr.config_file, cr.config_key, cr.priority
-        """, (plugin_name,))
-        
-        rules = db.cursor.fetchall()
-        
-        # Organize by file and key
-        config_structure = {}
-        
-        for rule in rules:
-            file = rule['config_file']
-            key = rule['config_key']
-            full_key = f"{file}:{key}"
-            
-            if full_key not in config_structure:
-                config_structure[full_key] = {
-                    'file': file,
-                    'key': key,
-                    'value': None,
-                    'source': 'default',
-                    'source_description': 'No value set',
-                    'hierarchy': []
-                }
-            
-            # Add to hierarchy
-            config_structure[full_key]['hierarchy'].append({
-                'scope': rule['scope_type'],
-                'selector': rule['scope_selector'],
-                'value': rule['config_value'],
-                'priority': rule['priority']
-            })
-            
-            # Determine effective value based on scope filter
-            if scope == 'universal' and rule['scope_type'] == 'GLOBAL':
-                config_structure[full_key]['value'] = rule['config_value']
-                config_structure[full_key]['source'] = 'universal'
-                config_structure[full_key]['source_description'] = 'Universal default (applies to all)'
-            elif rule['scope_type'] in ['SERVER', 'META_TAG', 'INSTANCE']:
-                # Higher priority override
-                if config_structure[full_key]['value'] is None or rule['priority'] < config_structure[full_key].get('effective_priority', 999):
-                    config_structure[full_key]['value'] = rule['config_value']
-                    config_structure[full_key]['source'] = rule['scope_type'].lower()
-                    config_structure[full_key]['effective_priority'] = rule['priority']
-                    
-                    if rule['scope_selector']:
-                        config_structure[full_key]['source_description'] = f"Override: {rule['scope_type']} = {rule['scope_selector']}"
-        
-        return {
-            'plugin_id': plugin_id,
-            'plugin_name': plugin_name,
-            'scope': scope,
-            'keys': config_structure,
-            'total_keys': len(config_structure)
-        }
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.post("/api/config/universal")
-async def set_universal_config(config: Dict[str, Any]):
-    """
-    Set a universal config value (applies to ALL instances)
-    Creates or updates a GLOBAL scope rule
-    
-    Body:
-        plugin_id: Plugin identifier
-        config_key: Full key path (e.g., "config.yml:server.max-players")
-        value: The value to set
-        notes: Optional notes about why this was set
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        plugin_id = config['plugin_id']
-        config_key = config['config_key']
-        value = config['value']
-        notes = config.get('notes', 'Set via Universal Config UI')
-        
-        # Get plugin name
-        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
-        plugin = db.cursor.fetchone()
-        
-        if not plugin:
-            raise HTTPException(status_code=404, detail="Plugin not found")
-        
-        plugin_name = plugin['plugin_name']
-        
-        # Parse file and key from full key
-        if ':' in config_key:
-            file, key = config_key.split(':', 1)
-        else:
-            file = 'config.yml'
-            key = config_key
-        
-        # Check if universal rule already exists
-        db.cursor.execute("""
-            SELECT rule_id FROM config_rules
-            WHERE plugin_name = %s
-            AND config_file = %s
-            AND config_key = %s
-            AND scope_type = 'GLOBAL'
-        """, (plugin_name, file, key))
-        
-        existing = db.cursor.fetchone()
-        
-        if existing:
-            # Update existing
-            db.cursor.execute("""
-                UPDATE config_rules
-                SET config_value = %s,
-                    notes = %s,
-                    updated_at = NOW()
-                WHERE rule_id = %s
-            """, (value, notes, existing['rule_id']))
-            
-            rule_id = existing['rule_id']
-            action = 'updated'
-        else:
-            # Create new
-            db.cursor.execute("""
-                INSERT INTO config_rules 
-                (plugin_name, config_file, config_key, scope_type, scope_selector, 
-                 config_value, value_type, priority, created_by, notes)
-                VALUES (%s, %s, %s, 'GLOBAL', NULL, %s, 'string', 4, 'web_ui', %s)
-            """, (plugin_name, file, key, value, notes))
-            
-            rule_id = db.cursor.lastrowid
-            action = 'created'
-        
-        db.commit()
-        
-        return {
-            'success': True,
-            'action': action,
-            'rule_id': rule_id,
-            'plugin_name': plugin_name,
-            'config_key': f"{file}:{key}",
-            'value': value
-        }
-    
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.delete("/api/config/override")
-async def clear_config_override(config: Dict[str, Any]):
-    """
-    Clear a config override at specified scope
-    
-    Body:
-        plugin_id: Plugin identifier
-        config_key: Full key path
-        scope: universal|server|group|instance
-        selector: Optional scope selector (server name, tag, etc.)
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        plugin_id = config['plugin_id']
-        config_key = config['config_key']
-        scope = config.get('scope', 'universal')
-        selector = config.get('selector')
-        
-        # Get plugin name
-        db.cursor.execute("SELECT plugin_name FROM plugins WHERE plugin_id = %s", (plugin_id,))
-        plugin = db.cursor.fetchone()
-        
-        if not plugin:
-            raise HTTPException(status_code=404, detail="Plugin not found")
-        
-        plugin_name = plugin['plugin_name']
-        
-        # Parse file and key
-        if ':' in config_key:
-            file, key = config_key.split(':', 1)
-        else:
-            file = 'config.yml'
-            key = config_key
-        
-        # Map scope to scope_type
-        scope_map = {
-            'universal': 'GLOBAL',
-            'server': 'SERVER',
-            'group': 'META_TAG',
-            'instance': 'INSTANCE'
-        }
-        
-        scope_type = scope_map.get(scope, 'GLOBAL')
-        
-        # Delete rule
-        query = """
-            DELETE FROM config_rules
-            WHERE plugin_name = %s
-            AND config_file = %s
-            AND config_key = %s
-            AND scope_type = %s
-        """
-        params = [plugin_name, file, key, scope_type]
-        
-        if selector:
-            query += " AND scope_selector = %s"
-            params.append(selector)
-        
-        db.cursor.execute(query, params)
-        deleted_count = db.cursor.rowcount
-        db.commit()
-        
-        return {
-            'success': True,
-            'deleted_count': deleted_count,
-            'plugin_name': plugin_name,
-            'config_key': f"{file}:{key}",
-            'scope': scope
-        }
-    
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.post("/api/config/bulk-update")
-async def bulk_update_configs(updates: Dict[str, Any]):
-    """
-    Bulk update multiple config values at once
-    
-    Body:
-        scope: universal|server|group|instance
-        changes: {plugin_id: {config_key: value}}
-    """
-    if not db:
-        raise HTTPException(status_code=503, detail="Database not connected")
-    
-    try:
-        scope = updates.get('scope', 'universal')
-        changes = updates.get('changes', {})
-        
-        results = []
-        errors = []
-        
-        for plugin_id, config_changes in changes.items():
-            for config_key, value in config_changes.items():
-                try:
-                    # Use the set_universal_config logic
-                    result = await set_universal_config({
-                        'plugin_id': plugin_id,
-                        'config_key': config_key,
-                        'value': value,
-                        'notes': f'Bulk update via API (scope: {scope})'
-                    })
-                    results.append(result)
-                except Exception as e:
-                    errors.append({
-                        'plugin_id': plugin_id,
-                        'config_key': config_key,
-                        'error': str(e)
-                    })
-        
-        return {
-            'success': len(errors) == 0,
-            'total_changes': len(results),
-            'successful': results,
-            'errors': errors
-        }
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
-
-
-@app.get("/universal_config", response_class=HTMLResponse)
-async def universal_config_page():
-    """Serve Universal Config Manager UI"""
-    html_file = static_dir / "universal_config.html"
-    if html_file.exists():
-        return html_file.read_text()
-    raise HTTPException(status_code=404, detail="Universal Config UI not found")
-
-
-@app.get("/history", response_class=HTMLResponse)
-async def history_page():
-    """Serve Change History UI"""
-    html_file = static_dir / "history.html"
-    if html_file.exists():
-        return html_file.read_text()
-    raise HTTPException(status_code=404, detail="History UI not found")
-
-
-@app.get("/migrations", response_class=HTMLResponse)
-async def migrations_page():
-    """Serve Migrations UI"""
-    html_file = static_dir / "migrations.html"
-    if html_file.exists():
-        return html_file.read_text()
-    raise HTTPException(status_code=404, detail="Migrations UI not found")
 
 
 if __name__ == "__main__":

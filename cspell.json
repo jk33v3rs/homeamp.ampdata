@@ -1,0 +1,9 @@
+{
+    "version": "0.2",
+    "ignorePaths": [],
+    "dictionaryDefinitions": [],
+    "dictionaries": ["custom-dictionary-user.txt"],
+    "words": [],
+    "ignoreWords": [],
+    "import": []
+}
