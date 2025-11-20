@@ -31,6 +31,11 @@ from ..analyzers.drift_detector import DriftDetector
 from ..core.safety_validator import SafetyValidator
 from ..core.settings import get_settings
 
+# Import new tracking/notification modules
+from .notification_system import create_notification_system
+from .scheduled_tasks import create_scheduler
+from .performance_metrics import create_metrics_collector
+
 
 class AgentService:
     """
@@ -98,6 +103,50 @@ class AgentService:
         )
         
         # Initialize managers with proper paths
+        
+        # Initialize database connection for new modules
+        try:
+            import mariadb
+            
+            # Try to get database config from YAML config, fallback to settings
+            if 'database' in self.config:
+                db_config = self.config['database']
+            else:
+                # Fallback to settings
+                db_config = {
+                    'host': self.settings.DB_HOST,
+                    'port': self.settings.DB_PORT,
+                    'user': 'sqlworkerSMP',
+                    'password': '',  # Will need to be in config
+                    'database': 'asmp_config'
+                }
+            
+            self.db_conn = mariadb.connect(
+                host=db_config.get('host', 'localhost'),
+                port=db_config.get('port', 3306),
+                user=db_config.get('user', 'sqlworkerSMP'),
+                password=db_config.get('password', ''),
+                database=db_config.get('database', 'asmp_config')
+            )
+            
+            # Initialize notification system
+            self.notifier = create_notification_system(self.db_conn)
+            self.logger.info("Notification system initialized")
+            
+            # Initialize metrics collector
+            self.metrics = create_metrics_collector(self.db_conn)
+            self.logger.info("Metrics collector initialized")
+            
+            # Initialize and start scheduler
+            self.scheduler = create_scheduler(self.db_conn, agent_instance=self)
+            self.scheduler.start()
+            self.logger.info("Task scheduler started")
+            
+        except Exception as e:
+            self.logger.warning(f"Could not initialize tracking modules: {e}")
+            self.notifier = None
+            self.metrics = None
+            self.scheduler = None
         self.change_manager = ChangeRequestManager(self.storage)
         self.updater = ConfigUpdater(self.settings.instances_path)
         self.drift_detector = DriftDetector(self.settings.instances_path)
@@ -221,32 +270,68 @@ class AgentService:
     def _process_pending_changes(self):
         """Process any pending configuration changes"""
         try:
-            # Get pending changes from cloud storage
-            pending_changes = self.change_manager.list_pending_changes()
-            
-            if not pending_changes:
-                self.logger.debug("No pending changes found")
-                return
-            
-            self.logger.info(f"Found {len(pending_changes)} pending changes")
-            
-            for change_request in pending_changes:
-                request_id = change_request.get('request_id')
-                target_servers = change_request.get('target_servers', [])
+            # Collect metrics on processing time
+            if self.metrics:
+                with self.metrics.measure_time('change_processing', 'agent', 'process_changes'):
+                    self._do_process_changes()
+            else:
+                self._do_process_changes()
                 
-                # Check if this change applies to this server
-                if (target_servers != 'all' and 
-                    self.server_name not in target_servers):
-                    continue
+        except Exception as e:
+            self.logger.error(f"Error processing changes: {e}", exc_info=True)
+            
+            # Send notification on failure
+            if self.notifier:
+                self.notifier.notify_health_alert(
+                    alert_type="change_processing_error",
+                    alert_message=f"Failed to process changes: {str(e)}",
+                    severity=self.notifier.NotificationPriority.HIGH,
+                    system_component="agent"
+                )
+    
+    def _do_process_changes(self):
+        """Actually process pending changes"""
+        # Get pending changes from cloud storage
+        pending_changes = self.change_manager.list_pending_changes()
+        
+        if not pending_changes:
+            self.logger.debug("No pending changes found")
+            return
+        
+        self.logger.info(f"Found {len(pending_changes)} pending changes")
+        
+        for change_request in pending_changes:
+            request_id = change_request.get('request_id')
+            target_servers = change_request.get('target_servers', [])
+            
+            # Check if this change applies to this server
+            if (target_servers != 'all' and 
+                self.server_name not in target_servers):
+                continue
+            
+            self.logger.info(f"Processing change request {request_id}")
+            
+            try:
+                # Apply the change request
+                result = self._apply_change_request(request_id, change_request)
                 
-                self.logger.info(f"Processing change request {request_id}")
+                # Upload result back to storage
+                self.change_manager.upload_change_result(request_id, result)
                 
-                try:
-                    # Apply the change request
-                    result = self._apply_change_request(request_id, change_request)
-                    
-                    # Upload result back to storage
-                    self.change_manager.upload_change_result(request_id, result)
+                # Send notification on success
+                if self.notifier and result.get('success'):
+                    self.notifier.notify_deployment_success(
+                        deployment_id=request_id,
+                        deployment_type="config_change",
+                        target_instances=result.get('instances', [])
+                    )
+                elif self.notifier:
+                    self.notifier.notify_deployment_failure(
+                        deployment_id=request_id,
+                        deployment_type="config_change",
+                        error_message=result.get('error', 'Unknown error'),
+                        failed_instances=result.get('failed_instances', [])
+                    )
                     
                     # Mark as completed if successful
                     if result.get('success'):
@@ -343,6 +428,16 @@ class AgentService:
             # Upload results
             self._upload_drift_report(drift_data)
             
+            # Send drift notifications
+            if self.notifier and drift_data['drift_detected']:
+                for drift_item in drift_results.get('drift_items', []):
+                    self.notifier.notify_drift_detected(
+                        instance_id=drift_item.get('instance_id', 'unknown'),
+                        plugin_name=drift_item.get('plugin_name', 'unknown'),
+                        drift_count=drift_item.get('variance_count', 1),
+                        variance_details=drift_item.get('variances', [])
+                    )
+            
             # Update last check time
             self.last_drift_check = time.time()
             
@@ -353,6 +448,15 @@ class AgentService:
                 
         except Exception as e:
             self.logger.error(f"Drift detection failed: {e}")
+            
+            # Send health alert
+            if self.notifier:
+                self.notifier.notify_health_alert(
+                    alert_type="drift_detection_error",
+                    alert_message=f"Drift detection failed: {str(e)}",
+                    severity=self.notifier.NotificationPriority.HIGH,
+                    system_component="drift_detector"
+                )
     
     def _upload_drift_report(self, drift_data: Dict[str, Any]):
         """Upload drift detection results to MinIO"""
@@ -377,6 +481,14 @@ class AgentService:
         """Handle graceful shutdown"""
         self.logger.info(f"Received signal {signum}, shutting down gracefully...")
         self.running = False
+        
+        # Stop scheduler
+        if hasattr(self, 'scheduler') and self.scheduler:
+            self.scheduler.stop()
+        
+        # Close database connection
+        if hasattr(self, 'db_conn') and self.db_conn:
+            self.db_conn.close()
 
 
 def main():

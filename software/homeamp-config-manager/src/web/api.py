@@ -1484,6 +1484,268 @@ async def create_tag_category(category: Dict[str, Any]):
 # STATIC FILES & ROOT
 # ============================================================================
 
+# ============================================================================
+# HISTORY & TRACKING ENDPOINTS
+# ============================================================================
+
+@app.get("/api/history/changes")
+async def get_change_history(
+    instance_id: str = None,
+    plugin_name: str = None,
+    changed_by: str = None,
+    change_type: str = None,
+    limit: int = 100,
+    offset: int = 0
+):
+    """Get config change history with filters"""
+    query = "SELECT * FROM config_change_history WHERE 1=1"
+    params = []
+    
+    if instance_id:
+        query += " AND instance_id = %s"
+        params.append(instance_id)
+    
+    if plugin_name:
+        query += " AND plugin_name = %s"
+        params.append(plugin_name)
+    
+    if changed_by:
+        query += " AND changed_by = %s"
+        params.append(changed_by)
+    
+    if change_type:
+        query += " AND change_type = %s"
+        params.append(change_type)
+    
+    query += " ORDER BY changed_at DESC LIMIT %s OFFSET %s"
+    params.extend([limit, offset])
+    
+    db.cursor.execute(query, params)
+    changes = db.cursor.fetchall()
+    
+    # Get total count
+    count_query = query.replace("SELECT *", "SELECT COUNT(*)").split(" ORDER BY")[0]
+    db.cursor.execute(count_query, params[:-2])
+    total = db.cursor.fetchone()[0]
+    
+    return {
+        "changes": changes,
+        "total": total,
+        "limit": limit,
+        "offset": offset
+    }
+
+
+@app.get("/api/history/deployments")
+async def get_deployment_history(
+    deployed_by: str = None,
+    status: str = None,
+    deployment_type: str = None,
+    limit: int = 50,
+    offset: int = 0
+):
+    """Get deployment history with filters"""
+    query = "SELECT * FROM deployment_history WHERE 1=1"
+    params = []
+    
+    if deployed_by:
+        query += " AND deployed_by = %s"
+        params.append(deployed_by)
+    
+    if status:
+        query += " AND deployment_status = %s"
+        params.append(status)
+    
+    if deployment_type:
+        query += " AND deployment_type = %s"
+        params.append(deployment_type)
+    
+    query += " ORDER BY deployed_at DESC LIMIT %s OFFSET %s"
+    params.extend([limit, offset])
+    
+    db.cursor.execute(query, params)
+    deployments = db.cursor.fetchall()
+    
+    # Get total count
+    count_query = query.replace("SELECT *", "SELECT COUNT(*)").split(" ORDER BY")[0]
+    db.cursor.execute(count_query, params[:-2])
+    total = db.cursor.fetchone()[0]
+    
+    return {
+        "deployments": deployments,
+        "total": total,
+        "limit": limit,
+        "offset": offset
+    }
+
+
+@app.get("/api/migrations")
+async def get_all_migrations():
+    """Get all config key migrations"""
+    db.cursor.execute("""
+        SELECT * FROM config_key_migrations
+        ORDER BY plugin_name, from_version, to_version
+    """)
+    migrations = db.cursor.fetchall()
+    return {"migrations": migrations, "total": len(migrations)}
+
+
+@app.get("/api/migrations/{plugin_name}")
+async def get_plugin_migrations(plugin_name: str):
+    """Get known migrations for a specific plugin"""
+    db.cursor.execute("""
+        SELECT * FROM config_key_migrations
+        WHERE plugin_name = %s
+        ORDER BY from_version, to_version
+    """, (plugin_name,))
+    
+    migrations = db.cursor.fetchall()
+    
+    return {
+        "plugin": plugin_name,
+        "migrations": migrations,
+        "total": len(migrations)
+    }
+
+
+@app.get("/api/variance/history")
+async def get_variance_history(
+    instance_id: str = None,
+    plugin_name: str = None,
+    config_key: str = None,
+    limit: int = 100
+):
+    """Get historical variance snapshots"""
+    query = "SELECT * FROM config_variance_history WHERE 1=1"
+    params = []
+    
+    if instance_id:
+        query += " AND instance_id = %s"
+        params.append(instance_id)
+    
+    if plugin_name:
+        query += " AND plugin_name = %s"
+        params.append(plugin_name)
+    
+    if config_key:
+        query += " AND config_key = %s"
+        params.append(config_key)
+    
+    query += " ORDER BY snapshot_at DESC LIMIT %s"
+    params.append(limit)
+    
+    db.cursor.execute(query, params)
+    history = db.cursor.fetchall()
+    
+    return {"history": history, "total": len(history)}
+
+
+@app.get("/api/notifications")
+async def get_notification_log(
+    notification_type: str = None,
+    status: str = None,
+    limit: int = 50
+):
+    """Get notification log"""
+    query = "SELECT * FROM notification_log WHERE 1=1"
+    params = []
+    
+    if notification_type:
+        query += " AND notification_type = %s"
+        params.append(notification_type)
+    
+    if status:
+        query += " AND status = %s"
+        params.append(status)
+    
+    query += " ORDER BY created_at DESC LIMIT %s"
+    params.append(limit)
+    
+    db.cursor.execute(query, params)
+    notifications = db.cursor.fetchall()
+    
+    return {"notifications": notifications, "total": len(notifications)}
+
+
+@app.post("/api/notifications/{notification_id}/mark-read")
+async def mark_notification_read(notification_id: int, read_by: str = "web_user"):
+    """Mark notification as read"""
+    db.cursor.execute("""
+        UPDATE notification_log
+        SET read_at = NOW(), read_by = %s
+        WHERE id = %s
+    """, (read_by, notification_id))
+    db.commit()
+    return {"success": True}
+
+
+@app.get("/api/templates")
+async def get_config_templates(plugin_name: str = None):
+    """Get config templates"""
+    query = "SELECT * FROM config_templates WHERE 1=1"
+    params = []
+    
+    if plugin_name:
+        query += " AND plugin_name = %s"
+        params.append(plugin_name)
+    
+    query += " ORDER BY created_at DESC"
+    
+    db.cursor.execute(query, params)
+    templates = db.cursor.fetchall()
+    
+    return {"templates": templates, "total": len(templates)}
+
+
+@app.get("/api/metrics/performance")
+async def get_performance_metrics(hours: int = 24):
+    """Get performance metrics summary"""
+    db.cursor.execute("""
+        SELECT 
+            metric_name,
+            component,
+            AVG(metric_value) as avg_value,
+            MIN(metric_value) as min_value,
+            MAX(metric_value) as max_value,
+            COUNT(*) as sample_count
+        FROM system_health_metrics
+        WHERE recorded_at > DATE_SUB(NOW(), INTERVAL %s HOUR)
+        GROUP BY metric_name, component
+        ORDER BY metric_name
+    """, (hours,))
+    
+    metrics = db.cursor.fetchall()
+    return {"metrics": metrics, "hours": hours}
+
+
+@app.get("/api/approval/pending")
+async def get_pending_approvals():
+    """Get pending approval requests"""
+    db.cursor.execute("""
+        SELECT * FROM change_approval_requests
+        WHERE status = 'pending'
+        ORDER BY created_at DESC
+    """)
+    
+    requests = db.cursor.fetchall()
+    return {"pending_requests": requests, "total": len(requests)}
+
+
+@app.post("/api/approval/{request_id}/vote")
+async def vote_on_approval(request_id: int, approved: bool, voted_by: str, comment: str = ""):
+    """Vote on an approval request"""
+    from ..agent.approval_workflow import create_approval_workflow
+    
+    workflow = create_approval_workflow(db.conn)
+    result = workflow.add_approval(request_id, voted_by, approved, comment)
+    
+    return {"success": True, "status": result}
+
+
+# ============================================================================
+# UI ENDPOINTS
+# ============================================================================
+
 # Serve static frontend files
 BASE_DIR = Path(__file__).parent.parent.parent
 static_dir = BASE_DIR / "src" / "web" / "static"
