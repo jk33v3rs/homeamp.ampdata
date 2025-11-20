@@ -18,9 +18,15 @@
 - **Hetzner Xeon** (archivesmp.site, 135.181.212.169): First deployment target
   - 11 instances currently deployed and running
   - Services: archivesmp-webapi.service, homeamp-agent.service
+  - MariaDB runs locally on this server (no `-h` or `-P` needed for mysql commands)
 - **OVH Ryzen** (archivesmp.online, 37.187.143.41): Second deployment target (pending)
-- **Access Model**: Developer has SSH and SFTP access with sudo privileges
-- **Your Role**: Provide commands for the developer to execute on production
+- **Access Model**: Developer has RDP access via Nom Machine (NOT SSH)
+- **Your Role**: Provide commands for the developer to execute on production via RDP terminal
+
+### User Accounts & Permissions:
+- **webadmin**: Admin user for sudo commands and system operations
+- **amp**: Application user - runs all services and agents
+- **Development Rule**: Avoid hardcoded values; features should dynamically detect what agents find
 
 ### Workflow Rules:
 
@@ -40,12 +46,25 @@
 - ❌ Use relative imports or assumptions about production file structure
 
 ### Command Format for Production:
-When providing commands to run on production, format them as:
+When providing commands to run on production (Debian 12), format them as:
 
 ```bash
 # Clear description of what this does
+# Run as webadmin user for sudo operations
 sudo <command>
 ```
+
+**Local Commands (Windows PowerShell):**
+```powershell
+# Description
+<powershell command>
+```
+
+**Important:**
+- MariaDB on Hetzner: Use `mysql -u sqlworkerSMP -p asmp_config` (local connection, no host/port)
+- Production access: Via RDP/Nom Machine, NOT SSH
+- Sudo user: `webadmin`
+- Service user: `amp`
 
 ### Deployment Process:
 1. **Fix Locally**: Edit code in `e:\homeamp.ampdata\software\homeamp-config-manager\`
