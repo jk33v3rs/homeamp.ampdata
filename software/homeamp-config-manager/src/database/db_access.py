@@ -67,6 +67,34 @@ class ConfigDatabase:
         if self.conn:
             self.conn.rollback()
     
+    def execute_query(self, query: str, params: Dict[str, Any] = None, fetch: bool = False):
+        """
+        Generic query execution wrapper for compatibility with agent code
+        
+        Args:
+            query: SQL query string
+            params: Query parameters dict
+            fetch: Whether to return cursor for fetching results
+            
+        Returns:
+            Cursor if fetch=True, None otherwise
+        """
+        try:
+            if params:
+                self.cursor.execute(query, params)
+            else:
+                self.cursor.execute(query)
+            
+            if not fetch:
+                self.commit()
+                return None
+            else:
+                return self.cursor
+        except Error as e:
+            logger.error(f"Query execution error: {e}")
+            self.rollback()
+            raise
+    
     # ========================================================================
     # INSTANCE QUERIES
     # ========================================================================
