@@ -42,7 +42,7 @@ class ProductionEndpointAgent:
         Args:
             server_name: Physical server name ('hetzner-xeon' or 'ovh-ryzen')
             db_config: Database connection config
-            config: Agent configuration (scan intervals, feature flags, etc.)
+            config: Agent configuration (scan intervals, feature flags, drift settings, etc.)
         """
         self.server_name = server_name
         self.db = ConfigDatabase(**db_config)
@@ -62,16 +62,30 @@ class ProductionEndpointAgent:
         self.datapack_registry: Dict[str, Dict] = {}
         
         # Feature flags
-        self.enable_auto_discovery = self.config.get('enable_auto_discovery', True)
-        self.enable_plugin_updates = self.config.get('enable_plugin_updates', True)
-        self.enable_datapack_deployment = self.config.get('enable_datapack_deployment', True)
-        self.enable_drift_detection = self.config.get('enable_drift_detection', True)
+        features = self.config.get('features', {})
+        self.enable_auto_discovery = features.get('auto_discovery', True)
+        self.enable_plugin_updates = features.get('plugin_updates', True)
+        self.enable_datapack_deployment = features.get('datapack_deployment', True)
+        self.enable_drift_detection = features.get('drift_detection', True)
         self.enable_meta_tagging = self.config.get('enable_meta_tagging', True)
         
-        # Intervals (seconds)
-        self.full_scan_interval = self.config.get('full_scan_interval', 300)  # 5 min
-        self.update_check_interval = self.config.get('update_check_interval', 600)  # 10 min
-        self.queue_process_interval = self.config.get('queue_process_interval', 60)  # 1 min
+        # Intervals (seconds) - now configurable via YAML
+        intervals = self.config.get('intervals', {})
+        self.full_scan_interval = intervals.get('full_scan', 3600)  # 1 hour default
+        self.update_check_interval = intervals.get('update_check', 7200)  # 2 hours default
+        self.queue_process_interval = intervals.get('queue_process', 300)  # 5 min default
+        self.drift_check_interval = intervals.get('drift_check', 1800)  # 30 min default
+        
+        # Drift detection settings
+        drift_config = self.config.get('drift', {})
+        self.drift_compare_before_log = drift_config.get('compare_before_log', True)
+        self.drift_ignore_timestamps = drift_config.get('ignore_timestamps', True)
+        self.drift_ignore_comments = drift_config.get('ignore_comments', True)
+        self.drift_batch_similar = drift_config.get('batch_similar_changes', True)
+        
+        # State tracking for drift
+        self.last_drift_check = None
+        self.last_config_state: Dict[str, Dict] = {}  # {instance_plugin: {key: value}}
         
         self.running = False
         self.last_full_scan = None
@@ -98,6 +112,12 @@ class ProductionEndpointAgent:
                         f"updates={self.enable_plugin_updates}, "
                         f"datapacks={self.enable_datapack_deployment}, "
                         f"drift={self.enable_drift_detection}")
+        self.logger.info(f"⏱️  Intervals: scan={self.full_scan_interval}s, "
+                        f"updates={self.update_check_interval}s, "
+                        f"drift={self.drift_check_interval}s, "
+                        f"queue={self.queue_process_interval}s")
+        self.logger.info(f"🔍 Drift: compare_first={self.drift_compare_before_log}, "
+                        f"ignore_timestamps={self.drift_ignore_timestamps}")
         
         self.db.connect()
         self.running = True
@@ -128,6 +148,13 @@ class ProductionEndpointAgent:
         now = datetime.now()
         
         try:
+            # 0. Check for manual scan trigger
+            if self._check_manual_scan_trigger():
+                self.logger.info("🔄 Manual scan triggered")
+                self._run_full_discovery()
+                self.last_full_scan = now
+                return  # Skip normal cycle after manual scan
+            
             # 1. Full discovery scan
             if self.enable_auto_discovery and self._should_run_full_scan(now):
                 self._run_full_discovery()
@@ -152,6 +179,17 @@ class ProductionEndpointAgent:
         
         except Exception as e:
             self.logger.error(f"❌ Error in agent cycle: {e}", exc_info=True)
+    
+    def _check_manual_scan_trigger(self) -> bool:
+        """Check if manual scan was triggered via signal file"""
+        signal_file = Path("/var/run/archivesmp/trigger_scan")
+        if signal_file.exists():
+            try:
+                signal_file.unlink()  # Delete signal file
+                return True
+            except Exception as e:
+                self.logger.warning(f"Failed to remove scan trigger: {e}")
+        return False
     
     def _should_run_full_scan(self, now: datetime) -> bool:
         if not self.last_full_scan:
@@ -391,6 +429,102 @@ class ProductionEndpointAgent:
             self.logger.warning(f"⚠️  Failed to analyze {jar_path.name}: {e}")
             return None
     
+    def _scan_instance_configs(self, instance_id: str, instance_path: Path):
+        """
+        Scan plugin configs and detect drift
+        Only logs ACTUAL CHANGES if drift_compare_before_log is enabled
+        """
+        plugins_dir = instance_path / 'Minecraft' / 'plugins'
+        if not plugins_dir.exists():
+            return
+        
+        reader = PluginConfigReader(plugins_dir)
+        current_configs = reader.read_all_configs()
+        
+        # Compare with last known state
+        for plugin_name, config_files in current_configs.items():
+            for config_file, config_data in config_files.items():
+                if not isinstance(config_data, dict):
+                    continue
+                
+                # Flatten config for comparison
+                flat_config = self._flatten_dict(config_data)
+                
+                # Generate state key
+                state_key = f"{instance_id}:{plugin_name}:{config_file}"
+                
+                # Get last known state
+                last_state = self.last_config_state.get(state_key, {})
+                
+                # Compare and log only changes
+                if self.drift_compare_before_log:
+                    for key, new_value in flat_config.items():
+                        old_value = last_state.get(key)
+                        
+                        # Skip if no change
+                        if old_value == new_value:
+                            continue
+                        
+                        # Skip timestamp-only changes if configured
+                        if self.drift_ignore_timestamps and self._is_timestamp_key(key):
+                            continue
+                        
+                        # Skip comment-only changes if configured
+                        if self.drift_ignore_comments and self._is_comment_key(key):
+                            continue
+                        
+                        # Log the actual change
+                        change_type = 'automated' if old_value is None else 'drift_fix'
+                        self.db.log_config_change(
+                            instance_id=instance_id,
+                            plugin_name=plugin_name,
+                            config_file=config_file,
+                            config_key=key,
+                            old_value=str(old_value) if old_value is not None else None,
+                            new_value=str(new_value),
+                            change_type=change_type,
+                            change_source='agent_drift_detection'
+                        )
+                        
+                        self.logger.debug(f"📝 {instance_id} | {plugin_name}.{config_file} | {key}: {old_value} → {new_value}")
+                
+                else:
+                    # Legacy mode: log all configs (not recommended)
+                    for key, value in flat_config.items():
+                        self.db.log_config_change(
+                            instance_id=instance_id,
+                            plugin_name=plugin_name,
+                            config_file=config_file,
+                            config_key=key,
+                            old_value=None,
+                            new_value=str(value),
+                            change_type='automated',
+                            change_source='agent_scan'
+                        )
+                
+                # Update last known state
+                self.last_config_state[state_key] = flat_config
+    
+    def _flatten_dict(self, d: Dict, parent_key: str = '', sep: str = '.') -> Dict:
+        """Flatten nested dict for easier comparison"""
+        items = []
+        for k, v in d.items():
+            new_key = f"{parent_key}{sep}{k}" if parent_key else k
+            if isinstance(v, dict):
+                items.extend(self._flatten_dict(v, new_key, sep=sep).items())
+            else:
+                items.append((new_key, v))
+        return dict(items)
+    
+    def _is_timestamp_key(self, key: str) -> bool:
+        """Check if key is likely a timestamp field"""
+        timestamp_patterns = ['timestamp', 'time', 'date', 'updated', 'modified', 'created', 'last_']
+        return any(pattern in key.lower() for pattern in timestamp_patterns)
+    
+    def _is_comment_key(self, key: str) -> bool:
+        """Check if key is a comment field"""
+        return key.lower().startswith('comment') or key.lower().startswith('_comment')
+    
     def _analyze_datapack(self, datapack_path: Path, world_name: str) -> Optional[Dict]:
         """
         Extract metadata from datapack (ZIP or folder)
@@ -470,4 +604,61 @@ class ProductionEndpointAgent:
         
         return 'unknown'
     
-    # Continued in next message due to length...
+    def trigger_manual_scan(self):
+        """Trigger immediate full scan (called via API)"""
+        self.logger.info("🔄 Manual scan triggered via API")
+        try:
+            self._run_full_discovery()
+            self.last_full_scan = datetime.now()
+            return {"status": "success", "message": "Manual scan completed"}
+        except Exception as e:
+            self.logger.error(f"❌ Manual scan failed: {e}", exc_info=True)
+            return {"status": "error", "message": str(e)}
+
+
+def main():
+    """Main entry point for agent service"""
+    import argparse
+    
+    parser = argparse.ArgumentParser(description='ArchiveSMP Configuration Management Agent')
+    parser.add_argument('--config', '-c', default='/etc/archivesmp/agent.yaml',
+                       help='Path to agent config file')
+    args = parser.parse_args()
+    
+    # Load YAML config
+    config_path = Path(args.config)
+    if not config_path.exists():
+        print(f"ERROR: Config file not found: {config_path}")
+        print("Create /etc/archivesmp/agent.yaml using the example config")
+        sys.exit(1)
+    
+    with open(config_path) as f:
+        config = yaml.safe_load(f)
+    
+    # Extract database config
+    db_config = {
+        'host': config['database']['host'],
+        'port': config['database']['port'],
+        'user': config['database']['user'],
+        'password': config['database']['password'],
+        'database': config['database']['database']
+    }
+    
+    # Server name
+    server_name = config['server']['name']
+    
+    # Agent config (intervals, features, drift settings)
+    agent_config = {
+        'amp_base_dir': config['server'].get('amp_base_dir', '/home/amp/.ampdata/instances'),
+        'intervals': config.get('intervals', {}),
+        'features': config.get('features', {}),
+        'drift': config.get('drift', {})
+    }
+    
+    # Create and start agent
+    agent = ProductionEndpointAgent(server_name, db_config, agent_config)
+    agent.start()
+
+
+if __name__ == '__main__':
+    main()

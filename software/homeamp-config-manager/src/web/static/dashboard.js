@@ -478,16 +478,53 @@ async function initDashboard() {
     const approveBtn = document.getElementById('approve-selected-btn');
     const rejectBtn = document.getElementById('reject-selected-btn');
     const refreshBtn = document.getElementById('dashboard-refresh-btn');
+    const triggerScanBtn = document.getElementById('trigger-scan-btn');
 
     if (approveBtn) approveBtn.addEventListener('click', approveSelected);
     if (rejectBtn) rejectBtn.addEventListener('click', rejectSelected);
     if (refreshBtn) refreshBtn.addEventListener('click', refreshDashboard);
+    if (triggerScanBtn) triggerScanBtn.addEventListener('click', triggerManualScan);
 
     // Initial load
     await refreshDashboard();
 
     // Start polling
     startDashboardPolling();
+}
+
+/**
+ * Trigger manual agent scan
+ */
+async function triggerManualScan() {
+    const btn = document.getElementById('trigger-scan-btn');
+    if (!btn) return;
+    
+    // Disable button during scan
+    btn.disabled = true;
+    btn.textContent = '⏳ Scanning...';
+    
+    try {
+        const response = await fetch('/api/agent/trigger-scan', { method: 'POST' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        if (data.status === 'success' || data.status === 'triggered') {
+            showSuccess(data.message || 'Scan triggered successfully');
+            
+            // Refresh dashboard after a few seconds to show new data
+            setTimeout(() => refreshDashboard(), 3000);
+        } else {
+            showError(data.message || 'Scan failed');
+        }
+    } catch (error) {
+        console.error('Failed to trigger scan:', error);
+        showError('Failed to trigger agent scan');
+    } finally {
+        // Re-enable button
+        btn.disabled = false;
+        btn.textContent = '🔄 Trigger Scan';
+    }
 }
 
 // ====================

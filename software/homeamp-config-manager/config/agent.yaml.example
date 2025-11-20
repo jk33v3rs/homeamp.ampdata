@@ -1,0 +1,43 @@
+# ArchiveSMP Configuration Management Agent
+# Deploy to: /etc/archivesmp/agent.yaml
+
+# Server identification
+server:
+  name: "hetzner-xeon"  # or "ovh-ryzen"
+  amp_base_dir: "/home/amp/.ampdata"
+
+# Database connection
+database:
+  host: "localhost"  # MariaDB on same server
+  port: 3306
+  user: "sqlworkerSMP"
+  password: "2024!SQLdb"
+  database: "asmp_config"
+
+# Scan intervals (seconds)
+intervals:
+  full_scan: 3600        # 1 hour - full instance/plugin discovery
+  update_check: 7200     # 2 hours - check for plugin updates
+  queue_process: 300     # 5 minutes - process deployment queues
+  drift_check: 1800      # 30 minutes - detect configuration drift
+
+# Feature flags
+features:
+  auto_discovery: true          # Discover instances/plugins automatically
+  plugin_updates: true          # Enable plugin update checking
+  datapack_deployment: true     # Enable datapack deployment
+  drift_detection: true         # Enable drift detection and logging
+
+# Drift detection settings
+drift:
+  compare_before_log: true      # Only log actual changes, not every scan
+  ignore_timestamps: true       # Ignore timestamp-only changes
+  ignore_comments: true         # Ignore comment-only changes
+  batch_similar_changes: true   # Group similar changes in one log entry
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "/var/log/archivesmp/agent.log"
+  max_size_mb: 100
+  backup_count: 5

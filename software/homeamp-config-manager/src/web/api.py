@@ -54,6 +54,7 @@ app.add_middleware(
 
 # Database connection (configured on startup)
 db = None
+agent = None  # Reference to running agent (if any)
 
 @app.on_event("startup")
 async def startup():
@@ -72,6 +73,39 @@ async def shutdown():
     """Close database connection"""
     if db:
         db.disconnect()
+
+
+# ============================================================================
+# AGENT CONTROL ENDPOINTS
+# ============================================================================
+
+@app.post("/api/agent/trigger-scan")
+async def trigger_manual_scan():
+    """
+    Trigger immediate full scan of all instances
+    Normally scans run on schedule (configurable interval)
+    This forces an immediate scan for manual refresh
+    """
+    # Check if agent is running and accessible
+    if agent is None:
+        # Agent not running in same process - trigger via file signal
+        import os
+        signal_file = Path("/var/run/archivesmp/trigger_scan")
+        signal_file.parent.mkdir(parents=True, exist_ok=True)
+        signal_file.write_text(str(datetime.now()))
+        
+        return {
+            "status": "triggered",
+            "message": "Scan signal sent to agent (will execute on next cycle)",
+            "note": "Agent runs independently - check logs for scan results"
+        }
+    
+    # Agent running in same process - trigger directly
+    try:
+        result = agent.trigger_manual_scan()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Scan failed: {str(e)}")
 
 
 # ============================================================================
