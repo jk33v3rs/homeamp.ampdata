@@ -4,6 +4,7 @@ Handles webhook events, update checks, and automated deployments
 """
 
 from typing import Dict, Any, List, Optional
+from pathlib import Path
 import requests
 import json
 from datetime import datetime, timedelta
