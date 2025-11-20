@@ -184,6 +184,7 @@ CREATE TABLE IF NOT EXISTS config_rule_history (
 COMMENT 'Audit trail for changes to config_rules table';
 
 -- Create trigger to auto-populate config_rule_history on UPDATE
+DROP TRIGGER IF EXISTS config_rule_update_history;
 DELIMITER //
 CREATE TRIGGER config_rule_update_history
 AFTER UPDATE ON config_rules
@@ -215,6 +216,7 @@ END//
 DELIMITER ;
 
 -- Create trigger for INSERT (create events)
+DROP TRIGGER IF EXISTS config_rule_create_history;
 DELIMITER //
 CREATE TRIGGER config_rule_create_history
 AFTER INSERT ON config_rules
@@ -441,7 +443,7 @@ COMMENT 'Time-series metrics for monitoring system health';
 
 SELECT 'Tracking & History tables created successfully!' AS status;
 SELECT COUNT(*) AS new_tables_created FROM information_schema.tables 
-WHERE table_schema = 'asmp_config' 
+WHERE table_schema = DATABASE()
 AND table_name IN (
     'config_key_migrations',
     'config_change_history',
