@@ -81,8 +81,9 @@ async function fetchRecentActivity(limit = 10) {
         const response = await fetch(`/dashboard/recent-activity?limit=${limit}`);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
-        dashboardState.recentActivity = data;
-        return data;
+        // API returns {activities: [...], count: N}
+        dashboardState.recentActivity = data.activities || [];
+        return data.activities || [];
     } catch (error) {
         console.error('Failed to fetch recent activity:', error);
         showError('Failed to load recent activity');

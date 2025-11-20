@@ -5,9 +5,9 @@
 
 const TAG_MANAGER_POLL_INTERVAL = 60000; // 60 seconds
 let tagManagerPollInterval = null;
-let allTags = [];
+let tagManagerTags = [];
 let allCategories = [];
-let allInstances = [];
+let tagManagerInstances = [];
 let selectedInstances = [];
 
 /**
@@ -72,8 +72,8 @@ async function fetchAllTags() {
         const response = await fetch('/api/tags/all');
         if (!response.ok) throw new Error('Failed to fetch tags');
         
-        allTags = await response.json();
-        console.log(`[Tag Manager] Fetched ${allTags.length} tags`);
+        tagManagerTags = await response.json();
+        console.log(`[Tag Manager] Fetched ${tagManagerTags.length} tags`);
         
         renderTagsTable();
     } catch (error) {
@@ -104,8 +104,8 @@ async function fetchInstances() {
         if (!response.ok) throw new Error('Failed to fetch instances');
         
         const data = await response.json();
-        allInstances = data.instances || [];
-        console.log(`[Tag Manager] Fetched ${allInstances.length} instances`);
+        tagManagerInstances = data.instances || [];
+        console.log(`[Tag Manager] Fetched ${tagManagerInstances.length} instances`);
         
         renderInstancesForAssignment();
     } catch (error) {
@@ -155,12 +155,12 @@ function renderTagsTable() {
     const tbody = document.getElementById('tags-table-body');
     if (!tbody) return;
     
-    if (allTags.length === 0) {
+    if (tagManagerTags.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7">No tags found</td></tr>';
         return;
     }
     
-    tbody.innerHTML = allTags.map(tag => `
+    tbody.innerHTML = tagManagerTags.map(tag => `
         <tr draggable="true" data-tag-id="${tag.tag_id}" ondragstart="handleTagDragStart(event)">
             <td>
                 ${tag.icon ? `<span class="tag-icon">${tag.icon}</span>` : ''}
@@ -206,7 +206,7 @@ function renderInstancesForAssignment() {
     const container = document.getElementById('instance-assignment-list');
     if (!container) return;
     
-    container.innerHTML = allInstances.map(inst => `
+    container.innerHTML = tagManagerInstances.map(inst => `
         <div class="instance-card" data-instance-id="${inst.instance_id}" 
              ondrop="handleTagDrop(event)" ondragover="handleDragOver(event)">
             <h4>${inst.instance_name}</h4>
@@ -217,7 +217,7 @@ function renderInstancesForAssignment() {
     `).join('');
     
     // Fetch tags for each instance
-    allInstances.forEach(inst => fetchInstanceTags(inst.instance_id));
+    tagManagerInstances.forEach(inst => fetchInstanceTags(inst.instance_id));
 }
 
 async function fetchInstanceTags(instanceId) {
@@ -487,7 +487,7 @@ async function deleteCategory(categoryId, categoryName) {
 }
 
 function editTag(tagId) {
-    const tag = allTags.find(t => t.tag_id === tagId);
+    const tag = tagManagerTags.find(t => t.tag_id === tagId);
     if (!tag) return;
     
     document.getElementById('tag-modal-title').textContent = 'Edit Tag';

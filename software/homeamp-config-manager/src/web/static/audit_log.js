@@ -8,7 +8,7 @@ const AUDIT_PAGE_SIZE = 50;
 let currentPage = 1;
 let totalPages = 1;
 let allAuditEvents = [];
-let allInstances = [];
+let auditLogInstances = [];
 
 // ====================
 // Initialization
@@ -90,8 +90,8 @@ async function fetchAllInstances() {
         const response = await fetch('/api/dashboard/instances');
         if (!response.ok) throw new Error('Failed to fetch instances');
         
-        allInstances = await response.json();
-        return allInstances;
+        auditLogInstances = await response.json();
+        return auditLogInstances;
     } catch (error) {
         console.error('Error fetching instances:', error);
         return [];
@@ -135,10 +135,10 @@ function renderAuditTable(events) {
 
 function populateInstanceFilter() {
     const filter = document.getElementById('audit-filter-instance');
-    if (!filter || allInstances.length === 0) return;
+    if (!filter || auditLogInstances.length === 0) return;
     
     filter.innerHTML = '<option value="">All Instances</option>' + 
-        allInstances.map(inst => 
+        auditLogInstances.map(inst => 
             `<option value="${inst.instance_id}">${escapeHtml(inst.instance_name)}</option>`
         ).join('');
 }

@@ -2,7 +2,7 @@
 // Manage meta tags and instance assignments
 
 const API_BASE = '/api';
-let allTags = [];
+let metaTagManagerTags = [];
 let currentTagId = null;
 
 // Load tags
@@ -11,7 +11,7 @@ async function loadTags() {
         const response = await fetch(`${API_BASE}/meta-tags`);
         const data = await response.json();
         
-        allTags = data.tags;
+        metaTagManagerTags = data.tags;
         renderTagList();
     } catch (error) {
         console.error('Error loading tags:', error);
@@ -23,12 +23,12 @@ function renderTagList() {
     const container = document.getElementById('tag-list');
     container.innerHTML = '';
     
-    if (allTags.length === 0) {
+    if (metaTagManagerTags.length === 0) {
         container.innerHTML = '<p style="color: #718096; text-align: center;">No tags created yet</p>';
         return;
     }
     
-    allTags.forEach(tag => {
+    metaTagManagerTags.forEach(tag => {
         const div = document.createElement('div');
         div.className = 'tag-item';
         div.onclick = () => selectTag(tag.tag_id);
@@ -55,7 +55,7 @@ async function selectTag(tagId) {
     document.getElementById('tag-details').style.display = 'block';
     
     // Load tag details
-    const tag = allTags.find(t => t.tag_id === tagId);
+    const tag = metaTagManagerTags.find(t => t.tag_id === tagId);
     document.getElementById('detail-tag-name').textContent = tag.tag_name;
     document.getElementById('detail-tag-description').textContent = tag.tag_description || 'No description';
     
@@ -67,7 +67,7 @@ async function selectTag(tagId) {
 // Load tag instances
 async function loadTagInstances(tagId) {
     try {
-        const response = await fetch(`${API_BASE}/tags/${allTags.find(t => t.tag_id === tagId).tag_name}/instances`);
+        const response = await fetch(`${API_BASE}/tags/${metaTagManagerTags.find(t => t.tag_id === tagId).tag_name}/instances`);
         const data = await response.json();
         
         const container = document.getElementById('instance-grid');
