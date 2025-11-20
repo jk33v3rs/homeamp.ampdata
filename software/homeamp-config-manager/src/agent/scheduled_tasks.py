@@ -9,13 +9,18 @@ Manages periodic tasks:
 """
 
 import mariadb
-import schedule
 import time
 import threading
 import logging
 from datetime import datetime, timedelta
 from typing import Dict, Any, Callable, Optional
 import json
+
+try:
+    import schedule
+    HAS_SCHEDULE = True
+except ImportError:
+    HAS_SCHEDULE = False
 
 logger = logging.getLogger("scheduled_tasks")
 

@@ -15,8 +15,15 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 from contextlib import contextmanager
 import logging
-import psutil
 import os
+
+# Optional dependency - gracefully degrade if not available
+try:
+    import psutil
+    HAS_PSUTIL = True
+except ImportError:
+    HAS_PSUTIL = False
+    logging.warning("psutil not available - system metrics will be limited")
 
 logger = logging.getLogger("performance_metrics")
 
@@ -33,7 +40,10 @@ class PerformanceMetrics:
         """
         self.db = db_connection
         self.cursor = db_connection.cursor(dictionary=True)
-        self.process = psutil.Process(os.getpid())
+        if HAS_PSUTIL:
+            self.process = psutil.Process(os.getpid())
+        else:
+            self.process = None
     
     def record_metric(
         self,
@@ -372,7 +382,7 @@ class PerformanceMetrics:
         
         if component:
             query += " AND component = %s"
-            params.append(component)
+            params.append(component)  # type: ignore
         
         query += " ORDER BY metric_value DESC LIMIT %s"
         params.append(limit)

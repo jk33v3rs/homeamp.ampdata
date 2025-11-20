@@ -9,6 +9,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import json
 import logging
+from .notification_system import NotificationType, NotificationPriority
 
 logger = logging.getLogger("approval_workflow")
 
@@ -214,19 +215,19 @@ class ApprovalWorkflow:
             
             if new_status in ['approved', 'auto_approved']:
                 notifier.create_notification(
-                    notification_type=notifier.NotificationType.APPROVAL_NEEDED,
+                    notification_type=NotificationType.APPROVAL_NEEDED,
                     title=f"Change approved: {request['change_type']}",
                     message=f"Approval request #{request_id} has been approved",
-                    priority=notifier.NotificationPriority.MEDIUM,
+                    priority=NotificationPriority.MEDIUM,
                     related_entity_type='approval',
                     related_entity_id=str(request_id)
                 )
             else:
                 notifier.create_notification(
-                    notification_type=notifier.NotificationType.APPROVAL_NEEDED,
+                    notification_type=NotificationType.APPROVAL_NEEDED,
                     title=f"Change rejected: {request['change_type']}",
                     message=f"Approval request #{request_id} has been rejected",
-                    priority=notifier.NotificationPriority.HIGH,
+                    priority=NotificationPriority.HIGH,
                     related_entity_type='approval',
                     related_entity_id=str(request_id)
                 )
@@ -238,10 +239,10 @@ class ApprovalWorkflow:
             'required_approvals': request['required_approvals']
         }
     
-    def get_pending_requests(
+    def get_pending_approvals(
         self,
-        change_type: str = None,
-        priority: str = None,
+        change_type: Optional[str] = None,
+        priority: Optional[str] = None,
         limit: int = 50
     ) -> List[Dict[str, Any]]:
         """

@@ -4,11 +4,16 @@ Redis Cache Manager for ArchiveSMP Config Manager
 Provides caching for frequently accessed data
 """
 
-import redis
 import json
 from typing import Any, Optional
 import logging
 from datetime import timedelta
+
+try:
+    import redis
+    HAS_REDIS = True
+except ImportError:
+    HAS_REDIS = False
 
 logger = logging.getLogger("cache_manager")
 

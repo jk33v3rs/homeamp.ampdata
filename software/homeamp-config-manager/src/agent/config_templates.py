@@ -33,7 +33,7 @@ class ConfigTemplateManager:
         template_data: Dict[str, Any],
         description: str = "",
         created_by: str = "system",
-        tags: List[str] = None
+        tags: Optional[List[str]] = None
     ) -> int:
         """
         Create a new config template
@@ -76,7 +76,7 @@ class ConfigTemplateManager:
         logger.info(f"Created template: {template_name} (ID: {template_id})")
         return template_id
     
-    def get_template(self, template_id: int = None, template_name: str = None) -> Optional[Dict[str, Any]]:
+    def get_template(self, template_id: Optional[int] = None, template_name: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
         Get template by ID or name
         
@@ -105,8 +105,8 @@ class ConfigTemplateManager:
     
     def list_templates(
         self,
-        plugin_name: str = None,
-        tags: List[str] = None,
+        plugin_name: Optional[str] = None,
+        tags: Optional[List[str]] = None,
         limit: int = 100
     ) -> List[Dict[str, Any]]:
         """
@@ -189,9 +189,9 @@ class ConfigTemplateManager:
     def update_template(
         self,
         template_id: int,
-        template_data: Dict[str, Any] = None,
-        description: str = None,
-        tags: List[str] = None
+        template_data: Optional[Dict[str, Any]] = None,
+        description: Optional[str] = None,
+        tags: Optional[List[str]] = None
     ) -> bool:
         """
         Update existing template

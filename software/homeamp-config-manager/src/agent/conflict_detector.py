@@ -278,7 +278,7 @@ class ConflictDetector:
         
         return count
     
-    def get_active_locks(self, instance_id: str = None) -> List[Dict[str, Any]]:
+    def get_active_locks(self, instance_id: Optional[str] = None) -> List[Dict[str, Any]]:
         """
         Get currently active locks
         

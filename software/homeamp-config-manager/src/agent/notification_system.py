@@ -68,7 +68,7 @@ class NotificationSystem:
         related_entity_type: Optional[str] = None,
         related_entity_id: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
-        channels: List[NotificationChannel] = None
+        channels: Optional[List[NotificationChannel]] = None
     ) -> int:
         """
         Create a new notification

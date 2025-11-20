@@ -10,26 +10,28 @@
 
 ### 20 Missing Features Identified:
 
-1. ❌ Config Key Migration/Remapping
-2. ❌ Database Change History (currently file-based)
-3. ❌ Deployment History Tracking
-4. ❌ Config Rule Change History
-5. ❌ Variance History (trends over time)
-6. ❌ Plugin Installation History
-7. ⚠️ Approval Workflow (JSON files, needs DB)
-8. ❌ Notification System
-9. ⚠️ Scheduled Task Tracking
-10. ⚠️ Rollback Capability (stub only)
-11. ❌ Performance Metrics
-12. ❌ Access Control/RBAC
-13. ⚠️ Config Templates
-14. ❌ Conflict Detection
-15. ❌ Testing Framework
-16. ⚠️ Environment Configuration
-17. ❌ Cache Management (Redis)
-18. ❌ Backward Compatibility Checking
-19. ❌ Multi-user Approval (currently single reviewer)
-20. ❌ Notification Log
+1. ✅ Config Key Migration/Remapping - INTEGRATED
+2. ✅ Database Change History (currently file-based) - INTEGRATED
+3. ✅ Deployment History Tracking - INTEGRATED
+4. ✅ Config Rule Change History - INTEGRATED (SQL triggers)
+5. ✅ Variance History (trends over time) - INTEGRATED
+6. ✅ Plugin Installation History - INTEGRATED
+7. ✅ Approval Workflow (JSON files, needs DB) - INTEGRATED
+8. ✅ Notification System - INTEGRATED
+9. ✅ Scheduled Task Tracking - INTEGRATED
+10. ⚠️ Rollback Capability (stub only) - DEFERRED
+11. ✅ Performance Metrics - INTEGRATED
+12. ❌ Access Control/RBAC - NOT IMPLEMENTING (using YunoHost)
+13. ✅ Config Templates - INTEGRATED
+14. ✅ Conflict Detection - INTEGRATED
+15. ❌ Testing Framework - NOT IMPLEMENTING (user choice)
+16. ✅ Environment Configuration - INTEGRATED
+17. ✅ Cache Management (Redis) - INTEGRATED (optional dependency)
+18. ✅ Backward Compatibility Checking - INTEGRATED
+19. ✅ Multi-user Approval (currently single reviewer) - INTEGRATED
+20. ✅ Notification Log - INTEGRATED
+
+**Status: 14 of 17 requested features FULLY INTEGRATED** (3 excluded by user)
 
 ### 11 New Database Tables:
 
@@ -54,20 +56,17 @@
 ### Step 1: Deploy Database Tables (15 minutes)
 
 ```bash
-# On your Windows PC (development)
-cd d:\homeamp.ampdata\homeamp.ampdata
+# On Hetzner server (via RDP terminal as webadmin):
 
-# SSH to Hetzner
-ssh root@135.181.212.169
+# 1. Copy SQL file from dev PC to production
+#    Use RDP file sharing or paste file content into:
+#    /tmp/add_tracking_history_tables.sql
 
-# Upload SQL file
-scp scripts/add_tracking_history_tables.sql root@135.181.212.169:/tmp/
-
-# On Hetzner, execute SQL
-mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p asmp_config < /tmp/add_tracking_history_tables.sql
+# 2. Execute SQL on local MariaDB
+mysql -u sqlworkerSMP -p asmp_config < /tmp/add_tracking_history_tables.sql
 # Password: 2024!SQLdb
 
-# Verify tables created (should show 11 new tables)
+# 3. Verify tables created (should show 11 new tables)
 mysql -u sqlworkerSMP -p asmp_config -e "SHOW TABLES" | grep -E "(migration|history|approval|notification|scheduled|metrics)"
 ```
 
