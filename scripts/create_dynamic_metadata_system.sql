@@ -468,16 +468,14 @@ CREATE TABLE IF NOT EXISTS cicd_webhook_events (
 CREATE OR REPLACE VIEW v_plugin_status AS
 SELECT 
     ip.instance_id,
-    i.instance_name AS instance_name,
+    i.instance_name,
     ip.plugin_id,
     p.plugin_name,
     ip.installed_version,
     p.latest_version,
-    ip.is_outdated,
     ip.is_enabled,
     p.platform,
-    p.auto_update_enabled,
-    ip.last_seen_at,
+    ip.last_checked_at,
     p.last_checked_at AS plugin_last_checked
 FROM instance_plugins ip
 JOIN plugins p ON ip.plugin_id = p.plugin_id
