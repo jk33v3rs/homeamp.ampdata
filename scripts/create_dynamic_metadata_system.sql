@@ -486,36 +486,33 @@ ORDER BY ip.instance_id, p.plugin_name;
 CREATE OR REPLACE VIEW v_instance_summary AS
 SELECT 
     i.instance_id,
-    i.display_name,
+    i.instance_name,
     i.platform,
     i.minecraft_version,
     i.server_name,
-    GROUP_CONCAT(DISTINCT mt.display_name ORDER BY mtc.display_order SEPARATOR ', ') AS tags,
+    GROUP_CONCAT(DISTINCT mt.tag_name ORDER BY mtc.display_order SEPARATOR ', ') AS tags,
     COUNT(DISTINCT ip.plugin_id) AS plugin_count,
-    COUNT(DISTINCT id.datapack_id) AS datapack_count,
-    i.last_seen_at
+    i.last_seen
 FROM instances i
 LEFT JOIN instance_meta_tags imt ON i.instance_id = imt.instance_id
 LEFT JOIN meta_tags mt ON imt.tag_id = mt.tag_id
 LEFT JOIN meta_tag_categories mtc ON mt.category_id = mtc.category_id
 LEFT JOIN instance_plugins ip ON i.instance_id = ip.instance_id
-LEFT JOIN instance_datapacks id ON i.instance_id = id.instance_id
 GROUP BY i.instance_id;
 
--- Pending updates
+-- Pending updates (simplified - removed non-existent columns)
 CREATE OR REPLACE VIEW v_pending_updates AS
 SELECT 
     ip.instance_id,
-    i.display_name AS instance_name,
+    i.instance_name,
     ip.plugin_id,
-    p.display_name AS plugin_name,
+    p.plugin_name,
     ip.installed_version AS current_version,
-    p.latest_version AS available_version,
-    p.changelog_url,
-    p.auto_update_enabled
+    p.latest_version AS available_version
 FROM instance_plugins ip
 JOIN plugins p ON ip.plugin_id = p.plugin_id
 JOIN instances i ON ip.instance_id = i.instance_id
-WHERE ip.is_outdated = TRUE
-ORDER BY p.auto_update_enabled DESC, i.instance_id;
+WHERE p.latest_version IS NOT NULL 
+  AND p.latest_version != ip.installed_version
+ORDER BY i.instance_id;
 
