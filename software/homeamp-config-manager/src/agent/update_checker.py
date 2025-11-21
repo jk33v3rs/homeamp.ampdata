@@ -12,6 +12,7 @@ import mysql.connector
 from packaging import version
 
 from ..core.settings import get_settings
+from ..api.db_config import get_db_connection
 
 logger = logging.getLogger(__name__)
 
@@ -31,13 +32,7 @@ class UpdateChecker:
     
     def get_db_connection(self):
         """Get database connection"""
-        return mysql.connector.connect(
-            host=self.settings.db_host,
-            port=self.settings.db_port,
-            user=self.settings.db_user,
-            password=self.settings.db_password,
-            database=self.settings.db_name
-        )
+        return get_db_connection()
     
     def run_update_check_cycle(self):
         """

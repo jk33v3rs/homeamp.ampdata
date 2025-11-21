@@ -11,6 +11,8 @@ from pathlib import Path
 from datetime import datetime
 import logging
 
+from ..api.db_config import get_db_config
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,6 +40,23 @@ class ConfigDatabase:
         }
         self.conn = None
         self.cursor = None
+    
+    @classmethod
+    def from_config(cls) -> 'ConfigDatabase':
+        """
+        Create ConfigDatabase instance using centralized configuration
+        
+        Returns:
+            ConfigDatabase instance initialized with config from agent.yaml
+        """
+        db_config = get_db_config()
+        return cls(
+            host=db_config['host'],
+            port=db_config['port'],
+            user=db_config['user'],
+            password=db_config['password'],
+            database=db_config.get('database', 'asmp_config')
+        )
     
     def connect(self):
         """Establish database connection"""

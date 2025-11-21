@@ -10,16 +10,10 @@ import mysql.connector
 import json
 import os
 
-router = APIRouter(prefix="/api/tags", tags=["Tag Manager"])
-
 # Database connection helper
-def get_db():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "asmp_admin"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "asmp_config")
-    )
+from .db_config import get_db_connection as get_db
+
+router = APIRouter(prefix="/api/tags", tags=["Tag Manager"])
 
 # ==================== Models ====================
 

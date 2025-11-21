@@ -26,18 +26,12 @@ class ConfigVariance:
 class VarianceDetector:
     """Detects configuration variances across instances"""
     
-    def __init__(self, db_config: Dict[str, str]):
-        self.db_config = db_config
+    def __init__(self, db_config: Dict[str, str] = None):
+        self.db_config = db_config or get_db_config()
     
     def _get_db_connection(self):
         """Create database connection"""
-        return mysql.connector.connect(
-            host=self.db_config['host'],
-            port=self.db_config['port'],
-            user=self.db_config['user'],
-            password=self.db_config['password'],
-            database=self.db_config['database']
-        )
+        return get_db_connection()
     
     def _get_baseline_config(self, plugin_name: str) -> Dict[str, Any]:
         """Fetch baseline configuration for a plugin from database"""

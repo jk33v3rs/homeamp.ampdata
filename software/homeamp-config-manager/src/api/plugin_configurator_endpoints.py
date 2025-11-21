@@ -13,14 +13,7 @@ import json
 import os
 
 # Database connection helper
-def get_db():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "asmp_admin"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "asmp_config"),
-        port=int(os.getenv("DB_PORT", "3306"))
-    )
+from .db_config import get_db_connection as get_db
 
 router = APIRouter(prefix="/api/plugin-configurator", tags=["plugin-configurator"])
 
@@ -148,7 +141,7 @@ async def list_plugins(
                 p.category,
                 COUNT(DISTINCT pi.instance_id) as total_instances,
                 (p.baseline_config_path IS NOT NULL) as has_baseline,
-                (SELECT COUNT(*) FROM config_variances cv 
+                (SELECT COUNT(*) FROM config_variance_detected cv 
                  WHERE cv.plugin_id = p.plugin_id AND cv.is_intentional = FALSE) > 0 as has_variances,
                 (SELECT COUNT(*) FROM plugin_versions pv 
                  WHERE pv.plugin_id = p.plugin_id AND pv.update_available = TRUE) > 0 as update_available
@@ -206,7 +199,7 @@ async def get_plugin_details(plugin_id: int):
                 (p.baseline_config_path IS NOT NULL) as baseline_exists,
                 p.baseline_config_path,
                 COUNT(DISTINCT pi.instance_id) as total_instances,
-                (SELECT COUNT(*) FROM config_variances cv 
+                (SELECT COUNT(*) FROM config_variance_detected cv 
                  WHERE cv.plugin_id = p.plugin_id AND cv.is_intentional = FALSE) as variance_count
             FROM plugins p
             LEFT JOIN plugin_instances pi ON p.plugin_id = pi.plugin_id
@@ -368,7 +361,7 @@ async def get_plugin_variances(
                 cv.actual_value,
                 cv.is_intentional,
                 cv.reason
-            FROM config_variances cv
+            FROM config_variance_detected cv
             INNER JOIN instances i ON cv.instance_id = i.instance_id
             WHERE cv.plugin_id = %s
         """
@@ -525,7 +518,7 @@ async def mark_variance_intentional(request: MarkVarianceRequest):
 
     try:
         cursor.execute("""
-            UPDATE config_variances
+            UPDATE config_variance_detected
             SET is_intentional = %s, reason = %s, last_updated = NOW()
             WHERE variance_id = %s
         """, (request.is_intentional, request.reason, request.variance_id))

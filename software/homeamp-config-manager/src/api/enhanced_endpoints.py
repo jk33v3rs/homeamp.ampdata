@@ -21,14 +21,7 @@ from mysql.connector import Error
 import os
 
 # Database connection helper
-def get_db():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "asmp_admin"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "asmp_config"),
-        port=int(os.getenv("DB_PORT", "3306"))
-    )
+from .db_config import get_db_connection as get_db
 
 
 # Pydantic models for request/response

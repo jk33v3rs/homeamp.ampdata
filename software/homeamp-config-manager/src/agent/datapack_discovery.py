@@ -25,19 +25,13 @@ class Datapack:
 class DatapackDiscovery:
     """Discovers and tracks datapacks across all instances"""
     
-    def __init__(self, db_config: Dict[str, str]):
-        self.db_config = db_config
+    def __init__(self, db_config: Dict[str, str] = None):
+        self.db_config = db_config or get_db_config()
         self.world_folders = ['world', 'world_nether', 'world_the_end']
     
     def _get_db_connection(self):
         """Create database connection"""
-        return mysql.connector.connect(
-            host=self.db_config['host'],
-            port=self.db_config['port'],
-            user=self.db_config['user'],
-            password=self.db_config['password'],
-            database=self.db_config['database']
-        )
+        return get_db_connection()
     
     def extract_pack_metadata(self, datapack_path: str) -> Optional[Dict[str, Any]]:
         """Extract metadata from pack.mcmeta file"""

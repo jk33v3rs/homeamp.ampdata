@@ -12,18 +12,12 @@ logger = logging.getLogger(__name__)
 class ServerPropertiesScanner:
     """Scans and tracks server.properties files across instances"""
     
-    def __init__(self, db_config: Dict[str, str]):
-        self.db_config = db_config
+    def __init__(self, db_config: Dict[str, str] = None):
+        self.db_config = db_config or get_db_config()
     
     def _get_db_connection(self):
         """Create database connection"""
-        return mysql.connector.connect(
-            host=self.db_config['host'],
-            port=self.db_config['port'],
-            user=self.db_config['user'],
-            password=self.db_config['password'],
-            database=self.db_config['database']
-        )
+        return get_db_connection()
     
     def scan_instance_properties(self, instance_path: str) -> Dict[str, Any]:
         """Read and parse server.properties file from instance"""

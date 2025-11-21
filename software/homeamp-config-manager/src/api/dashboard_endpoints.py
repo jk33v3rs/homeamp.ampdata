@@ -12,14 +12,7 @@ import mysql.connector
 import os
 
 # Database connection helper
-def get_db():
-    return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "135.181.212.169"),
-        user=os.getenv("DB_USER", "sqlworkerSMP"),
-        password=os.getenv("DB_PASSWORD", "2024!SQLdb"),
-        database=os.getenv("DB_NAME", "asmp_config"),
-        port=int(os.getenv("DB_PORT", "3369"))
-    )
+from .db_config import get_db_connection as get_db
 
 
 # Pydantic models

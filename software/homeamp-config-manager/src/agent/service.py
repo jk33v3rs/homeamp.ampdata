@@ -28,6 +28,7 @@ from datetime import datetime
 from ..core.cloud_storage import CloudStorage, ChangeRequestManager
 from ..updaters.config_updater import ConfigUpdater
 from ..analyzers.drift_detector import DriftDetector
+from ..api.db_config import get_db_config
 from ..core.safety_validator import SafetyValidator
 from ..core.settings import get_settings
 
@@ -108,18 +109,8 @@ class AgentService:
         try:
             import mariadb
             
-            # Try to get database config from YAML config, fallback to settings
-            if 'database' in self.config:
-                db_config = self.config['database']
-            else:
-                # Fallback to settings
-                db_config = {
-                    'host': self.settings.DB_HOST,
-                    'port': self.settings.DB_PORT,
-                    'user': 'sqlworkerSMP',
-                    'password': '',  # Will need to be in config
-                    'database': 'asmp_config'
-                }
+            # Get database config from centralized source
+            db_config = get_db_config()
             
             self.db_conn = mariadb.connect(
                 host=db_config.get('host', 'localhost'),

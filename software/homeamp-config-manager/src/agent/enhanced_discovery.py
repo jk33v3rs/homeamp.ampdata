@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Dict, Any, List
 from pathlib import Path
 
+from ..api.db_config import get_db_connection
 from .variance_detector import VarianceDetector
 from .server_properties_scanner import ServerPropertiesScanner
 from .datapack_discovery import DatapackDiscovery
@@ -119,7 +120,7 @@ class EnhancedDiscovery:
         """
         conn = None
         try:
-            conn = mysql.connector.connect(**self.db_config)
+            conn = get_db_connection()
             cursor = conn.cursor()
             
             # Upsert heartbeat
@@ -176,7 +177,7 @@ class HeartbeatMonitor:
         """
         conn = None
         try:
-            conn = mysql.connector.connect(**self.db_config)
+            conn = get_db_connection()
             cursor = conn.cursor()
             
             query = """
