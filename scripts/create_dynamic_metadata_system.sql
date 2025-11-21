@@ -468,7 +468,7 @@ CREATE TABLE IF NOT EXISTS cicd_webhook_events (
 CREATE OR REPLACE VIEW v_plugin_status AS
 SELECT 
     ip.instance_id,
-    i.display_name AS instance_name,
+    i.friendly_name AS instance_name,
     ip.plugin_id,
     p.display_name AS plugin_name,
     ip.installed_version,
