@@ -470,7 +470,7 @@ SELECT
     ip.instance_id,
     i.instance_name AS instance_name,
     ip.plugin_id,
-    p.display_name AS plugin_name,
+    p.plugin_name,
     ip.installed_version,
     p.latest_version,
     ip.is_outdated,
@@ -482,7 +482,7 @@ SELECT
 FROM instance_plugins ip
 JOIN plugins p ON ip.plugin_id = p.plugin_id
 JOIN instances i ON ip.instance_id = i.instance_id
-ORDER BY ip.instance_id, p.display_name;
+ORDER BY ip.instance_id, p.plugin_name;
 
 -- Instance summary with tags
 CREATE OR REPLACE VIEW v_instance_summary AS
