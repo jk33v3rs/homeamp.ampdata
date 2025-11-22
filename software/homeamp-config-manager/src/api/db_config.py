@@ -50,8 +50,8 @@ def get_db_config() -> Dict[str, Any]:
                 config = yaml.safe_load(f)
                 db_config = config.get('database', {})
                 return {
-                    'host': db_config.get('host', 'localhost'),
-                    'port': db_config.get('port', 3306),
+                    'host': db_config.get('host', '135.181.212.169'),
+                    'port': db_config.get('port', 3369),
                     'user': db_config.get('user', 'sqlworkerSMP'),
                     'password': db_config.get('password', ''),
                     'database': db_config.get('database', 'asmp_config')
@@ -59,8 +59,8 @@ def get_db_config() -> Dict[str, Any]:
         else:
             # Final fallback to environment variables
             return {
-                'host': os.getenv("DB_HOST", "localhost"),
-                'port': int(os.getenv("DB_PORT", "3306")),
+                'host': os.getenv("DB_HOST", "135.181.212.169"),
+                'port': int(os.getenv("DB_PORT", "3369")),
                 'user': os.getenv("DB_USER", "sqlworkerSMP"),
                 'password': os.getenv("DB_PASSWORD", ""),
                 'database': os.getenv("DB_NAME", "asmp_config")

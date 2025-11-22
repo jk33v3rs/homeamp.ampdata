@@ -425,12 +425,12 @@ class SettingsHandler:
     @property
     def production_db_host(self) -> str:
         """Get production database host"""
-        return self.get('database', 'production_db_host', default='localhost:3306')
+        return self.get('database', 'production_db_host', default='135.181.212.169:3369')
     
     @property
     def production_db_name(self) -> str:
         """Get production database name"""
-        return self.get('database', 'production_db_name', default='asmp_SQL')
+        return self.get('database', 'production_db_name', default='asmp_config')
     
     @property
     def DB_HOST(self) -> str:
@@ -442,7 +442,7 @@ class SettingsHandler:
     def DB_PORT(self) -> int:
         """Get database port (backwards compat)"""
         host_port = self.production_db_host
-        return int(host_port.split(':')[1]) if ':' in host_port else 3306
+        return int(host_port.split(':')[1]) if ':' in host_port else 3369
     
     @property
     def DB_NAME(self) -> str:

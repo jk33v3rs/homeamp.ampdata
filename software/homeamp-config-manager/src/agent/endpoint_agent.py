@@ -692,9 +692,9 @@ def main():
     
     parser = argparse.ArgumentParser(description='ArchiveSMP Endpoint Agent')
     parser.add_argument('--server', required=True, help='Server name (hetzner-xeon or ovh-ryzen)')
-    parser.add_argument('--db-host', default='localhost', help='Database host')
-    parser.add_argument('--db-port', type=int, default=3306, help='Database port')
-    parser.add_argument('--db-user', default='root', help='Database user')
+    parser.add_argument('--db-host', default='135.181.212.169', help='Database host')
+    parser.add_argument('--db-port', type=int, default=3369, help='Database port')
+    parser.add_argument('--db-user', default='sqlworkerSMP', help='Database user')
     parser.add_argument('--db-password', required=True, help='Database password')
     parser.add_argument('--db-name', default='asmp_config', help='Database name')
     

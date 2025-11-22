@@ -7,7 +7,7 @@ echo "=========================================="
 echo
 
 echo "=== 1. Database Status ==="
-mysql -h localhost -P 3369 -u root -p'2024!SQLdb' asmp_config -e "
+mysql -h 135.181.212.169 -P 3369 -u root -p'2024!SQLdb' asmp_config -e "
 SELECT 'Instances' as table_name, COUNT(*) as count FROM instances
 UNION ALL
 SELECT 'Plugins', COUNT(*) FROM plugins
@@ -25,7 +25,7 @@ SELECT 'Plugin Versions', COUNT(*) FROM plugin_versions;
 echo
 
 echo "=== 2. Sample Plugin Data ==="
-mysql -h localhost -P 3369 -u root -p'2024!SQLdb' asmp_config -e "
+mysql -h 135.181.212.169 -P 3369 -u root -p'2024!SQLdb' asmp_config -e "
 SELECT name, current_version, latest_version, update_available 
 FROM plugins 
 LIMIT 5;

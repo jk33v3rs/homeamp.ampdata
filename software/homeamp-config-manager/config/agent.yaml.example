@@ -8,8 +8,8 @@ server:
 
 # Database connection
 database:
-  host: "localhost"  # MariaDB on same server
-  port: 3306
+  host: "135.181.212.169"  # MariaDB on same server
+  port: 3369
   user: "sqlworkerSMP"
   password: "2024!SQLdb"
   database: "asmp_config"
