@@ -231,3 +231,48 @@ async def export_audit_log(
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error exporting audit log: {str(e)}")
+
+
+# ==================== Additional Bootstrap UI Endpoints ====================
+
+class RecentActivity(BaseModel):
+    timestamp: datetime
+    action: str
+    details: Optional[str] = None
+    user: Optional[str] = None
+
+
+@router.get("/recent", response_model=List[RecentActivity])
+async def get_recent_activity(limit: int = 10):
+    """Get recent activity for dashboard"""
+    try:
+        conn = get_db()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT 
+                timestamp,
+                event_type as action,
+                description as details,
+                user
+            FROM audit_log
+            ORDER BY timestamp DESC
+            LIMIT %s
+        """, (limit,))
+        
+        activities = []
+        for row in cursor.fetchall():
+            activities.append(RecentActivity(
+                timestamp=row['timestamp'],
+                action=row['action'],
+                details=row['details'],
+                user=row['user']
+            ))
+        
+        cursor.close()
+        conn.close()
+        
+        return activities
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")

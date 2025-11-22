@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ArchiveSMP Config Manager{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+    </nav>
+    
+    <!-- Stats Cards -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card stat-card info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Instances</h6>
+                            <h3 class="mb-0" id="stat-total-instances">-</h3>
+                        </div>
+                        <div class="text-info">
+                            <i class="fas fa-server fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Active Plugins</h6>
+                            <h3 class="mb-0" id="stat-active-plugins">-</h3>
+                        </div>
+                        <div class="text-success">
+                            <i class="fas fa-puzzle-piece fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Updates Available</h6>
+                            <h3 class="mb-0" id="stat-updates-available">-</h3>
+                        </div>
+                        <div class="text-warning">
+                            <i class="fas fa-sync-alt fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Config Drifts</h6>
+                            <h3 class="mb-0" id="stat-config-drifts">-</h3>
+                        </div>
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-triangle fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Servers Overview -->
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-server"></i> Server Status
+                </div>
+                <div class="card-body">
+                    <div id="servers-list">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-clock"></i> Recent Activity
+                </div>
+                <div class="card-body">
+                    <div id="recent-activity">
+                        <div class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Instances Table -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-list"></i> All Instances</span>
+                    <button class="btn btn-sm btn-primary" onclick="loadDashboard()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="instances-table">
+                            <thead>
+                                <tr>
+                                    <th>Instance</th>
+                                    <th>Server</th>
+                                    <th>Plugins</th>
+                                    <th>Updates</th>
+                                    <th>Tags</th>
+                                    <th>Last Seen</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="instances-tbody">
+                                <tr>
+                                    <td colspan="7" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="sr-only">Loading...</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    async function loadDashboard() {
+        try {
+            // Load summary stats
+            const summary = await apiCall('/dashboard/summary');
+            $('#stat-total-instances').text(summary.total_instances || 0);
+            $('#stat-active-plugins').text(summary.unique_plugins || 0);
+            $('#stat-updates-available').text(summary.updates_available || 0);
+            $('#stat-config-drifts').text(summary.config_drifts || 0);
+            
+            // Load servers
+            const servers = await apiCall('/dashboard/servers');
+            renderServers(servers);
+            
+            // Load instances
+            const instances = await apiCall('/dashboard/instances');
+            renderInstances(instances);
+            
+            // Load recent activity
+            loadRecentActivity();
+            
+        } catch (error) {
+            console.error('Failed to load dashboard:', error);
+        }
+    }
+    
+    function renderServers(servers) {
+        const html = servers.map(server => `
+            <div class="mb-3 pb-3 border-bottom">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="mb-1">${server.server_name}</h6>
+                        <small class="text-muted">${server.instance_count} instances</small>
+                    </div>
+                    <span class="badge badge-success">Online</span>
+                </div>
+            </div>
+        `).join('');
+        
+        $('#servers-list').html(html || '<p class="text-muted">No servers found</p>');
+    }
+    
+    function renderInstances(instances) {
+        const tbody = instances.map(inst => `
+            <tr>
+                <td>
+                    <strong>${inst.instance_name}</strong>
+                </td>
+                <td>
+                    <span class="badge badge-secondary">${inst.server_name}</span>
+                </td>
+                <td>${inst.plugin_count || 0}</td>
+                <td>
+                    ${inst.updates_available > 0 ? 
+                        `<span class="badge badge-warning">${inst.updates_available}</span>` : 
+                        '<span class="text-muted">-</span>'}
+                </td>
+                <td>
+                    ${inst.tags && inst.tags.length > 0 ?
+                        inst.tags.map(tag => `<span class="badge badge-info badge-instance">${tag}</span>`).join(' ') :
+                        '<span class="text-muted">No tags</span>'}
+                </td>
+                <td>
+                    <small class="text-muted">${formatDate(inst.last_seen)}</small>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="viewInstance('${inst.instance_name}')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn btn-outline-secondary" onclick="editTags('${inst.instance_name}')">
+                            <i class="fas fa-tag"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        
+        $('#instances-tbody').html(tbody || '<tr><td colspan="7" class="text-center text-muted">No instances found</td></tr>');
+    }
+    
+    async function loadRecentActivity() {
+        try {
+            const activity = await apiCall('/audit-log/recent?limit=10');
+            const html = activity.map(item => `
+                <div class="mb-2 pb-2 border-bottom">
+                    <small class="text-muted">${formatDate(item.timestamp)}</small>
+                    <div>${item.action} - ${item.details || ''}</div>
+                </div>
+            `).join('');
+            
+            $('#recent-activity').html(html || '<p class="text-muted">No recent activity</p>');
+        } catch (error) {
+            $('#recent-activity').html('<p class="text-danger">Failed to load activity</p>');
+        }
+    }
+    
+    function formatDate(dateStr) {
+        if (!dateStr) return 'Never';
+        const date = new Date(dateStr);
+        return date.toLocaleString();
+    }
+    
+    function viewInstance(instanceName) {
+        window.location.href = `/instance/${instanceName}`;
+    }
+    
+    function editTags(instanceName) {
+        window.location.href = `/tags?instance=${instanceName}`;
+    }
+    
+    // Load on page ready
+    $(document).ready(function() {
+        loadDashboard();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadDashboard, 30000);
+    });
+</script>
+{% endblock %}

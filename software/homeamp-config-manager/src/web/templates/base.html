@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ArchiveSMP Config Manager{% endblock %}</title>
+    
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --info: #3498db;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        
+        .nav-link {
+            color: rgba(255,255,255,0.8) !important;
+            transition: color 0.2s;
+        }
+        
+        .nav-link:hover,
+        .nav-link.active {
+            color: #fff !important;
+        }
+        
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background-color: #fff;
+            border-right: 1px solid #dee2e6;
+            padding: 1rem 0;
+        }
+        
+        .sidebar .nav-link {
+            color: #495057;
+            padding: 0.75rem 1.5rem;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar .nav-link:hover {
+            background-color: #f8f9fa;
+            border-left-color: var(--info);
+        }
+        
+        .sidebar .nav-link.active {
+            background-color: #e9ecef;
+            border-left-color: var(--primary);
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-header {
+            background-color: #fff;
+            border-bottom: 2px solid var(--primary);
+            font-weight: 600;
+            padding: 1rem 1.5rem;
+        }
+        
+        .badge-instance {
+            font-size: 0.85rem;
+            padding: 0.35rem 0.65rem;
+        }
+        
+        .stat-card {
+            border-left: 4px solid var(--primary);
+        }
+        
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+        
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+        
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+        
+        .stat-card.info {
+            border-left-color: var(--info);
+        }
+        
+        .table thead th {
+            border-top: none;
+            border-bottom: 2px solid #dee2e6;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn {
+            border-radius: 0.25rem;
+            font-weight: 500;
+        }
+        
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+        }
+        
+        .modal-header .close {
+            color: white;
+            opacity: 0.8;
+        }
+        
+        .modal-header .close:hover {
+            opacity: 1;
+        }
+        
+        .breadcrumb {
+            background-color: #fff;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 0.25rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        
+        .alert {
+            border: none;
+            border-left: 4px solid;
+        }
+        
+        .filter-section {
+            background-color: #fff;
+            padding: 1.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Top Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-server"></i> ArchiveSMP Config Manager
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/plugins">
+                            <i class="fas fa-puzzle-piece"></i> Plugins
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tags">
+                            <i class="fas fa-tags"></i> Tags
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/updates">
+                            <i class="fas fa-sync-alt"></i> Updates
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/variance">
+                            <i class="fas fa-chart-line"></i> Variance
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid">
+        <div class="row">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 70px; right: 20px; z-index: 9999;">
+        <div id="toast-container"></div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toast notification helper
+        function showToast(message, type = 'info') {
+            const bgClass = {
+                'success': 'bg-success',
+                'error': 'bg-danger',
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[type] || 'bg-info';
+            
+            const toast = $(`
+                <div class="toast" role="alert" data-autohide="true" data-delay="5000">
+                    <div class="toast-header ${bgClass} text-white">
+                        <strong class="mr-auto">Notification</strong>
+                        <button type="button" class="ml-2 mb-1 close text-white" data-dismiss="toast">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `);
+            
+            $('#toast-container').append(toast);
+            toast.toast('show');
+            toast.on('hidden.bs.toast', function() {
+                $(this).remove();
+            });
+        }
+        
+        // API helper
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`/api${endpoint}`, {
+                    ...options,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                showToast(error.message, 'error');
+                throw error;
+            }
+        }
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

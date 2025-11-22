@@ -1,0 +1,380 @@
+{% extends "base.html" %}
+
+{% block title %}Plugin Configurator - ArchiveSMP Config Manager{% endblock %}
+
+{% block content %}
+<div class="col-12">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Dashboard</a></li>
+            <li class="breadcrumb-item active">Plugin Configurator</li>
+        </ol>
+    </nav>
+    
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-3">
+                <label>Server Filter</label>
+                <select class="form-control" id="filter-server" onchange="applyFilters()">
+                    <option value="">All Servers</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Instance Filter</label>
+                <select class="form-control" id="filter-instance" onchange="applyFilters()">
+                    <option value="">All Instances</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label>Plugin Search</label>
+                <input type="text" class="form-control" id="filter-plugin" placeholder="Search plugins..." onkeyup="applyFilters()">
+            </div>
+            <div class="col-md-3">
+                <label>Meta Tag Filter</label>
+                <select class="form-control" id="filter-meta-tag" onchange="applyFilters()">
+                    <option value="">All Tags</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Plugins Table -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-puzzle-piece"></i> Installed Plugins</span>
+            <div>
+                <button class="btn btn-sm btn-success" onclick="showBulkUpdate()">
+                    <i class="fas fa-sync-alt"></i> Bulk Update
+                </button>
+                <button class="btn btn-sm btn-primary" onclick="loadPlugins()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="plugins-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="select-all" onclick="toggleSelectAll()">
+                            </th>
+                            <th>Plugin Name</th>
+                            <th>Instance</th>
+                            <th>Server</th>
+                            <th>Version</th>
+                            <th>Latest</th>
+                            <th>Status</th>
+                            <th>Tags</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plugins-tbody">
+                        <tr>
+                            <td colspan="9" class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tag Assignment Modal -->
+<div class="modal fade" id="tagModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Assign Meta Tags</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="tag-plugin-id">
+                <div class="form-group">
+                    <label>Select Tags</label>
+                    <div id="available-tags">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm" role="status"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveTags()">Save Tags</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bulk Update Modal -->
+<div class="modal fade" id="bulkUpdateModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Bulk Update Plugins</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Update <strong><span id="bulk-update-count">0</span></strong> selected plugins?</p>
+                <div id="bulk-update-list"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="executeBulkUpdate()">
+                    <i class="fas fa-sync-alt"></i> Update All
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let allPlugins = [];
+    let selectedPlugins = new Set();
+    
+    async function loadPlugins() {
+        try {
+            const plugins = await apiCall('/plugin-configurator/plugins');
+            allPlugins = plugins;
+            renderPlugins(plugins);
+            
+            // Load filter options
+            await loadFilterOptions();
+            await loadMetaTags();
+        } catch (error) {
+            console.error('Failed to load plugins:', error);
+        }
+    }
+    
+    async function loadFilterOptions() {
+        try {
+            const instances = await apiCall('/dashboard/instances');
+            
+            // Populate server filter
+            const servers = [...new Set(instances.map(i => i.server_name))];
+            const serverOptions = servers.map(s => `<option value="${s}">${s}</option>`).join('');
+            $('#filter-server').append(serverOptions);
+            
+            // Populate instance filter
+            const instanceOptions = instances.map(i => 
+                `<option value="${i.instance_name}">${i.instance_name}</option>`
+            ).join('');
+            $('#filter-instance').append(instanceOptions);
+        } catch (error) {
+            console.error('Failed to load filter options:', error);
+        }
+    }
+    
+    async function loadMetaTags() {
+        try {
+            const tags = await apiCall('/plugin-configurator/meta-tags');
+            
+            // Populate meta tag filter
+            const tagOptions = tags.map(t => 
+                `<option value="${t.tag_id}">${t.tag_name}</option>`
+            ).join('');
+            $('#filter-meta-tag').append(tagOptions);
+        } catch (error) {
+            console.error('Failed to load meta tags:', error);
+        }
+    }
+    
+    function applyFilters() {
+        const serverFilter = $('#filter-server').val();
+        const instanceFilter = $('#filter-instance').val();
+        const pluginSearch = $('#filter-plugin').val().toLowerCase();
+        const metaTagFilter = $('#filter-meta-tag').val();
+        
+        const filtered = allPlugins.filter(p => {
+            if (serverFilter && p.server_name !== serverFilter) return false;
+            if (instanceFilter && p.instance_name !== instanceFilter) return false;
+            if (pluginSearch && !p.plugin_name.toLowerCase().includes(pluginSearch)) return false;
+            if (metaTagFilter && (!p.meta_tags || !p.meta_tags.includes(parseInt(metaTagFilter)))) return false;
+            return true;
+        });
+        
+        renderPlugins(filtered);
+    }
+    
+    function renderPlugins(plugins) {
+        const tbody = plugins.map(p => `
+            <tr>
+                <td>
+                    <input type="checkbox" class="plugin-select" value="${p.id}" 
+                           ${selectedPlugins.has(p.id) ? 'checked' : ''}
+                           onchange="togglePlugin(${p.id})">
+                </td>
+                <td><strong>${p.plugin_name}</strong></td>
+                <td>${p.instance_name}</td>
+                <td><span class="badge badge-secondary">${p.server_name}</span></td>
+                <td>${p.installed_version || 'Unknown'}</td>
+                <td>${p.latest_version || '-'}</td>
+                <td>
+                    ${p.is_enabled ? 
+                        '<span class="badge badge-success">Enabled</span>' : 
+                        '<span class="badge badge-secondary">Disabled</span>'}
+                    ${p.has_update ? 
+                        '<span class="badge badge-warning ml-1">Update Available</span>' : ''}
+                </td>
+                <td>
+                    ${p.meta_tag_names && p.meta_tag_names.length > 0 ?
+                        p.meta_tag_names.map(tag => `<span class="badge badge-info badge-instance">${tag}</span>`).join(' ') :
+                        '<span class="text-muted">No tags</span>'}
+                </td>
+                <td>
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-primary" onclick="assignTags(${p.id}, '${p.plugin_name}')">
+                            <i class="fas fa-tag"></i>
+                        </button>
+                        ${p.has_update ? 
+                            `<button class="btn btn-outline-success" onclick="updatePlugin(${p.id})">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>` : ''}
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+        
+        $('#plugins-tbody').html(tbody || '<tr><td colspan="9" class="text-center text-muted">No plugins found</td></tr>');
+    }
+    
+    function togglePlugin(pluginId) {
+        if (selectedPlugins.has(pluginId)) {
+            selectedPlugins.delete(pluginId);
+        } else {
+            selectedPlugins.add(pluginId);
+        }
+    }
+    
+    function toggleSelectAll() {
+        const checked = $('#select-all').is(':checked');
+        $('.plugin-select').prop('checked', checked);
+        
+        selectedPlugins.clear();
+        if (checked) {
+            $('.plugin-select').each(function() {
+                selectedPlugins.add(parseInt($(this).val()));
+            });
+        }
+    }
+    
+    async function assignTags(pluginId, pluginName) {
+        $('#tag-plugin-id').val(pluginId);
+        $('#tagModal .modal-title').text(`Assign Tags to ${pluginName}`);
+        
+        try {
+            const tags = await apiCall('/plugin-configurator/meta-tags');
+            const plugin = allPlugins.find(p => p.id === pluginId);
+            const currentTags = plugin?.meta_tags || [];
+            
+            const html = tags.map(tag => `
+                <div class="form-check">
+                    <input class="form-check-input tag-checkbox" type="checkbox" 
+                           value="${tag.tag_id}" id="tag-${tag.tag_id}"
+                           ${currentTags.includes(tag.tag_id) ? 'checked' : ''}>
+                    <label class="form-check-label" for="tag-${tag.tag_id}">
+                        ${tag.tag_name}
+                        <small class="text-muted">(${tag.category_name})</small>
+                    </label>
+                </div>
+            `).join('');
+            
+            $('#available-tags').html(html);
+            $('#tagModal').modal('show');
+        } catch (error) {
+            showToast('Failed to load tags', 'error');
+        }
+    }
+    
+    async function saveTags() {
+        const pluginId = $('#tag-plugin-id').val();
+        const selectedTags = [];
+        $('.tag-checkbox:checked').each(function() {
+            selectedTags.push(parseInt($(this).val()));
+        });
+        
+        try {
+            await apiCall(`/plugin-configurator/plugins/${pluginId}/tags`, {
+                method: 'POST',
+                body: JSON.stringify({ tag_ids: selectedTags })
+            });
+            
+            showToast('Tags updated successfully', 'success');
+            $('#tagModal').modal('hide');
+            loadPlugins();
+        } catch (error) {
+            showToast('Failed to update tags', 'error');
+        }
+    }
+    
+    function showBulkUpdate() {
+        if (selectedPlugins.size === 0) {
+            showToast('Please select plugins to update', 'warning');
+            return;
+        }
+        
+        const plugins = allPlugins.filter(p => selectedPlugins.has(p.id) && p.has_update);
+        $('#bulk-update-count').text(plugins.length);
+        
+        const html = plugins.map(p => 
+            `<div class="mb-2">
+                <strong>${p.plugin_name}</strong> on ${p.instance_name}
+                <br><small class="text-muted">${p.installed_version} → ${p.latest_version}</small>
+            </div>`
+        ).join('');
+        
+        $('#bulk-update-list').html(html);
+        $('#bulkUpdateModal').modal('show');
+    }
+    
+    async function executeBulkUpdate() {
+        const plugins = allPlugins.filter(p => selectedPlugins.has(p.id) && p.has_update);
+        
+        try {
+            await apiCall('/updates/bulk-update', {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    plugin_ids: plugins.map(p => p.id) 
+                })
+            });
+            
+            showToast('Bulk update queued successfully', 'success');
+            $('#bulkUpdateModal').modal('hide');
+            selectedPlugins.clear();
+            loadPlugins();
+        } catch (error) {
+            showToast('Failed to queue bulk update', 'error');
+        }
+    }
+    
+    async function updatePlugin(pluginId) {
+        try {
+            await apiCall(`/updates/plugins/${pluginId}/update`, {
+                method: 'POST'
+            });
+            
+            showToast('Plugin update queued', 'success');
+            loadPlugins();
+        } catch (error) {
+            showToast('Failed to queue update', 'error');
+        }
+    }
+    
+    // Load on page ready
+    $(document).ready(function() {
+        loadPlugins();
+    });
+</script>
+{% endblock %}

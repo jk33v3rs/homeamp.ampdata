@@ -1,0 +1,19 @@
+[Unit]
+Description=ArchiveSMP Config Manager - Bootstrap UI (Port 8001)
+After=network.target mariadb.service
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/archivesmp-config-manager
+Environment="PATH=/opt/archivesmp-config-manager/env/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/opt/archivesmp-config-manager/env/bin/python -m uvicorn src.web.bootstrap_app:app --host 0.0.0.0 --port 8001 --workers 2
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=archivesmp-bootstrap-ui
+
+[Install]
+WantedBy=multi-user.target

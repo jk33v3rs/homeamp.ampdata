@@ -454,3 +454,169 @@ async def get_cicd_endpoints():
     **Semantic**: `CICDService.getEndpoints()`
     """
     return []
+
+
+# ==================== Additional Bootstrap UI Endpoints ====================
+
+class DashboardSummary(BaseModel):
+    total_instances: int
+    unique_plugins: int
+    updates_available: int
+    config_drifts: int
+
+class ServerInfo(BaseModel):
+    server_name: str
+    instance_count: int
+
+class InstanceInfo(BaseModel):
+    instance_id: int
+    instance_name: str
+    server_name: str
+    plugin_count: int
+    updates_available: int
+    tags: List[str]
+    last_seen: Optional[datetime]
+
+
+@router.get("/summary", response_model=DashboardSummary)
+async def get_dashboard_summary():
+    """Get summary statistics for dashboard"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Total instances
+        cursor.execute("SELECT COUNT(*) as count FROM instances")
+        total_instances = cursor.fetchone()['count']
+        
+        # Unique plugins
+        cursor.execute("SELECT COUNT(DISTINCT plugin_id) as count FROM instance_plugins WHERE is_enabled = TRUE")
+        unique_plugins = cursor.fetchone()['count']
+        
+        # Updates available (from pending_updates table or check latest_version != installed_version)
+        cursor.execute("""
+            SELECT COUNT(*) as count 
+            FROM instance_plugins ip
+            JOIN plugins p ON ip.plugin_id = p.plugin_id
+            WHERE ip.is_enabled = TRUE 
+            AND p.latest_version IS NOT NULL 
+            AND ip.installed_version != p.latest_version
+        """)
+        updates_available = cursor.fetchone()['count'] or 0
+        
+        # Config drifts
+        cursor.execute("SELECT COUNT(*) as count FROM config_variance_detected WHERE is_resolved = FALSE")
+        config_drifts = cursor.fetchone()['count'] or 0
+        
+        return DashboardSummary(
+            total_instances=total_instances,
+            unique_plugins=unique_plugins,
+            updates_available=updates_available,
+            config_drifts=config_drifts
+        )
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@router.get("/servers", response_model=List[ServerInfo])
+async def get_servers():
+    """Get list of servers with instance counts"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT 
+                server_name,
+                COUNT(*) as instance_count
+            FROM instances
+            GROUP BY server_name
+            ORDER BY server_name
+        """)
+        
+        servers = []
+        for row in cursor.fetchall():
+            servers.append(ServerInfo(
+                server_name=row['server_name'],
+                instance_count=row['instance_count']
+            ))
+        
+        return servers
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
+
+
+@router.get("/instances", response_model=List[InstanceInfo])
+async def get_all_instances():
+    """Get all instances with their details"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        cursor.execute("""
+            SELECT 
+                i.instance_id,
+                i.instance_name,
+                i.server_name,
+                i.last_seen,
+                COUNT(DISTINCT ip.plugin_id) as plugin_count
+            FROM instances i
+            LEFT JOIN instance_plugins ip ON i.instance_id = ip.instance_id AND ip.is_enabled = TRUE
+            GROUP BY i.instance_id, i.instance_name, i.server_name, i.last_seen
+            ORDER BY i.server_name, i.instance_name
+        """)
+        
+        instances = []
+        for row in cursor.fetchall():
+            # Get tags for this instance
+            cursor.execute("""
+                SELECT t.tag_name
+                FROM instance_meta_tags imt
+                JOIN meta_tags t ON imt.tag_id = t.tag_id
+                WHERE imt.instance_id = %s
+            """, (row['instance_id'],))
+            tags = [tag_row['tag_name'] for tag_row in cursor.fetchall()]
+            
+            # Get updates available for this instance
+            cursor.execute("""
+                SELECT COUNT(*) as count
+                FROM instance_plugins ip
+                JOIN plugins p ON ip.plugin_id = p.plugin_id
+                WHERE ip.instance_id = %s
+                AND ip.is_enabled = TRUE
+                AND p.latest_version IS NOT NULL
+                AND ip.installed_version != p.latest_version
+            """, (row['instance_id'],))
+            updates = cursor.fetchone()['count'] or 0
+            
+            instances.append(InstanceInfo(
+                instance_id=row['instance_id'],
+                instance_name=row['instance_name'],
+                server_name=row['server_name'],
+                plugin_count=row['plugin_count'] or 0,
+                updates_available=updates,
+                tags=tags,
+                last_seen=row['last_seen']
+            ))
+        
+        return instances
+        
+    except mysql.connector.Error as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        if conn and conn.is_connected():
+            cursor.close()
+            conn.close()
