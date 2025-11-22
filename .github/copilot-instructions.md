@@ -117,3 +117,38 @@ This is a configuration management system for managing Minecraft server plugin c
 
 **Example of RIGHT approach:**
 - "I don't see evidence of deployment on OVH. Can you confirm: Is the agent installed there? What does `systemctl status homeamp-agent` show on OVH?"
+
+## Context7 Library Documentation Usage
+
+**ALWAYS use Context7 tools when working with external libraries or frameworks:**
+
+### When to Use Context7:
+1. ✅ **Before generating code** for any external library (FastAPI, Bootstrap, Jinja2, SQLAlchemy, etc.)
+2. ✅ **When debugging** import errors, API changes, or deprecated methods
+3. ✅ **When user mentions** a specific library or asks "how do I use X"
+4. ✅ **When implementing new features** that require library-specific patterns
+5. ✅ **When upgrading** or changing library versions
+
+### How to Use:
+1. First call `mcp_context72_resolve-library-id` with the library name (e.g., "FastAPI", "Bootstrap", "Jinja2")
+2. Then call `mcp_context72_get-library-docs` with the resolved library ID and relevant topic
+3. Use the documentation to generate accurate, up-to-date code
+
+### Example Workflow:
+```
+User: "Add a new FastAPI endpoint for uploading files"
+→ Call mcp_context72_resolve-library-id(libraryName="FastAPI")
+→ Call mcp_context72_get-library-docs(context7CompatibleLibraryID="/tiangolo/fastapi", topic="file upload")
+→ Generate code using the latest API patterns from documentation
+```
+
+### Libraries We Use:
+- **FastAPI**: Web framework for APIs
+- **Jinja2**: Template engine
+- **Bootstrap 4/5**: Frontend CSS framework
+- **SQLAlchemy**: Database ORM (if we add it)
+- **Pydantic**: Data validation
+- **Uvicorn**: ASGI server
+- **mysql-connector-python**: MySQL driver
+
+**Don't assume you know the API - verify with Context7 first!**
