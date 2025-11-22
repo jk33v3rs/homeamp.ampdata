@@ -6,13 +6,9 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import sys
 from pathlib import Path
 
-# Add parent directory to path for imports
-sys.path.append(str(Path(__file__).parent.parent))
-
-from api import (
+from src.api import (
     dashboard_endpoints,
     plugin_configurator_endpoints,
     tag_manager_endpoints,
