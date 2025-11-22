@@ -490,24 +490,18 @@ async def get_dashboard_summary():
         cursor.execute("SELECT COUNT(*) as count FROM instances")
         total_instances = cursor.fetchone()['count']
         
-        # Unique plugins
-        cursor.execute("SELECT COUNT(DISTINCT plugin_id) as count FROM instance_plugins WHERE is_enabled = TRUE")
-        unique_plugins = cursor.fetchone()['count']
+        # Unique plugins - use config_variance_cache which actually exists
+        cursor.execute("SELECT COUNT(DISTINCT plugin_name) as count FROM config_variance_cache WHERE config_type = 'plugin'")
+        result = cursor.fetchone()
+        unique_plugins = result['count'] if result and result['count'] else 0
         
-        # Updates available (from pending_updates table or check latest_version != installed_version)
-        cursor.execute("""
-            SELECT COUNT(*) as count 
-            FROM instance_plugins ip
-            JOIN plugins p ON ip.plugin_id = p.plugin_id
-            WHERE ip.is_enabled = TRUE 
-            AND p.latest_version IS NOT NULL 
-            AND ip.installed_version != p.latest_version
-        """)
-        updates_available = cursor.fetchone()['count'] or 0
+        # Updates available - placeholder until plugin tracking is implemented
+        updates_available = 0
         
-        # Config drifts
-        cursor.execute("SELECT COUNT(*) as count FROM config_variance_detected WHERE is_resolved = FALSE")
-        config_drifts = cursor.fetchone()['count'] or 0
+        # Config drifts - use config_variance_cache
+        cursor.execute("SELECT COUNT(*) as count FROM config_variance_cache WHERE is_baseline = FALSE")
+        result = cursor.fetchone()
+        config_drifts = result['count'] if result and result['count'] else 0
         
         return DashboardSummary(
             total_instances=total_instances,
@@ -571,11 +565,8 @@ async def get_all_instances():
                 i.instance_id,
                 i.instance_name,
                 i.server_name,
-                i.last_seen,
-                COUNT(DISTINCT ip.plugin_id) as plugin_count
+                i.last_seen
             FROM instances i
-            LEFT JOIN instance_plugins ip ON i.instance_id = ip.instance_id AND ip.is_enabled = TRUE
-            GROUP BY i.instance_id, i.instance_name, i.server_name, i.last_seen
             ORDER BY i.server_name, i.instance_name
         """)
         
@@ -584,29 +575,29 @@ async def get_all_instances():
             # Get tags for this instance
             cursor.execute("""
                 SELECT t.tag_name
-                FROM instance_meta_tags imt
-                JOIN meta_tags t ON imt.tag_id = t.tag_id
-                WHERE imt.instance_id = %s
+                FROM instance_tags it
+                JOIN meta_tags t ON it.tag_id = t.tag_id
+                WHERE it.instance_id = %s
             """, (row['instance_id'],))
             tags = [tag_row['tag_name'] for tag_row in cursor.fetchall()]
             
-            # Get updates available for this instance
+            # Get plugin count from config_variance_cache
             cursor.execute("""
-                SELECT COUNT(*) as count
-                FROM instance_plugins ip
-                JOIN plugins p ON ip.plugin_id = p.plugin_id
-                WHERE ip.instance_id = %s
-                AND ip.is_enabled = TRUE
-                AND p.latest_version IS NOT NULL
-                AND ip.installed_version != p.latest_version
+                SELECT COUNT(DISTINCT plugin_name) as count
+                FROM config_variance_cache
+                WHERE instance_id = %s AND config_type = 'plugin'
             """, (row['instance_id'],))
-            updates = cursor.fetchone()['count'] or 0
+            result = cursor.fetchone()
+            plugin_count = result['count'] if result and result['count'] else 0
+            
+            # Updates available - placeholder
+            updates = 0
             
             instances.append(InstanceInfo(
                 instance_id=row['instance_id'],
                 instance_name=row['instance_name'],
                 server_name=row['server_name'],
-                plugin_count=row['plugin_count'] or 0,
+                plugin_count=plugin_count,
                 updates_available=updates,
                 tags=tags,
                 last_seen=row['last_seen']
