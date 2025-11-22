@@ -29,14 +29,14 @@ app = FastAPI(
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
 
-# Include API routers
-app.include_router(dashboard_endpoints.router, prefix="/api/dashboard", tags=["Dashboard"])
-app.include_router(plugin_configurator_endpoints.router, prefix="/api/plugin-configurator", tags=["Plugins"])
-app.include_router(tag_manager_endpoints.router, prefix="/api/tag-manager", tags=["Tags"])
-app.include_router(update_manager_endpoints.router, prefix="/api/updates", tags=["Updates"])
-app.include_router(variance_endpoints.router, prefix="/api/variance", tags=["Variance"])
-app.include_router(audit_log_endpoints.router, prefix="/api/audit-log", tags=["Audit"])
-app.include_router(deployment_endpoints.router, prefix="/api/deployment", tags=["Deployment"])
+# Include API routers (routers already have their prefixes defined)
+app.include_router(dashboard_endpoints.router)
+app.include_router(plugin_configurator_endpoints.router)
+app.include_router(tag_manager_endpoints.router)
+app.include_router(update_manager_endpoints.router)
+app.include_router(variance_endpoints.router)
+app.include_router(audit_log_endpoints.router)
+app.include_router(deployment_endpoints.router)
 
 # Page routes
 @app.get("/", response_class=HTMLResponse)
