@@ -452,7 +452,7 @@ class SettingsHandler:
     @property
     def DB_USER(self) -> str:
         """Get database user"""
-        return self.get('database', 'user', default='archivesmp')
+        return self.get('database', 'user', default='sqlworkerSMP')
     
     @property
     def DB_PASSWORD(self) -> str:
