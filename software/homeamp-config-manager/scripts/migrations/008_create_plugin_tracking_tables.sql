@@ -14,9 +14,23 @@ ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMP NULL COMMENT 'Last time this plu
 ADD COLUMN IF NOT EXISTS installation_method VARCHAR(50) DEFAULT 'unknown' COMMENT 'How plugin was installed';
 
 -- Add missing columns to instance_datapacks table
--- Note: Renaming datapack_name to datapack_id for consistency with FK relationships
+-- Note: Handle both datapack_name and datapack_id (idempotent)
+-- First, check if we need to rename datapack_name to datapack_id
+SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS 
+    WHERE TABLE_SCHEMA = DATABASE() 
+    AND TABLE_NAME = 'instance_datapacks' 
+    AND COLUMN_NAME = 'datapack_name');
+
+SET @sql_rename = IF(@col_exists > 0, 
+    'ALTER TABLE instance_datapacks CHANGE COLUMN datapack_name datapack_id VARCHAR(128) NOT NULL COMMENT "Datapack identifier"',
+    'SELECT "Column datapack_name does not exist, skipping rename" AS Info');
+
+PREPARE stmt FROM @sql_rename;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Now add the missing columns
 ALTER TABLE instance_datapacks
-CHANGE COLUMN datapack_name datapack_id VARCHAR(128) NOT NULL COMMENT 'Datapack identifier',
 ADD COLUMN IF NOT EXISTS file_path TEXT COMMENT 'Full path to datapack folder/zip',
 ADD COLUMN IF NOT EXISTS file_size BIGINT COMMENT 'File size in bytes, 0 for folders',
 ADD COLUMN IF NOT EXISTS first_discovered_at TIMESTAMP NULL COMMENT 'First time this datapack was discovered',
