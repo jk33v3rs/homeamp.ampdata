@@ -67,7 +67,8 @@ async def startup():
         host=db_config['host'],
         port=db_config['port'],
         user=db_config['user'],
-        password=db_config['password']
+        password=db_config['password'],
+        database=db_config['database']
     )
     db.connect()
 
