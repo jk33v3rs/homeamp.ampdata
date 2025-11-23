@@ -2,8 +2,13 @@
     "version": "0.2",
     "ignorePaths": [],
     "dictionaryDefinitions": [],
-    "dictionaries": ["custom-dictionary-user.txt"],
-    "words": [],
+    "dictionaries": [
+        "custom-dictionary-user.txt"
+    ],
+    "words": [
+        "homeamp",
+        "sudo"
+    ],
     "ignoreWords": [],
     "import": []
 }

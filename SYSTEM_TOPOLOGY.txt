@@ -1,0 +1,463 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                   ARCHIVESMP CONFIG MANAGER - SYSTEM TOPOLOGY                  ║
+║                           Network & Data Architecture                           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          PRODUCTION INFRASTRUCTURE                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  HETZNER XEON SERVER (archivesmp.site - 135.181.212.169)
+  ┌────────────────────────────────────────────────────────────────┐
+  │  OS: Debian 12                                                  │
+  │  Access: RDP via Nom Machine (NOT SSH)                         │
+  │  Users: webadmin (sudo), amp (service runner)                  │
+  │                                                                 │
+  │  ┌──────────────────────────────────────────────────────────┐  │
+  │  │  AMP (Application Management Panel)                      │  │
+  │  │  - Manages 11 Minecraft instances                        │  │
+  │  │  - Path: /home/amp/.ampdata/instances/<ID>/             │  │
+  │  │                                                           │  │
+  │  │  Instances:                                              │  │
+  │  │    • BENT01  [Paper 1.21+]  - BentoBox/Skyblock        │  │
+  │  │    • CLIP01  [Paper 1.21+]  - ClipMC                    │  │
+  │  │    • CREA01  [Paper 1.21+]  - Creative                  │  │
+  │  │    • EMAD01  [Paper 1.21+]  - EliteMobs Adventure       │  │
+  │  │    • EVO01   [Paper 1.21+]  - Evolution SMP             │  │
+  │  │    • HUB01   [Paper 1.21+]  - Hub/Lobby                 │  │
+  │  │    • MIN01   [Paper 1.21+]  - Minigames                 │  │
+  │  │    │PRI01   [Paper 1.21+]  - Prison/Jails             │  │
+  │  │    • SMP101  [Paper 1.21+]  - SMP Season 1              │  │
+  │  │    • SMP201  [Paper 1.21+]  - SMP Season 2              │  │
+  │  │    • VEL01   [Velocity]     - Proxy Server              │  │
+  │  └──────────────────────────────────────────────────────────┘  │
+  │                                                                 │
+  │  ┌──────────────────────────────────────────────────────────┐  │
+  │  │  Config Manager Services                                 │  │
+  │  │  Path: /opt/archivesmp-config-manager/                  │  │
+  │  │  Owner: amp:amp                                          │  │
+  │  │                                                           │  │
+  │  │  [systemd] homeamp-agent.service                         │  │
+  │  │    └─> Runs: production_endpoint_agent.py               │  │
+  │  │        └─> Discovers instances, plugins, datapacks       │  │
+  │  │        └─> Detects config drift                          │  │
+  │  │        └─> Logs to: journalctl -u homeamp-agent          │  │
+  │  │                                                           │  │
+  │  │  [systemd] archivesmp-webapi.service                     │  │
+  │  │    └─> Runs: uvicorn src.web.api:app                    │  │
+  │  │        └─> Port: 8000                                    │  │
+  │  │        └─> Workers: 4                                    │  │
+  │  │        └─> Serves Web UI + REST API                      │  │
+  │  │        └─> Logs to: journalctl -u archivesmp-webapi      │  │
+  │  └──────────────────────────────────────────────────────────┘  │
+  │                                                                 │
+  │  ┌──────────────────────────────────────────────────────────┐  │
+  │  │  MariaDB Database (LOCAL)                                │  │
+  │  │  Port: 3369 (non-standard)                               │  │
+  │  │  Database: asmp_config                                   │  │
+  │  │  User: sqlworkerSMP                                      │  │
+  │  │  Connection: mysql -u sqlworkerSMP -p asmp_config        │  │
+  │  │              (NO -h or -P needed - local socket)         │  │
+  │  └──────────────────────────────────────────────────────────┘  │
+  └────────────────────────────────────────────────────────────────┘
+
+  OVH RYZEN SERVER (archivesmp.online - 37.187.143.41)
+  ┌────────────────────────────────────────────────────────────────┐
+  │  OS: Debian 12                                                  │
+  │  Status: PENDING DEPLOYMENT (not yet configured)                │
+  │  Planned: Second deployment target for redundancy               │
+  └────────────────────────────────────────────────────────────────┘
+
+  DEVELOPER PC (Windows)
+  ┌────────────────────────────────────────────────────────────────┐
+  │  Location: e:\homeamp.ampdata\                                  │
+  │                                                                 │
+  │  utildata/           - Replicated config snapshots             │
+  │  software/           - Source code (homeamp-config-manager/)   │
+  │  scripts/            - SQL migrations, Python utilities         │
+  │                                                                 │
+  │  Git Repo: github.com/jk33v3rs/homeamp.ampdata                │
+  │  Access: Push/pull to sync with production                     │
+  └────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           DATABASE ARCHITECTURE                              │
+│                        (MariaDB - asmp_config)                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                        CORE INFRASTRUCTURE TABLES                          ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  instances                                   plugins
+  ┌─────────────────────────────┐            ┌──────────────────────────┐
+  │ instance_id (PK)            │            │ plugin_id (PK)           │
+  │ display_name                │            │ plugin_name              │
+  │ platform (paper/velocity)   │            │ display_name             │
+  │ minecraft_version           │            │ platform                 │
+  │ server_name (hetzner/ovh)   │            │ current_stable_version   │
+  │ instance_path               │            │ author                   │
+  │ last_seen_at                │            │ description              │
+  │ created_at                  │            │ first_seen_at            │
+  └─────────────────────────────┘            │ last_checked_at          │
+             │                               └──────────────────────────┘
+             │                                          │
+             │                                          │
+             └──────────────┬───────────────────────────┘
+                            │
+                            ▼
+                 instance_plugins (M:M)
+                 ┌────────────────────────────────┐
+                 │ id (PK)                        │
+                 │ instance_id (FK)               │
+                 │ plugin_id (FK)                 │
+                 │ installed_version              │
+                 │ file_name                      │
+                 │ file_path                      │
+                 │ file_hash (SHA256)             │
+                 │ file_size (bytes)              │
+                 │ file_modified_at               │
+                 │ is_enabled                     │
+                 │ first_discovered_at            │
+                 │ last_seen_at                   │
+                 │ installation_method            │
+                 └────────────────────────────────┘
+
+  datapacks                                instance_datapacks (M:M)
+  ┌─────────────────────────┐            ┌──────────────────────────────┐
+  │ datapack_id (PK)        │            │ id (PK)                      │
+  │ datapack_name           │            │ instance_id (FK)             │
+  │ display_name            │◄───────────│ datapack_id (FK)             │
+  │ version                 │            │ world_name                   │
+  │ description             │            │ version                      │
+  │ last_checked_at         │            │ file_name                    │
+  └─────────────────────────┘            │ file_path                    │
+                                         │ file_hash                    │
+                                         │ file_size                    │
+                                         │ is_enabled                   │
+                                         │ first_discovered_at          │
+                                         │ last_seen_at                 │
+                                         └──────────────────────────────┘
+
+  instance_server_properties                worlds
+  ┌────────────────────────────┐           ┌─────────────────────────┐
+  │ instance_id (PK, FK)       │           │ world_id (PK)           │
+  │ level_name                 │           │ instance_id (FK)        │
+  │ gamemode                   │           │ world_name              │
+  │ difficulty                 │           │ world_type              │
+  │ max_players                │           │ seed                    │
+  │ view_distance              │           │ spawn_x, spawn_y, spawn_z│
+  │ simulation_distance        │           │ difficulty              │
+  │ pvp                        │           │ hardcore                │
+  │ properties_json            │           │ last_scanned_at         │
+  │ last_scanned_at            │           └─────────────────────────┘
+  └────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       DISCOVERY & MONITORING TABLES                        ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  discovery_runs (Summary of each agent scan)
+  ┌─────────────────────────────────────┐
+  │ run_id (PK)                         │
+  │ server_name (hetzner-xeon/ovh-ryzen)│
+  │ run_type (full_scan/incremental)    │
+  │ started_at                          │
+  │ completed_at                        │
+  │ status (running/completed/failed)   │
+  │ instances_discovered (count)        │
+  │ plugins_discovered (count)          │
+  │ datapacks_discovered (count)        │
+  │ configs_scanned (count)             │
+  │ new_items_found (count)             │
+  │ changed_items (count)               │
+  └─────────────────────────────────────┘
+
+  ⚠️  discovery_items table REMOVED
+      - Was logging EVERY item on EVERY scan
+      - Caused 153M record bloat
+      - Now only discovery_runs stores summary stats
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                          TAGGING & METADATA TABLES                         ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  meta_tag_categories          meta_tags                    instance_meta_tags
+  ┌──────────────────┐        ┌─────────────────┐          ┌────────────────────┐
+  │ category_id (PK) │        │ tag_id (PK)     │          │ instance_id (FK)   │
+  │ category_name    │◄───────│ tag_name        │◄─────────│ tag_id (FK)        │
+  │ display_name     │        │ display_name    │          │ applied_at         │
+  │ description      │        │ category_id (FK)│          │ applied_by         │
+  └──────────────────┘        │ description     │          │ is_auto_detected   │
+                              │ tag_color       │          │ confidence_score   │
+                              └─────────────────┘          └────────────────────┘
+
+  instance_tags (simple key-value)    meta_tag_history
+  ┌──────────────────────────┐       ┌──────────────────────┐
+  │ id (PK)                  │       │ history_id (PK)      │
+  │ instance_id (FK)         │       │ instance_id (FK)     │
+  │ tag_name                 │       │ tag_id (FK)          │
+  │ tag_value                │       │ action (added/removed│
+  │ assigned_by              │       │ performed_by         │
+  │ assigned_at              │       │ performed_at         │
+  └──────────────────────────┘       │ reason               │
+                                     └──────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                      CONFIGURATION MANAGEMENT TABLES                       ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  config_rules (Baseline expectations)
+  ┌────────────────────────────────────┐
+  │ rule_id (PK)                       │
+  │ plugin_id (FK)                     │
+  │ config_file (e.g., config.yml)    │
+  │ config_key (dot.notation.path)    │
+  │ expected_value                     │
+  │ value_type (string/int/bool/list) │
+  │ applies_to_platform                │
+  │ is_required                        │
+  │ created_at                         │
+  └────────────────────────────────────┘
+
+  config_variance_detected (Drift from baselines)
+  ┌────────────────────────────────────┐
+  │ variance_id (PK)                   │
+  │ instance_id (FK)                   │
+  │ plugin_id (FK)                     │
+  │ config_file                        │
+  │ config_key                         │
+  │ expected_value                     │
+  │ actual_value                       │
+  │ variance_type (missing/different)  │
+  │ detected_at                        │
+  │ resolved_at                        │
+  │ resolution (auto/manual/ignored)   │
+  └────────────────────────────────────┘
+
+  config_change_history (ONLY actual deployments, NOT drift detection)
+  ┌────────────────────────────────────┐
+  │ change_id (PK)                     │
+  │ instance_id (FK)                   │
+  │ plugin_name                        │
+  │ config_file                        │
+  │ config_key                         │
+  │ old_value                          │
+  │ new_value                          │
+  │ change_type (manual/automated)     │
+  │ change_source (web_ui/agent/api)   │
+  │ changed_by                         │
+  │ changed_at                         │
+  │ change_reason                      │
+  │ batch_id                           │
+  │ deployment_id (FK)                 │
+  └────────────────────────────────────┘
+  ⚠️  Drift logging DISABLED - was causing 455K record bloat
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       DEPLOYMENT & UPDATE TABLES                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  plugin_update_queue               deployment_history
+  ┌──────────────────────────┐     ┌──────────────────────────────┐
+  │ queue_id (PK)            │     │ deployment_id (PK)           │
+  │ instance_id (FK)         │     │ deployment_type              │
+  │ plugin_id (FK)           │     │ target_instances (JSON)      │
+  │ current_version          │     │ initiated_by                 │
+  │ target_version           │     │ initiated_at                 │
+  │ update_priority          │     │ completed_at                 │
+  │ queued_at                │     │ status                       │
+  │ queued_by                │     │ success_count                │
+  │ status                   │     │ failure_count                │
+  │ started_at               │     │ deployment_notes             │
+  │ completed_at             │     └──────────────────────────────┘
+  │ error_message            │
+  └──────────────────────────┘
+
+  change_approval_requests
+  ┌──────────────────────────────┐
+  │ request_id (PK)              │
+  │ change_type                  │
+  │ change_description           │
+  │ affected_instances (JSON)    │
+  │ requested_by                 │
+  │ requested_at                 │
+  │ approval_status              │
+  │ reviewed_by                  │
+  │ reviewed_at                  │
+  │ review_notes                 │
+  └──────────────────────────────┘
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       SYSTEM HEALTH & MONITORING                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+  ⚠️  system_health_metrics table REMOVED
+      - Was inserting 3 metrics every 5 minutes (864/day)
+      - Caused millions of records
+      - Now logs to journalctl instead
+
+  notification_log                   scheduled_tasks
+  ┌─────────────────────────┐       ┌─────────────────────────┐
+  │ id (PK)                 │       │ task_id (PK)            │
+  │ notification_type       │       │ task_name               │
+  │ title                   │       │ task_type               │
+  │ message                 │       │ schedule_expression     │
+  │ priority                │       │ is_enabled              │
+  │ related_entity_type     │       │ last_run_at             │
+  │ related_entity_id       │       │ last_run_status         │
+  │ metadata (JSON)         │       │ next_run_at             │
+  │ channels                │       │ run_count               │
+  │ status                  │       │ failure_count           │
+  │ sent_at                 │       │ created_at              │
+  │ read_at                 │       └─────────────────────────┘
+  │ read_by                 │
+  │ created_at              │       audit_log
+  └─────────────────────────┘       ┌─────────────────────────┐
+                                    │ id (PK)                 │
+                                    │ timestamp               │
+                                    │ user                    │
+                                    │ action                  │
+                                    │ description             │
+                                    │ ip_address              │
+                                    └─────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                             DATA FLOW DIAGRAM                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │                    HOMEAMP-AGENT (Discovery Agent)                    │
+  │                    Runs every 5 minutes via systemd                   │
+  └──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ 1. Scan /home/amp/.ampdata/instances/                                 │
+  │    └─> Discover AMP instances                                         │
+  │        └─> Write to: instances table                                  │
+  └──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ 2. For each instance, scan Minecraft/plugins/*.jar                    │
+  │    └─> Extract plugin.yml metadata                                    │
+  │        ├─> Write to: plugins (global registry)                        │
+  │        └─> Write to: instance_plugins (installations)                 │
+  └──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ 3. For each instance, scan world/datapacks/                           │
+  │    └─> Discover datapacks in each world folder                        │
+  │        ├─> Write to: datapacks (global registry)                      │
+  │        └─> Write to: instance_datapacks (installations)               │
+  └──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ 4. Scan server.properties                                             │
+  │    └─> Write to: instance_server_properties                           │
+  └──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ 5. Detect config drift (DISABLED LOGGING TO HISTORY)                  │
+  │    └─> Read: config_rules (baselines)                                 │
+  │    └─> Compare with actual configs                                    │
+  │    └─> Write to: config_variance_detected (NOT config_change_history) │
+  └──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ 6. Write summary to discovery_runs                                    │
+  │    (NO LONGER writes to discovery_items - was causing 153M bloat)     │
+  └──────────────────────────────────────────────────────────────────────┘
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │                    ARCHIVESMP-WEBAPI (Web Interface)                  │
+  │                    Port 8000, 4 uvicorn workers                       │
+  └──────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+  ┌─────────────────────────┐  ┌──────────────────────────────────┐
+  │  Web UI (Static HTML/JS)│  │  REST API Endpoints              │
+  │  ├─ dashboard.html      │  │  ├─ /api/instances              │
+  │  ├─ plugins.html        │  │  ├─ /api/plugins                │
+  │  ├─ variance.html       │  │  ├─ /api/drift                  │
+  │  ├─ deploy.html         │  │  ├─ /api/deploy                 │
+  │  └─ tags.html           │  │  ├─ /api/tags                   │
+  └─────────────────────────┘  │  └─ /api/history                │
+                               └──────────────────────────────────┘
+                                    │
+                                    ▼
+                          READ/WRITE to asmp_config database
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          CRITICAL CONFIGURATION                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  Configuration Files (Production):
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  /etc/archivesmp/agent.yaml
+    ├─ database.host: 135.181.212.169
+    ├─ database.port: 3369
+    ├─ database.user: sqlworkerSMP
+    ├─ database.password: [REDACTED]
+    ├─ database.database: asmp_config
+    ├─ amp_data_path: /home/${USER}/.ampdata/instances
+    └─ server_name: hetzner-xeon
+
+  /etc/systemd/system/homeamp-agent.service
+    └─> ExecStart: production_endpoint_agent.py --config /etc/archivesmp/agent.yaml
+        User: amp
+        Restart: always
+
+  /etc/systemd/system/archivesmp-webapi.service
+    └─> ExecStart: uvicorn src.web.api:app --host 0.0.0.0 --port 8000 --workers 4
+        User: amp
+        Restart: always
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              KEY FIXES APPLIED                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  ✅  Removed all hardcoded credentials from code
+  ✅  Created config file system (/etc/archivesmp/agent.yaml)
+  ✅  Disabled discovery_items logging (153M record bloat)
+  ✅  Disabled system_health_metrics insertion (millions of records)
+  ✅  Disabled config_change_history logging from drift detection (455K bloat)
+  ✅  Fixed DB property names in settings.py (production_db_name → database.database)
+  ✅  Added missing 'database' parameter to ConfigDatabase init in web API
+  ✅  Created single authoritative schema (AUTHORITATIVE_SCHEMA.sql)
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                          DEPLOYMENT INSTRUCTIONS                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+  ON PRODUCTION (Hetzner):
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # 1. Backup existing database (just in case)
+  mysqldump -u sqlworkerSMP -p'2024!SQLdb' asmp_config > /tmp/asmp_config_backup_$(date +%Y%m%d_%H%M%S).sql
+
+  # 2. Drop and recreate with clean schema
+  mariadb -u sqlworkerSMP -p'2024!SQLdb' < /tmp/AUTHORITATIVE_SCHEMA.sql
+
+  # 3. Restart services to repopulate from fresh discovery
+  sudo systemctl restart homeamp-agent
+  sudo systemctl restart archivesmp-webapi
+
+  # 4. Verify services running
+  sudo systemctl status homeamp-agent
+  sudo systemctl status archivesmp-webapi
+
+  # 5. Check logs for errors
+  sudo journalctl -u homeamp-agent -f
+
+  # 6. Access Web UI
+  http://135.181.212.169:8000/
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+                               END OF TOPOLOGY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
