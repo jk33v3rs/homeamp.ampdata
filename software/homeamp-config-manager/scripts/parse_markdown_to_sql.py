@@ -344,13 +344,14 @@ def main():
         sys.exit(1)
     
     # Database configuration (from environment or secrets)
-    # ISOLATED DATABASE - NOT production asmp_SQL
+    # ISOLATED DATABASE - NOT production database
+    # This creates a separate database for testing/development
     db_config = {
-        'host': os.getenv('DB_HOST', '135.181.212.169'),
-        'port': int(os.getenv('DB_PORT', 3369)),
-        'user': os.getenv('DB_USER', 'sqlworkerSMP'),
+        'host': os.getenv('DB_HOST', ''),
+        'port': int(os.getenv('DB_PORT', 0)),
+        'user': os.getenv('DB_USER', ''),
         'password': os.getenv('DB_PASSWORD'),  # Must be provided
-        'database': os.getenv('DB_NAME', 'asmp_config_controller')
+        'database': os.getenv('DB_NAME', '')
     }
     
     if not db_config['password']:

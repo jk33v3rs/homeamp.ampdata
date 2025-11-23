@@ -404,12 +404,15 @@ if __name__ == '__main__':
     
     # Example: Import to database (requires connection)
     # import mysql.connector
+    # from src.core.settings import get_settings
+    # settings = get_settings()
+    # db_config = settings.get('database', default={})
     # db = mysql.connector.connect(
-    #     host='135.181.212.169',
-    #     port=3369,
-    #     user='sqlworkerSMP',
-    #     password='SQLdb2024!',
-    #     database='archivesmp_config'
+    #     host=db_config.get('host'),
+    #     port=db_config.get('port'),
+    #     user=db_config.get('user'),
+    #     password=db_config.get('password'),
+    #     database=db_config.get('database')
     # )
     # 
     # importer = BaselineToDatabase(db)

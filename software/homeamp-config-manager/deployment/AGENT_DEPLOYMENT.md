@@ -133,7 +133,7 @@ db = ConfigDatabase(
     host='135.181.212.169',
     port=3369,
     user='sqlworkerSMP',
-    password='SQLdb2024!'
+    password='<YOUR_DB_PASSWORD>'
 )
 
 db.connect()

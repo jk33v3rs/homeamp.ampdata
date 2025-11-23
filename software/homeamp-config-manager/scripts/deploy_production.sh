@@ -1,16 +1,21 @@
 #!/bin/bash
 # =============================================================================
-# Production Deployment Script for Hetzner
+# Production Deployment Script
 # Deploys all metadata tracking, config management, and automation tools
 # =============================================================================
 
 set -e  # Exit on error
 
-SERVER="135.181.212.169"
+SERVER="${SERVER:-}"  # Must be set via environment
 DEPLOY_DIR="/opt/archivesmp-config-manager"
 DATA_DIR="/var/lib/archivesmp"
 BACKUP_DIR="$DATA_DIR/backups"
-AMP_DIR="/home/amp/.ampdata/instances"
+AMP_DIR="/home/${USER}/.ampdata/instances"
+
+if [ -z "$SERVER" ]; then
+    echo "ERROR: SERVER environment variable must be set"
+    exit 1
+fi
 
 echo "=========================================="
 echo "ArchiveSMP Config Manager - Deployment"
@@ -30,13 +35,13 @@ scp scripts/seed_meta_tags.sql root@$SERVER:/tmp/
 
 ssh root@$SERVER << 'ENDSSH'
     echo "Applying plugin metadata tables..."
-    mysql -u asmp_admin -p'Y0urP@ssw0rd' asmp_config < /tmp/add_plugin_metadata_tables.sql
+    mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < /tmp/add_plugin_metadata_tables.sql
     
     echo "Applying config rules tables..."
-    mysql -u asmp_admin -p'Y0urP@ssw0rd' asmp_config < /tmp/add_config_rules_tables.sql
+    mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < /tmp/add_config_rules_tables.sql
     
     echo "Seeding meta tags..."
-    mysql -u asmp_admin -p'Y0urP@ssw0rd' asmp_config < /tmp/seed_meta_tags.sql
+    mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" < /tmp/seed_meta_tags.sql
     
     echo "Schema deployment complete!"
 ENDSSH

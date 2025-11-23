@@ -2,7 +2,7 @@
 
 ## One-Line Install
 
-Run this command on your Hetzner server (135.181.212.169) as root:
+Run this command on your Hetzner server as root:
 
 ```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/jk33v3rs/homeamp.ampdata/master/software/homeamp-config-manager/deployment/install_hetzner.sh)

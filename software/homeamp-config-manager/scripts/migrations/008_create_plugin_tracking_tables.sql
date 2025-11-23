@@ -2,8 +2,7 @@
 -- Purpose: Add file_path, file_hash, file_size, etc. to instance_plugins and instance_datapacks
 -- Date: 2025-11-23
 -- Fixes: Agent errors "Unknown column 'file_path' in 'INSERT INTO'"
-
-USE asmp_config;
+-- Usage: mysql -h <HOST> -P <PORT> -u <USER> -p <DATABASE> < 008_create_plugin_tracking_tables.sql
 
 -- Add missing columns to instance_plugins table
 ALTER TABLE instance_plugins 
@@ -29,4 +28,4 @@ ADD INDEX IF NOT EXISTS idx_file_hash (file_hash);
 
 -- Deployment Instructions:
 -- Run on production (Hetzner):
--- mysql -h 135.181.212.169 -P 3369 -u root -p asmp_config < scripts/migrations/008_create_plugin_tracking_tables.sql
+-- mysql -h <DB_HOST> -P <DB_PORT> -u <DB_USER> -p <DB_NAME> < scripts/migrations/008_create_plugin_tracking_tables.sql

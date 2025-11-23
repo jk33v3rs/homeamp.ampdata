@@ -203,7 +203,7 @@ class PerformanceMetrics:
                 table_name,
                 ROUND(((data_length + index_length) / 1024 / 1024), 2) AS size_mb
             FROM information_schema.TABLES
-            WHERE table_schema = 'asmp_config'
+            WHERE table_schema = DATABASE()
             ORDER BY (data_length + index_length) DESC
             LIMIT 10
         """)

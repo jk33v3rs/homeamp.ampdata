@@ -243,9 +243,9 @@ class LiveAtlasConfigGenerator:
         """
         Generate nginx reverse proxy configuration for Pl3xMap servers.
         
-        This routes:
-        - https://map.archivesmp.site/bent01/ -> http://135.181.212.169:8080/
-        - https://map.archivesmp.site/csmc01/ -> http://135.181.212.169:8081/
+        This routes subpaths to local Pl3xMap web servers:
+        - https://map.archivesmp.site/bent01/ -> http://localhost:8080/
+        - https://map.archivesmp.site/csmc01/ -> http://localhost:8081/
         
         Args:
             deployment: 'public' or 'bts'

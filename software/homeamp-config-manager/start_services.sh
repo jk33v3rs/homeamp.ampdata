@@ -140,8 +140,8 @@ echo ""
 
 if [[ "$SERVER_TYPE" == "hetzner" ]]; then
     echo "Access points:"
-    echo "  - Web UI: http://135.181.212.169:8000/static/deploy.html"
-    echo "  - API Docs: http://135.181.212.169:8000/docs"
+    echo "  - Web UI: http://localhost:8000/static/deploy.html"
+    echo "  - API Docs: http://localhost:8000/docs"
     echo "  - Agent API: http://localhost:8001/docs"
     echo ""
     echo "Process IDs:"

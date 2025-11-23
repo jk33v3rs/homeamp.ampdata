@@ -6,8 +6,21 @@ echo "ArchiveSMP Config Manager - System Diagnostic"
 echo "=========================================="
 echo
 
+# Read credentials from environment or agent.yaml - NO DEFAULTS
+DB_HOST="${DB_HOST}"
+DB_PORT="${DB_PORT}"
+DB_USER="${DB_USER}"
+DB_PASSWORD="${DB_PASSWORD}"
+DB_NAME="${DB_NAME}"
+
+if [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_NAME" ]; then
+    echo "ERROR: All database connection parameters must be set via environment variables:"
+    echo "  DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME"
+    exit 1
+fi
+
 echo "=== 1. Database Status ==="
-mysql -h 135.181.212.169 -P 3369 -u root -p'2024!SQLdb' asmp_config -e "
+mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p"$DB_PASSWORD" $DB_NAME -e "
 SELECT 'Instances' as table_name, COUNT(*) as count FROM instances
 UNION ALL
 SELECT 'Plugins', COUNT(*) FROM plugins
@@ -25,7 +38,7 @@ SELECT 'Plugin Versions', COUNT(*) FROM plugin_versions;
 echo
 
 echo "=== 2. Sample Plugin Data ==="
-mysql -h 135.181.212.169 -P 3369 -u root -p'2024!SQLdb' asmp_config -e "
+mysql -h $DB_HOST -P $DB_PORT -u $DB_USER -p"$DB_PASSWORD" $DB_NAME -e "
 SELECT name, current_version, latest_version, update_available 
 FROM plugins 
 LIMIT 5;

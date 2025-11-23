@@ -125,11 +125,11 @@
   },
   "vwhitelist": {
     "config": {
-      "database.host": "135.181.212.169",
-      "database.name": "asmp_SQL",
-      "database.password": "SQLdb2024!",
-      "database.port": 3369,
-      "database.username": "sqlworkerSMP",
+      "database.host": "<OLD_DB_HOST>",
+      "database.name": "<OLD_DB_NAME>",
+      "database.password": "<OLD_DB_PASSWORD>",
+      "database.port": "<OLD_DB_PORT>",
+      "database.username": "<OLD_DB_USER>",
       "discord.allowed_channels": [
         "1283860074699423897",
         "1283456419298803742"

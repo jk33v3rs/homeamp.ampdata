@@ -67,11 +67,7 @@ Group=amp
 WorkingDirectory=$INSTALL_DIR/software/homeamp-config-manager
 Environment="PYTHONPATH=$INSTALL_DIR/software/homeamp-config-manager"
 ExecStart=$INSTALL_DIR/software/homeamp-config-manager/.venv/bin/python -m src.agent.endpoint_agent \\
-    --server=${SERVER_NAME} \\
-    --db-host=135.181.212.169 \\
-    --db-port=3369 \\
-    --db-user=sqlworkerSMP \\
-    --db-password=SQLdb2024!
+    --server=${SERVER_NAME}
 
 Restart=on-failure
 RestartSec=10

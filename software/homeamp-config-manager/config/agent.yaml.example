@@ -1,18 +1,19 @@
 # ArchiveSMP Configuration Management Agent
 # Deploy to: /etc/archivesmp/agent.yaml
+# IMPORTANT: Replace all <PLACEHOLDER> values with your actual credentials
 
 # Server identification
 server:
   name: "hetzner-xeon"  # or "ovh-ryzen"
-  amp_base_dir: "/home/amp/.ampdata"
+  amp_base_dir: "/home/${USER}/.ampdata"  # Uses current user's home directory
 
 # Database connection
 database:
-  host: "135.181.212.169"  # MariaDB on same server
-  port: 3369
-  user: "sqlworkerSMP"
-  password: "2024!SQLdb"
-  database: "asmp_config"
+  host: "<DB_HOST>"          # e.g., "localhost" or IP address
+  port: <DB_PORT>            # e.g., 3306
+  user: "<DB_USER>"          # Database username
+  password: "<DB_PASSWORD>"  # Database password
+  database: "<DB_NAME>"      # Database name
 
 # Scan intervals (seconds)
 intervals:

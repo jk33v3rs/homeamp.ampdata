@@ -190,7 +190,7 @@ python3 scripts/enforce_config.py BENT01 --apply
 ### Bulk Enforcement
 ```bash
 # Enforce all instances with drift
-for instance in $(mysql -h localhost -P 3369 -u asmp_admin -p'Y0urP@ssw0rd' asmp_config \
+for instance in $(mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" \
   -N -e "SELECT DISTINCT instance_id FROM config_variance_cache WHERE is_drift = TRUE"); do
   echo "Enforcing $instance..."
   python3 scripts/enforce_config.py $instance --apply
@@ -248,7 +248,7 @@ sudo journalctl -u archivesmp-drift-scanner -f
 
 ### Query current drift
 ```bash
-mysql -h localhost -P 3369 -u asmp_admin -p'Y0urP@ssw0rd' asmp_config \
+mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" \
   -e "SELECT instance_id, COUNT(*) as drift_count 
       FROM config_variance_cache 
       WHERE is_drift = TRUE 
@@ -257,7 +257,7 @@ mysql -h localhost -P 3369 -u asmp_admin -p'Y0urP@ssw0rd' asmp_config \
 
 ### View recent drift events
 ```bash
-mysql -h localhost -P 3369 -u asmp_admin -p'Y0urP@ssw0rd' asmp_config \
+mysql -h "${DB_HOST}" -P "${DB_PORT}" -u "${DB_USER}" -p"${DB_PASSWORD}" "${DB_NAME}" \
   -e "SELECT * FROM config_drift_log 
       WHERE detected_at > DATE_SUB(NOW(), INTERVAL 24 HOUR) 
       ORDER BY detected_at DESC 

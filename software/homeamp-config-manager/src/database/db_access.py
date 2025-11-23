@@ -1,7 +1,7 @@
 """
 Database Access Layer for Configuration Management
 
-Provides data access methods for the asmp_config MariaDB database.
+Provides data access methods for the MariaDB database.
 """
 
 import mysql.connector
@@ -19,14 +19,14 @@ logger = logging.getLogger(__name__)
 class ConfigDatabase:
     """Database connection and query interface"""
     
-    def __init__(self, host: str, port: int, user: str, password: str, database: str = 'asmp_config'):
+    def __init__(self, host: str, port: int, user: str, password: str, database: str):
         """
-        Initialize database connection
+        Initialize database connection.
         
         Args:
-            host: Database host (e.g., '135.181.212.169')
-            port: Database port (e.g., 3369)
-            user: Database user
+            host: Database host (e.g., 'localhost' or IP from config)
+            port: Database port
+            user: Database username
             password: Database password
             database: Database name
         """
@@ -55,7 +55,7 @@ class ConfigDatabase:
             port=db_config['port'],
             user=db_config['user'],
             password=db_config['password'],
-            database=db_config.get('database', 'asmp_config')
+            database=db_config.get('database', '')
         )
     
     def connect(self):

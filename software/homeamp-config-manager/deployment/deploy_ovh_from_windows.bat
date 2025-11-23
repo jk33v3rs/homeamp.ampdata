@@ -39,7 +39,7 @@ User=amp
 Group=amp
 WorkingDirectory=/opt/archivesmp-config-manager/software/homeamp-config-manager
 Environment="PYTHONPATH=/opt/archivesmp-config-manager/software/homeamp-config-manager"
-ExecStart=/opt/archivesmp-config-manager/software/homeamp-config-manager/.venv/bin/python -m src.agent.endpoint_agent --server=ovh-ryzen --db-host=135.181.212.169 --db-port=3369 --db-user=sqlworkerSMP --db-password=SQLdb2024!
+ExecStart=/opt/archivesmp-config-manager/software/homeamp-config-manager/.venv/bin/python -m src.agent.endpoint_agent --server=ovh-ryzen
 Restart=on-failure
 RestartSec=10
 

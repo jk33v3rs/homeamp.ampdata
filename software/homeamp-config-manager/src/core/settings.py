@@ -109,6 +109,23 @@ class SettingsHandler:
         self.logger.warning(f"No settings file found, using default location: {default_location}")
         return default_location
     
+    def _expand_env_vars(self, value: Any) -> Any:
+        """Recursively expand environment variables in strings using ${VAR} syntax"""
+        if isinstance(value, str):
+            # Expand ${VAR} and $VAR syntax
+            import re
+            def replace_var(match):
+                var_name = match.group(1) or match.group(2)
+                return os.environ.get(var_name, match.group(0))
+            # Match ${VAR} or $VAR patterns
+            value = re.sub(r'\$\{([^}]+)\}|\$(\w+)', replace_var, value)
+            return value
+        elif isinstance(value, dict):
+            return {k: self._expand_env_vars(v) for k, v in value.items()}
+        elif isinstance(value, list):
+            return [self._expand_env_vars(item) for item in value]
+        return value
+    
     def _load_settings(self) -> Dict[str, Any]:
         """Load settings from YAML file"""
         try:
@@ -119,6 +136,9 @@ class SettingsHandler:
             with open(self.config_file, 'r', encoding='utf-8') as f:
                 loaded_settings = yaml.safe_load(f)
                 settings: Dict[str, Any] = loaded_settings if loaded_settings else {}
+            
+            # Expand environment variables in string values
+            settings = self._expand_env_vars(settings)
             
             # Apply environment variable overrides
             settings = self._apply_env_overrides(settings)
@@ -425,12 +445,12 @@ class SettingsHandler:
     @property
     def production_db_host(self) -> str:
         """Get production database host"""
-        return self.get('database', 'production_db_host', default='135.181.212.169:3369')
+        return self.get('database', 'production_db_host', default='')
     
     @property
-    def production_db_name(self) -> str:
-        """Get production database name"""
-        return self.get('database', 'production_db_name', default='asmp_config')
+    def get_production_db_name(self) -> str:
+        """Get production database name from config"""
+        return self.get('database', 'production_db_name', default='')
     
     @property
     def DB_HOST(self) -> str:
@@ -452,7 +472,7 @@ class SettingsHandler:
     @property
     def DB_USER(self) -> str:
         """Get database user"""
-        return self.get('database', 'user', default='sqlworkerSMP')
+        return self.get('database', 'user', default='')
     
     @property
     def DB_PASSWORD(self) -> str:

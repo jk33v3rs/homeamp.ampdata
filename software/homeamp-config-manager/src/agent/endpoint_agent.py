@@ -692,20 +692,46 @@ def main():
     
     parser = argparse.ArgumentParser(description='ArchiveSMP Endpoint Agent')
     parser.add_argument('--server', required=True, help='Server name (hetzner-xeon or ovh-ryzen)')
-    parser.add_argument('--db-host', default='135.181.212.169', help='Database host')
-    parser.add_argument('--db-port', type=int, default=3369, help='Database port')
-    parser.add_argument('--db-user', default='sqlworkerSMP', help='Database user')
-    parser.add_argument('--db-password', required=True, help='Database password')
-    parser.add_argument('--db-name', default='asmp_config', help='Database name')
+    parser.add_argument('--db-host', default='', help='Database host (reads from /etc/archivesmp/agent.yaml if not provided)')
+    parser.add_argument('--db-port', type=int, default=0, help='Database port (reads from /etc/archivesmp/agent.yaml if not provided)')
+    parser.add_argument('--db-user', default='', help='Database user (reads from /etc/archivesmp/agent.yaml if not provided)')
+    parser.add_argument('--db-password', default='', help='Database password (reads from /etc/archivesmp/agent.yaml if not provided)')
+    parser.add_argument('--db-name', default='', help='Database name (reads from /etc/archivesmp/agent.yaml if not provided)')
     
     args = parser.parse_args()
     
+    # Load config from /etc/archivesmp/agent.yaml and merge with args
+    from ..core.settings import SettingsHandler
+    try:
+        settings = SettingsHandler()
+        config_db_host = settings.DB_HOST
+        config_db_port = settings.DB_PORT
+        config_db_user = settings.DB_USER
+        config_db_password = settings.DB_PASSWORD
+        config_db_name = settings.DB_NAME
+    except:
+        # Fallback: try loading agent.yaml directly
+        import yaml
+        config_path = Path("/etc/archivesmp/agent.yaml")
+        if config_path.exists():
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+                db_conf = config.get('database', {})
+                config_db_host = db_conf.get('host', '')
+                config_db_port = db_conf.get('port', 3306)
+                config_db_user = db_conf.get('user', '')
+                config_db_password = db_conf.get('password', '')
+                config_db_name = db_conf.get('database', '')
+        else:
+            raise RuntimeError("No agent.yaml config found at /etc/archivesmp/agent.yaml and SettingsHandler failed")
+    
+    # Args override config file (only if provided)
     db_config = {
-        'host': args.db_host,
-        'port': args.db_port,
-        'user': args.db_user,
-        'password': args.db_password,
-        'database': args.db_name
+        'host': args.db_host if args.db_host else config_db_host,
+        'port': args.db_port if args.db_port else config_db_port,
+        'user': args.db_user if args.db_user else config_db_user,
+        'password': args.db_password if args.db_password else config_db_password,
+        'database': args.db_name if args.db_name else config_db_name
     }
     
     agent = EndpointAgent(args.server, db_config)

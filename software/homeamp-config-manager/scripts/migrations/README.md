@@ -140,7 +140,7 @@ chmod +x run_migrations.sh
 ./run_migrations.sh <host> <port> <user> <password> <database>
 
 # Example
-./run_migrations.sh 135.181.212.169 3369 sqlworkerSMP 'SQLdb2024!' archivesmp_config
+./run_migrations.sh <DB_HOST> <DB_PORT> <DB_USER> '<DB_PASSWORD>' <DB_NAME>
 ```
 
 The script will:
@@ -155,8 +155,8 @@ The script will:
 Run migrations individually in order:
 
 ```bash
-mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'SQLdb2024!' archivesmp_config < migrations/001_create_meta_tags.sql
-mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'SQLdb2024!' archivesmp_config < migrations/002_create_instance_meta_tags.sql
+mysql -h <DB_HOST> -P <DB_PORT> -u <DB_USER> -p'<DB_PASSWORD>' <DB_NAME> < migrations/001_create_meta_tags.sql
+mysql -h <DB_HOST> -P <DB_PORT> -u <DB_USER> -p'<DB_PASSWORD>' <DB_NAME> < migrations/002_create_instance_meta_tags.sql
 # ... etc
 ```
 
@@ -166,8 +166,8 @@ mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'SQLdb2024!' archivesmp_confi
 cd scripts\migrations
 
 # Run each migration
-Get-Content .\001_create_meta_tags.sql | mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'SQLdb2024!' archivesmp_config
-Get-Content .\002_create_instance_meta_tags.sql | mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p'SQLdb2024!' archivesmp_config
+Get-Content .\001_create_meta_tags.sql | mysql -h <DB_HOST> -P <DB_PORT> -u <DB_USER> -p'<DB_PASSWORD>' <DB_NAME>
+Get-Content .\002_create_instance_meta_tags.sql | mysql -h <DB_HOST> -P <DB_PORT> -u <DB_USER> -p'<DB_PASSWORD>' <DB_NAME>
 # ... etc
 ```
 

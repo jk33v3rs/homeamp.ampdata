@@ -8,10 +8,10 @@
 # =============================================================================
 # Configuration
 # =============================================================================
-MYSQL_HOST="${1:-135.181.212.169}"
-MYSQL_PORT="${2:-3369}"
-MYSQL_USER="${3:-sqlworkerSMP}"
-MYSQL_PASSWORD="${4:-SQLdb2024!}"
+MYSQL_HOST="${1}"
+MYSQL_PORT="${2}"
+MYSQL_USER="${3}"
+MYSQL_PASSWORD="${4}"
 DATABASE="${5:-archivesmp_config}"
 
 MIGRATIONS_DIR="$(dirname "$0")/migrations"

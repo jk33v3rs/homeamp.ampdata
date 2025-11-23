@@ -113,11 +113,11 @@ class AgentService:
             db_config = get_db_config()
             
             self.db_conn = mariadb.connect(
-                host=db_config.get('host', '135.181.212.169'),
-                port=db_config.get('port', 3369),
-                user=db_config.get('user', 'sqlworkerSMP'),
+                host=db_config.get('host', ''),
+                port=db_config.get('port', 3306),
+                user=db_config.get('user', ''),
                 password=db_config.get('password', ''),
-                database=db_config.get('database', 'asmp_config')
+                database=db_config.get('database', '')
             )
             
             # Initialize notification system

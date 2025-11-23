@@ -568,10 +568,10 @@ class ConfigUpdater:
             import os
             
             # Get database connection from environment or use defaults
-            db_host = os.getenv('ASMP_DB_HOST', '135.181.212.169')
-            db_port = int(os.getenv('ASMP_DB_PORT', '3369'))
-            db_user = os.getenv('ASMP_DB_USER', 'sqlworkerSMP')
-            db_pass = os.getenv('ASMP_DB_PASSWORD', '2024!SQLdb')
+            db_host = os.getenv('ASMP_DB_HOST', '')
+            db_port = int(os.getenv('ASMP_DB_PORT', '0'))
+            db_user = os.getenv('ASMP_DB_USER', '')
+            db_pass = os.getenv('ASMP_DB_PASSWORD', '')
             
             # Connect to database
             db = ConfigDatabase(db_host, db_port, db_user, db_pass)

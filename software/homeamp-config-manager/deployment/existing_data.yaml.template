@@ -1,0 +1,23 @@
+# ArchiveSMP Existing Production Data Configuration
+# Deploy to: /etc/archivesmp/existing_data.yaml
+# IMPORTANT: Replace all <PLACEHOLDER> values with your actual production data
+
+# Legacy database connection (for migration/import scripts)
+legacy_database:
+  host: "<OLD_DB_HOST>"      # Legacy database host
+  port: <OLD_DB_PORT>        # Legacy database port (e.g., 3369)
+  user: "<OLD_DB_USER>"      # Legacy database username
+  password: "<OLD_DB_PASSWORD>"  # Legacy database password
+  database: "<OLD_DB_NAME>"  # Legacy database name (e.g., asmp_SQL)
+
+# Production paths and identifiers (for data import/migration)
+production_paths:
+  # AMP data paths on production servers
+  amp_data_base: "/home/${USER}/.ampdata"
+  
+  # Server identifiers for path matching
+  servers:
+    - name: "HETZNER"
+      path_pattern: "HETZNER.*"  # Glob pattern for directory matching
+    - name: "OVH"
+      path_pattern: "OVH.*"      # Glob pattern for directory matching

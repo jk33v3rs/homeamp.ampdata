@@ -25,18 +25,21 @@ def main():
     
     # Database config
     db_config = {
-        'host': '135.181.212.169',
-        'port': 3369,
-        'user': 'sqlworkerSMP',
-        'password': 'SQLdb2024!',
-        'database': 'asmp_config'
+        'host': os.getenv('DB_HOST'),
+        'port': int(os.getenv('DB_PORT', 3306)),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'database': os.getenv('DB_NAME')
     }
     
     # Determine server name from hostname
     import socket
     hostname = socket.gethostname()
-    if 'archivesmp' in hostname.lower() or '135.181' in hostname:
+    # Auto-detect if possible, otherwise prompt
+    if 'hetzner' in hostname.lower():
         server_name = 'hetzner-xeon'
+    elif 'ovh' in hostname.lower():
+        server_name = 'ovh-ryzen'
     else:
         server_name = input("Enter server name (hetzner-xeon or ovh-ryzen): ").strip()
     
@@ -59,7 +62,7 @@ def main():
     print("Next steps:")
     print("1. Check database: SELECT COUNT(*) FROM plugins;")
     print("2. Start agent: sudo systemctl restart homeamp-agent")
-    print("3. Check GUI: http://135.181.212.169:8078/")
+    print(f"3. Check GUI: http://{db_config['host']}:8078/")
 
 
 if __name__ == "__main__":

@@ -57,8 +57,9 @@ echo -e "${GREEN}✓ Python packages installed${NC}"
 
 echo -e "${YELLOW}[5/7] Creating configuration files...${NC}"
 
-# Create agent config
-cat > "$CONFIG_DIR/agent.yaml" << 'EOF'
+# Create agent config (only if it doesn't exist)
+if [ ! -f "$CONFIG_DIR/agent.yaml" ]; then
+  cat > "$CONFIG_DIR/agent.yaml" << 'EOF'
 agent:
   server_name: "HETZNER"
   amp_data_path: "/home/amp/.ampdata/instances"
@@ -72,8 +73,10 @@ storage:
     endpoint: "localhost:9000"
     secure: false
 EOF
-
-echo -e "${GREEN}✓ Created $CONFIG_DIR/agent.yaml${NC}"
+  echo -e "${GREEN}✓ Created $CONFIG_DIR/agent.yaml${NC}"
+else
+  echo -e "${YELLOW}⚠ agent.yaml already exists, skipping creation (preserving existing credentials)${NC}"
+fi
 
 echo -e "${YELLOW}[6/7] Installing systemd services...${NC}"
 

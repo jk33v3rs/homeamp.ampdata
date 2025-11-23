@@ -60,11 +60,14 @@ agent = None  # Reference to running agent (if any)
 async def startup():
     """Initialize database connection"""
     global db
+    from ..api.db_config import get_db_config
+    
+    db_config = get_db_config()
     db = ConfigDatabase(
-        host='135.181.212.169',
-        port=3369,
-        user='sqlworkerSMP',
-        password='2024!SQLdb'
+        host=db_config['host'],
+        port=db_config['port'],
+        user=db_config['user'],
+        password=db_config['password']
     )
     db.connect()
 

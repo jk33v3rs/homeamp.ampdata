@@ -1,11 +1,12 @@
 # ArchiveSMP Configuration Manager - Unified Configuration
 # This file should be placed at: /etc/archivesmp/agent.yaml
 # Used by both Agent Service and Web API
+# IMPORTANT: Replace all <PLACEHOLDER> values with your actual credentials
 
 # Physical server configuration
 agent:
   server_name: "HETZNER"  # Change to "OVH" for OVH server
-  amp_data_path: "/home/amp/.ampdata/instances"
+  amp_data_path: "/home/${USER}/.ampdata/instances"  # Uses current user's home directory
   
   # Polling intervals (seconds)
   polling:
@@ -20,6 +21,14 @@ agent:
     log_to_console: true
     log_to_file: true
     log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Database connection (REQUIRED)
+database:
+  host: "<DB_HOST>"          # e.g., "localhost" or IP address
+  port: <DB_PORT>            # e.g., 3306
+  user: "<DB_USER>"          # Database username
+  password: "<DB_PASSWORD>"  # Database password
+  database: "<DB_NAME>"      # Database name
 
 # MinIO storage configuration
 storage:

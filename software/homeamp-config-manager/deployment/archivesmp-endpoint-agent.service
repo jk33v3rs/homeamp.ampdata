@@ -10,11 +10,7 @@ Group=amp
 WorkingDirectory=/opt/archivesmp-config-manager
 Environment="PYTHONPATH=/opt/archivesmp-config-manager"
 ExecStart=/opt/archivesmp-config-manager/.venv/bin/python -m src.agent.endpoint_agent \
-    --server=SERVER_NAME_PLACEHOLDER \
-    --db-host=135.181.212.169 \
-    --db-port=3369 \
-    --db-user=sqlworkerSMP \
-    --db-password=SQLdb2024!
+    --server=SERVER_NAME_PLACEHOLDER
 
 Restart=on-failure
 RestartSec=10

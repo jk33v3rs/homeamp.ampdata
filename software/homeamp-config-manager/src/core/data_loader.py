@@ -91,12 +91,22 @@ class ProductionDataLoader:
     
     def _find_amp_config_path(self, server_id: str, platform: str) -> Optional[Path]:
         """Find AMP configuration snapshot path for a server"""
+        # Search for directories matching the platform (don't hardcode IPs)
         if platform == "OVH":
-            amp_path = self.base_path / "OVH.37.187.143.41" / "amp_config_snapshot" / server_id
+            # Find any directory starting with "OVH."
+            pattern = "OVH.*"
         else:  # Hetzner
-            amp_path = self.base_path / "HETZNER.135.181.212.169" / "amp_config_snapshot" / server_id
+            # Find any directory starting with "HETZNER."
+            pattern = "HETZNER.*"
         
-        return amp_path if amp_path.exists() else None
+        # Search for matching directory
+        for dir_path in self.base_path.glob(pattern):
+            if dir_path.is_dir():
+                amp_path = dir_path / "amp_config_snapshot" / server_id
+                if amp_path.exists():
+                    return amp_path
+        
+        return None
     
     def get_all_servers(self) -> Dict[str, ServerInfo]:
         """Get all discovered servers"""
