@@ -301,7 +301,6 @@ class ProductionEndpointAgent(AgentDatabaseMethods, AgentUpdateMethods, AgentCIC
             }
             
             discovered.append(instance_info)
-            self._log_discovery_item('instance', instance_info['name'], str(instance_dir), 'discovered')
         
         return discovered
     
@@ -330,7 +329,6 @@ class ProductionEndpointAgent(AgentDatabaseMethods, AgentUpdateMethods, AgentCIC
             self._register_plugin_installation(instance_id, plugin_id, plugin_info, jar_file)
             
             discovered.append(plugin_info)
-            self._log_discovery_item('plugin', plugin_id, str(jar_file), 'discovered')
         
         return discovered
     
@@ -371,7 +369,6 @@ class ProductionEndpointAgent(AgentDatabaseMethods, AgentUpdateMethods, AgentCIC
                 self._register_datapack_installation(instance_id, datapack_id, world_name, datapack_info, datapack_item)
                 
                 discovered.append(datapack_info)
-                self._log_discovery_item('datapack', datapack_id, str(datapack_item), 'discovered')
         
         return discovered
     

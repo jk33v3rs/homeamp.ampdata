@@ -343,25 +343,29 @@ class ScheduledTasksRunner:
             self.cursor.execute(query)
             unread_notifications = self.cursor.fetchone()['unread_count']
             
-            # Store metrics
-            query = """
-                INSERT INTO system_health_metrics (
-                    metric_name,
-                    metric_value,
-                    metric_unit,
-                    recorded_at
-                ) VALUES
-                (%s, %s, %s, NOW()),
-                (%s, %s, %s, NOW()),
-                (%s, %s, %s, NOW())
-            """
+            # DISABLED: Metrics insertion creates millions of records
+            # Just log the stats instead of inserting into DB
+            logger.info(f"Health metrics: instances={active_instances}, deployments={pending_deployments}, notifications={unread_notifications}")
             
-            self.cursor.execute(query, (
-                'active_instances', active_instances, 'count',
-                'pending_deployments', pending_deployments, 'count',
-                'unread_notifications', unread_notifications, 'count'
-            ))
-            self.db.commit()
+            # # Store metrics
+            # query = """
+            #     INSERT INTO system_health_metrics (
+            #         metric_name,
+            #         metric_value,
+            #         metric_unit,
+            #         recorded_at
+            #     ) VALUES
+            #     (%s, %s, %s, NOW()),
+            #     (%s, %s, %s, NOW()),
+            #     (%s, %s, %s, NOW())
+            # """
+            # 
+            # self.cursor.execute(query, (
+            #     'active_instances', active_instances, 'count',
+            #     'pending_deployments', pending_deployments, 'count',
+            #     'unread_notifications', unread_notifications, 'count'
+            # ))
+            # self.db.commit()
             
             return {
                 "active_instances": active_instances,
