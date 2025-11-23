@@ -443,31 +443,19 @@ class SettingsHandler:
     
     # Database Configuration
     @property
-    def production_db_host(self) -> str:
-        """Get production database host"""
-        return self.get('database', 'production_db_host', default='')
-    
-    @property
-    def get_production_db_name(self) -> str:
-        """Get production database name from config"""
-        return self.get('database', 'production_db_name', default='')
-    
-    @property
     def DB_HOST(self) -> str:
-        """Get database host (backwards compat)"""
-        host_port = self.production_db_host
-        return host_port.split(':')[0] if ':' in host_port else host_port
+        """Get database host"""
+        return self.get('database', 'host', default='')
     
     @property
     def DB_PORT(self) -> int:
-        """Get database port (backwards compat)"""
-        host_port = self.production_db_host
-        return int(host_port.split(':')[1]) if ':' in host_port else 3369
+        """Get database port"""
+        return self.get('database', 'port', default=3306)
     
     @property
     def DB_NAME(self) -> str:
-        """Get database name (backwards compat)"""
-        return self.production_db_name
+        """Get database name"""
+        return self.get('database', 'database', default='')
     
     @property
     def DB_USER(self) -> str:
