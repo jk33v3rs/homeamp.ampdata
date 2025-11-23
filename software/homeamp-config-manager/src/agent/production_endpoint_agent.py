@@ -473,31 +473,32 @@ class ProductionEndpointAgent(AgentDatabaseMethods, AgentUpdateMethods, AgentCIC
                         if self.drift_ignore_comments and self._is_comment_key(key):
                             continue
                         
-                        # Log the actual change
-                        change_type = 'automated' if old_value is None else 'drift_fix'
-                        self.db.log_config_change(
-                            instance_id=instance_id,
-                            plugin_name=plugin_name,
-                            config_file=config_file,
-                            config_key=key,
-                            old_value=str(old_value) if old_value is not None else None,
-                            new_value=str(new_value),
-                            change_type=change_type,
-                            change_source='agent_drift_detection'
-                        )
+                        # DISABLED: Logging drift to config_change_history creates 450K+ bloat
+                        # Drift should go to config_variance_detected, not change_history
+                        # change_type = 'automated' if old_value is None else 'drift_fix'
+                        # self.db.log_config_change(
+                        #     instance_id=instance_id,
+                        #     plugin_name=plugin_name,
+                        #     config_file=config_file,
+                        #     config_key=key,
+                        #     old_value=str(old_value) if old_value is not None else None,
+                        #     new_value=str(new_value),
+                        #     change_type=change_type,
+                        #     change_source='agent_drift_detection'
+                        # )
                         
                         self.logger.debug(f" {instance_id} | {plugin_name}.{config_file} | {key}: {old_value} → {new_value}")
                 
                 else:
-                    # Legacy mode: log all configs (not recommended)
-                    for key, value in flat_config.items():
-                        self.db.log_config_change(
-                            instance_id=instance_id,
-                            plugin_name=plugin_name,
-                            config_file=config_file,
-                            config_key=key,
-                            old_value=None,
-                            new_value=str(value),
+                    # DISABLED: Legacy logging creates massive bloat in config_change_history
+                    # for key, value in flat_config.items():
+                    #     self.db.log_config_change(
+                    #         instance_id=instance_id,
+                    #         plugin_name=plugin_name,
+                    #         config_file=config_file,
+                    #         config_key=key,
+                    #         old_value=None,
+                    #         new_value=str(value),
                             change_type='automated',
                             change_source='agent_scan'
                         )
