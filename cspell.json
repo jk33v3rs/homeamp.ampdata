@@ -1,13 +1,37 @@
 {
     "version": "0.2",
     "ignorePaths": [],
-    "dictionaryDefinitions": [],
+    "dictionaryDefinitions": [
+        {
+            "name": "custom-dictionary",
+            "path": "./.cspell/custom-dictionary.txt",
+            "addWords": true
+        }
+    ],
     "dictionaries": [
-        "custom-dictionary-user.txt"
+        "custom-dictionary-user.txt",
+        "custom-dictionary"
     ],
     "words": [
         "homeamp",
-        "sudo"
+        "sudo",
+        "usr",
+        "velocitab",
+        "vcustombrand",
+        "papi",
+        "minimessage",
+        "src",
+        "nametag",
+        "footers",
+        "placeholders",
+        "nametags",
+        "tablist",
+        "tablists",
+        "ampdata",
+        "vcustombrand",
+        "nametags",
+        "tablists",
+        "tablist",
     ],
     "ignoreWords": [],
     "import": []

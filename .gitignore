@@ -21,6 +21,9 @@ asset_registry_extracted/
 .venv/
 venv/
 
+# Node.js dependencies (can be reinstalled from package.json)
+node_modules/
+
 # Standard ignores for development
 *.tmp
 *.log
