@@ -28,9 +28,9 @@ class ConfigDeployer:
     def __init__(self):
         self.settings = get_settings()
         self.placeholder_patterns = {
-            '%SERVER_NAME%': lambda inst: inst['server_name'],
-            '%INSTANCE_NAME%': lambda inst: inst['instance_name'],
-            '%INSTANCE_SHORT%': lambda inst: self._get_instance_short(inst['instance_name'])
+            "%SERVER_NAME%": lambda inst: inst["server_name"],
+            "%INSTANCE_NAME%": lambda inst: inst["instance_name"],
+            "%INSTANCE_SHORT%": lambda inst: self._get_instance_short(inst["instance_name"]),
         }
 
     def _get_instance_short(self, instance_name: str) -> str:
@@ -38,7 +38,7 @@ class ConfigDeployer:
         Extract short name from instance name
         Example: 'PRI01-Survival' -> 'PRI01'
         """
-        return instance_name.split('-')[0] if '-' in instance_name else instance_name
+        return instance_name.split("-")[0] if "-" in instance_name else instance_name
 
     def _get_db_connection(self):
         """Get database connection"""
@@ -50,7 +50,7 @@ class ConfigDeployer:
         plugin_name: str,
         config_yaml: str,
         instance_ids: List[int],
-        resolve_placeholders: bool = True
+        resolve_placeholders: bool = True,
     ) -> Dict[str, any]:
         """
         Receive deployment request from API
@@ -69,11 +69,11 @@ class ConfigDeployer:
         logger.info(f"Received deployment {deployment_id} for {plugin_name} to {len(instance_ids)} instances")
 
         results = {
-            'deployment_id': deployment_id,
-            'total_instances': len(instance_ids),
-            'successful': 0,
-            'failed': 0,
-            'results': []
+            "deployment_id": deployment_id,
+            "total_instances": len(instance_ids),
+            "successful": 0,
+            "failed": 0,
+            "results": [],
         }
 
         conn = self._get_db_connection()
@@ -81,24 +81,25 @@ class ConfigDeployer:
 
         try:
             # Update deployment status to 'processing'
-            self.update_deployment_status(deployment_id, 'processing', 'Starting deployment')
+            self.update_deployment_status(deployment_id, "processing", "Starting deployment")
 
             for instance_id in instance_ids:
                 try:
                     # Get instance data
-                    cursor.execute("""
+                    cursor.execute(
+                        """
                         SELECT instance_id, instance_name, server_name, instance_path
                         FROM instances
                         WHERE instance_id = %s
-                    """, (instance_id,))
+                    """,
+                        (instance_id,),
+                    )
 
                     instance = cursor.fetchone()
                     if not instance:
                         logger.warning(f"Instance {instance_id} not found, skipping")
-                        self.log_deployment_event(
-                            deployment_id, instance_id, 'failed', f'Instance not found'
-                        )
-                        results['failed'] += 1
+                        self.log_deployment_event(deployment_id, instance_id, "failed", f"Instance not found")
+                        results["failed"] += 1
                         continue
 
                     # Resolve placeholders if needed
@@ -108,46 +109,38 @@ class ConfigDeployer:
                         resolved_yaml = config_yaml
 
                     # Write config to instance
-                    success = self.write_config_to_instance(
-                        instance, plugin_name, resolved_yaml
-                    )
+                    success = self.write_config_to_instance(instance, plugin_name, resolved_yaml)
 
                     if success:
-                        results['successful'] += 1
+                        results["successful"] += 1
                         self.log_deployment_event(
-                            deployment_id, instance_id, 'completed',
-                            f'Config deployed successfully'
+                            deployment_id, instance_id, "completed", f"Config deployed successfully"
                         )
-                        results['results'].append({
-                            'instance_id': instance_id,
-                            'instance_name': instance['instance_name'],
-                            'status': 'success'
-                        })
+                        results["results"].append(
+                            {
+                                "instance_id": instance_id,
+                                "instance_name": instance["instance_name"],
+                                "status": "success",
+                            }
+                        )
                     else:
-                        results['failed'] += 1
-                        results['results'].append({
-                            'instance_id': instance_id,
-                            'instance_name': instance['instance_name'],
-                            'status': 'failed'
-                        })
+                        results["failed"] += 1
+                        results["results"].append(
+                            {"instance_id": instance_id, "instance_name": instance["instance_name"], "status": "failed"}
+                        )
 
                 except Exception as e:
                     logger.error(f"Failed to deploy to instance {instance_id}: {e}")
-                    self.log_deployment_event(
-                        deployment_id, instance_id, 'failed', str(e)
-                    )
-                    results['failed'] += 1
-                    results['results'].append({
-                        'instance_id': instance_id,
-                        'status': 'error',
-                        'error': str(e)
-                    })
+                    self.log_deployment_event(deployment_id, instance_id, "failed", str(e))
+                    results["failed"] += 1
+                    results["results"].append({"instance_id": instance_id, "status": "error", "error": str(e)})
 
             # Update final deployment status
-            final_status = 'completed' if results['failed'] == 0 else 'partial'
+            final_status = "completed" if results["failed"] == 0 else "partial"
             self.update_deployment_status(
-                deployment_id, final_status,
-                f"Deployed to {results['successful']}/{results['total_instances']} instances"
+                deployment_id,
+                final_status,
+                f"Deployed to {results['successful']}/{results['total_instances']} instances",
             )
 
         finally:
@@ -183,12 +176,7 @@ class ConfigDeployer:
 
         return resolved
 
-    def write_config_to_instance(
-        self,
-        instance: Dict,
-        plugin_name: str,
-        config_yaml: str
-    ) -> bool:
+    def write_config_to_instance(self, instance: Dict, plugin_name: str, config_yaml: str) -> bool:
         """
         Write configuration to instance plugin directory
 
@@ -202,15 +190,15 @@ class ConfigDeployer:
         """
         try:
             # Construct target path
-            instance_path = Path(instance['instance_path'])
-            plugin_dir = instance_path / 'plugins' / plugin_name
-            config_file = plugin_dir / 'config.yml'
+            instance_path = Path(instance["instance_path"])
+            plugin_dir = instance_path / "plugins" / plugin_name
+            config_file = plugin_dir / "config.yml"
 
             # Create plugin directory if it doesn't exist
             plugin_dir.mkdir(parents=True, exist_ok=True)
 
             # Write config file
-            config_file.write_text(config_yaml, encoding='utf-8')
+            config_file.write_text(config_yaml, encoding="utf-8")
 
             logger.info(f"Wrote config to {config_file}")
             return True
@@ -234,12 +222,7 @@ class ConfigDeployer:
         # TODO: Call AMP API to restart instance
         return False
 
-    def update_deployment_status(
-        self,
-        deployment_id: int,
-        status: str,
-        message: str
-    ):
+    def update_deployment_status(self, deployment_id: int, status: str, message: str):
         """
         Update deployment queue status
 
@@ -252,11 +235,14 @@ class ConfigDeployer:
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE deployment_queue
                 SET status = %s, updated_at = NOW()
                 WHERE id = %s
-            """, (status, deployment_id))
+            """,
+                (status, deployment_id),
+            )
 
             conn.commit()
             logger.info(f"Deployment {deployment_id} status updated to {status}: {message}")
@@ -265,13 +251,7 @@ class ConfigDeployer:
             cursor.close()
             conn.close()
 
-    def log_deployment_event(
-        self,
-        deployment_id: int,
-        instance_id: int,
-        status: str,
-        message: str
-    ):
+    def log_deployment_event(self, deployment_id: int, instance_id: int, status: str, message: str):
         """
         Log deployment event to deployment_logs table
 
@@ -285,11 +265,14 @@ class ConfigDeployer:
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO deployment_logs
                 (deployment_id, instance_id, status, message, timestamp)
                 VALUES (%s, %s, %s, %s, NOW())
-            """, (deployment_id, instance_id, status, message))
+            """,
+                (deployment_id, instance_id, status, message),
+            )
 
             conn.commit()
 
@@ -300,13 +283,7 @@ class ConfigDeployer:
             cursor.close()
             conn.close()
 
-    def report_deployment_status(
-        self,
-        deployment_id: int,
-        instance_id: int,
-        status: str,
-        message: str
-    ):
+    def report_deployment_status(self, deployment_id: int, instance_id: int, status: str, message: str):
         """
         Report deployment status (alias for log_deployment_event)
         """

@@ -15,17 +15,17 @@ class UpdateSchedulerInstaller:
     Installs systemd timer and service for hourly plugin update checks
     on bare metal Debian servers
     """
-    
+
     def __init__(self, install_path: Path = Path("/opt/archivesmp-config-manager")):
         """
         Initialize installer
-        
+
         Args:
             install_path: Base installation directory
         """
         self.install_path = install_path
         self.logger = logging.getLogger(__name__)
-    
+
     def generate_systemd_service(self) -> str:
         """Generate systemd service file content"""
         return f"""[Unit]
@@ -49,7 +49,7 @@ Environment="EXCEL_PATH=/var/lib/archivesmp/reports/plugin_updates.xlsx"
 [Install]
 WantedBy=multi-user.target
 """
-    
+
     def generate_systemd_timer(self) -> str:
         """Generate systemd timer file content"""
         return """[Unit]
@@ -64,13 +64,13 @@ Unit=archivesmp-plugin-update.service
 [Install]
 WantedBy=timers.target
 """
-    
+
     def generate_crontab_entry(self) -> str:
         """Generate crontab entry as alternative to systemd timer"""
         return f"""# ArchiveSMP Plugin Update Checker - Runs hourly
 0 * * * * cd {self.install_path} && /usr/bin/python3 -m src.automation.pulumi_update_monitor >> /var/log/archivesmp/plugin-update.log 2>&1
 """
-    
+
     def generate_install_script(self) -> str:
         """Generate installation script"""
         return f"""#!/bin/bash
@@ -120,7 +120,7 @@ echo "  Timer: systemctl status archivesmp-plugin-update.timer"
 echo "  Logs:  journalctl -u archivesmp-plugin-update.service -f"
 echo "  Run manually: systemctl start archivesmp-plugin-update.service"
 """
-    
+
     def generate_plugin_registry_template(self) -> str:
         """Generate plugin registry YAML template"""
         return """# ArchiveSMP Plugin Registry
@@ -214,7 +214,7 @@ WorldGuard:
 #   requires_restart: true
 #   compatibility_notes: "Server essentials suite"
 """
-    
+
     def generate_uninstall_script(self) -> str:
         """Generate uninstallation script"""
         return """#!/bin/bash
@@ -239,66 +239,66 @@ echo " Plugin update scheduler uninstalled"
 echo "  Note: Staged plugins preserved in /var/lib/archivesmp/plugin-staging"
 echo "  Note: Reports preserved in /var/lib/archivesmp/reports"
 """
-    
+
     def write_install_files(self, output_dir: Path):
         """
         Write all installation files to directory
-        
+
         Args:
             output_dir: Directory to write installation files
         """
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Write systemd service
         service_file = output_dir / "archivesmp-plugin-update.service"
-        with open(service_file, 'w') as f:
+        with open(service_file, "w") as f:
             f.write(self.generate_systemd_service())
         self.logger.info(f"Written: {service_file}")
-        
+
         # Write systemd timer
         timer_file = output_dir / "archivesmp-plugin-update.timer"
-        with open(timer_file, 'w') as f:
+        with open(timer_file, "w") as f:
             f.write(self.generate_systemd_timer())
         self.logger.info(f"Written: {timer_file}")
-        
+
         # Write crontab entry
         crontab_file = output_dir / "crontab.txt"
-        with open(crontab_file, 'w') as f:
+        with open(crontab_file, "w") as f:
             f.write(self.generate_crontab_entry())
         self.logger.info(f"Written: {crontab_file}")
-        
+
         # Write install script
         install_script = output_dir / "install_scheduler.sh"
-        with open(install_script, 'w', encoding='utf-8') as f:
+        with open(install_script, "w", encoding="utf-8") as f:
             f.write(self.generate_install_script())
         install_script.chmod(0o755)
         self.logger.info(f"Written: {install_script}")
-        
+
         # Write uninstall script
         uninstall_script = output_dir / "uninstall_scheduler.sh"
-        with open(uninstall_script, 'w', encoding='utf-8') as f:
+        with open(uninstall_script, "w", encoding="utf-8") as f:
             f.write(self.generate_uninstall_script())
         uninstall_script.chmod(0o755)
         self.logger.info(f"Written: {uninstall_script}")
-        
+
         # Write plugin registry template
         registry_file = output_dir / "plugin_registry.yaml"
-        with open(registry_file, 'w') as f:
+        with open(registry_file, "w") as f:
             f.write(self.generate_plugin_registry_template())
         self.logger.info(f"Written: {registry_file}")
-        
+
         self.logger.info(f"All installation files written to: {output_dir}")
 
 
 def main():
     """Generate installation files"""
     logging.basicConfig(level=logging.INFO)
-    
+
     installer = UpdateSchedulerInstaller()
     output_dir = Path(__file__).parent.parent.parent / "deployment" / "plugin-update-scheduler"
-    
+
     installer.write_install_files(output_dir)
-    
+
     print(f"\n=== Installation files generated ===")
     print(f"Location: {output_dir}")
     print(f"\nTo install on production server:")

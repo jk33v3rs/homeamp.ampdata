@@ -19,8 +19,10 @@ router = APIRouter(prefix="/api/variances", tags=["variances"])
 # Pydantic Models
 # ====================
 
+
 class ConfigVariance(BaseModel):
     """Configuration variance model"""
+
     id: Optional[int] = None
     variance_id: Optional[int] = None
     plugin_name: str
@@ -33,17 +35,21 @@ class ConfigVariance(BaseModel):
     is_intentional: bool = False
     detected_at: Optional[datetime]
 
+
 # ====================
 # Database Helper
 # ====================
+
 
 def get_db_connection():
     """Get MySQL database connection"""
     return get_db()
 
+
 # ====================
 # Endpoints
 # ====================
+
 
 @router.get("/all", response_model=List[ConfigVariance])
 async def get_all_variances():
@@ -54,7 +60,8 @@ async def get_all_variances():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 cv.id as variance_id,
                 cv.plugin_name,
@@ -69,26 +76,29 @@ async def get_all_variances():
             FROM config_variances cv
             LEFT JOIN instances i ON cv.instance_id = i.instance_id
             ORDER BY cv.plugin_name ASC, i.instance_name ASC, cv.config_key ASC
-        """)
+        """
+        )
 
         results = cursor.fetchall()
-        
+
         variances = []
         for row in results:
-            variances.append(ConfigVariance(
-                id=row['variance_id'],
-                variance_id=row['variance_id'],
-                plugin_name=row['plugin_name'],
-                instance_id=row['instance_id'],
-                instance_name=row['instance_name'],
-                server_name=row['server_name'],
-                config_key=row['config_key'],
-                baseline_value=row['baseline_value'],
-                actual_value=row['actual_value'],
-                is_intentional=bool(row['is_intentional']),
-                detected_at=row['detected_at']
-            ))
-        
+            variances.append(
+                ConfigVariance(
+                    id=row["variance_id"],
+                    variance_id=row["variance_id"],
+                    plugin_name=row["plugin_name"],
+                    instance_id=row["instance_id"],
+                    instance_name=row["instance_name"],
+                    server_name=row["server_name"],
+                    config_key=row["config_key"],
+                    baseline_value=row["baseline_value"],
+                    actual_value=row["actual_value"],
+                    is_intentional=bool(row["is_intentional"]),
+                    detected_at=row["detected_at"],
+                )
+            )
+
         return variances
 
     finally:
@@ -107,12 +117,15 @@ async def remove_variance(plugin_name: str, instance_id: int, config_key: str):
 
     try:
         # Delete the variance record
-        cursor.execute("""
+        cursor.execute(
+            """
             DELETE FROM config_variances
             WHERE plugin_name = %s 
             AND instance_id = %s 
             AND config_key = %s
-        """, (plugin_name, instance_id, config_key))
+        """,
+            (plugin_name, instance_id, config_key),
+        )
 
         deleted_count = cursor.rowcount
         conn.commit()
@@ -120,11 +133,7 @@ async def remove_variance(plugin_name: str, instance_id: int, config_key: str):
         if deleted_count == 0:
             raise HTTPException(status_code=404, detail="Variance not found")
 
-        return {
-            'deleted': True,
-            'applied_default': True,
-            'message': f'Variance removed for {config_key}'
-        }
+        return {"deleted": True, "applied_default": True, "message": f"Variance removed for {config_key}"}
 
     finally:
         cursor.close()

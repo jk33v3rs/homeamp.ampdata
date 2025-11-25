@@ -22,6 +22,7 @@ router = APIRouter(prefix="/api/audit-log", tags=["audit-log"])
 # Models
 # ====================
 
+
 class AuditEvent(BaseModel):
     event_id: int
     event_type: str
@@ -32,6 +33,7 @@ class AuditEvent(BaseModel):
     details: Optional[Dict[str, Any]]
     timestamp: datetime
 
+
 class AuditEventsResponse(BaseModel):
     events: List[AuditEvent]
     total: int
@@ -39,9 +41,11 @@ class AuditEventsResponse(BaseModel):
     page_size: int
     total_pages: int
 
+
 # ====================
 # Endpoints
 # ====================
+
 
 @router.get("/events", response_model=AuditEventsResponse)
 async def get_audit_events(
@@ -51,7 +55,7 @@ async def get_audit_events(
     instance_id: Optional[int] = None,
     user: Optional[str] = None,
     start_date: Optional[date] = None,
-    end_date: Optional[date] = None
+    end_date: Optional[date] = None,
 ):
     """
     Get paginated audit events with optional filtering
@@ -59,48 +63,48 @@ async def get_audit_events(
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
-        
+
         # Build WHERE clause
         where_conditions = []
         params = []
-        
+
         if event_type:
             where_conditions.append("al.event_type = %s")
             params.append(event_type)
-        
+
         if instance_id:
             where_conditions.append("al.instance_id = %s")
             params.append(instance_id)
-        
+
         if user:
             where_conditions.append("al.user = %s")
             params.append(user)
-        
+
         if start_date:
             where_conditions.append("al.timestamp >= %s")
             params.append(start_date)
-        
+
         if end_date:
             # Include the entire end date
             where_conditions.append("al.timestamp < DATE_ADD(%s, INTERVAL 1 DAY)")
             params.append(end_date)
-        
+
         where_clause = " AND " + " AND ".join(where_conditions) if where_conditions else ""
-        
+
         # Get total count
         count_query = f"""
             SELECT COUNT(*) as total
             FROM audit_log al
             WHERE 1=1{where_clause}
         """
-        
+
         cursor.execute(count_query, params)
-        total = cursor.fetchone()['total']
-        
+        total = cursor.fetchone()["total"]
+
         # Calculate pagination
         offset = (page - 1) * page_size
         total_pages = (total + page_size - 1) // page_size
-        
+
         # Get events with instance info
         query = f"""
             SELECT 
@@ -118,21 +122,15 @@ async def get_audit_events(
             ORDER BY al.timestamp DESC
             LIMIT %s OFFSET %s
         """
-        
+
         cursor.execute(query, params + [page_size, offset])
         events = cursor.fetchall()
-        
+
         cursor.close()
         conn.close()
-        
-        return AuditEventsResponse(
-            events=events,
-            total=total,
-            page=page,
-            page_size=page_size,
-            total_pages=total_pages
-        )
-        
+
+        return AuditEventsResponse(events=events, total=total, page=page, page_size=page_size, total_pages=total_pages)
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
@@ -145,7 +143,7 @@ async def export_audit_log(
     instance_id: Optional[int] = None,
     user: Optional[str] = None,
     start_date: Optional[date] = None,
-    end_date: Optional[date] = None
+    end_date: Optional[date] = None,
 ):
     """
     Export audit log to CSV with optional filtering
@@ -153,33 +151,33 @@ async def export_audit_log(
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
-        
+
         # Build WHERE clause
         where_conditions = []
         params = []
-        
+
         if event_type:
             where_conditions.append("al.event_type = %s")
             params.append(event_type)
-        
+
         if instance_id:
             where_conditions.append("al.instance_id = %s")
             params.append(instance_id)
-        
+
         if user:
             where_conditions.append("al.user = %s")
             params.append(user)
-        
+
         if start_date:
             where_conditions.append("al.timestamp >= %s")
             params.append(start_date)
-        
+
         if end_date:
             where_conditions.append("al.timestamp < DATE_ADD(%s, INTERVAL 1 DAY)")
             params.append(end_date)
-        
+
         where_clause = " AND " + " AND ".join(where_conditions) if where_conditions else ""
-        
+
         # Get all matching events
         query = f"""
             SELECT 
@@ -194,39 +192,41 @@ async def export_audit_log(
             WHERE 1=1{where_clause}
             ORDER BY al.timestamp DESC
         """
-        
+
         cursor.execute(query, params)
         events = cursor.fetchall()
-        
+
         cursor.close()
         conn.close()
-        
+
         # Create CSV
         output = io.StringIO()
         writer = csv.writer(output)
-        
+
         # Header
-        writer.writerow(['Event ID', 'Timestamp', 'Event Type', 'Instance', 'User', 'Description'])
-        
+        writer.writerow(["Event ID", "Timestamp", "Event Type", "Instance", "User", "Description"])
+
         # Data
         for event in events:
-            writer.writerow([
-                event['event_id'],
-                event['timestamp'],
-                event['event_type'],
-                event['instance_name'] or 'N/A',
-                event['user'] or 'System',
-                event['description']
-            ])
-        
+            writer.writerow(
+                [
+                    event["event_id"],
+                    event["timestamp"],
+                    event["event_type"],
+                    event["instance_name"] or "N/A",
+                    event["user"] or "System",
+                    event["description"],
+                ]
+            )
+
         # Return CSV as download
         output.seek(0)
         return StreamingResponse(
             iter([output.getvalue()]),
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename=audit_log_{datetime.now().strftime('%Y%m%d')}.csv"}
+            headers={"Content-Disposition": f"attachment; filename=audit_log_{datetime.now().strftime('%Y%m%d')}.csv"},
         )
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     except Exception as e:
@@ -234,6 +234,7 @@ async def export_audit_log(
 
 
 # ==================== Additional Bootstrap UI Endpoints ====================
+
 
 class RecentActivity(BaseModel):
     timestamp: datetime
@@ -248,8 +249,9 @@ async def get_recent_activity(limit: int = 10):
     try:
         conn = get_db()
         cursor = conn.cursor(dictionary=True)
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT 
                 timestamp,
                 event_type as action,
@@ -258,21 +260,22 @@ async def get_recent_activity(limit: int = 10):
             FROM audit_log
             ORDER BY timestamp DESC
             LIMIT %s
-        """, (limit,))
-        
+        """,
+            (limit,),
+        )
+
         activities = []
         for row in cursor.fetchall():
-            activities.append(RecentActivity(
-                timestamp=row['timestamp'],
-                action=row['action'],
-                details=row['details'],
-                user=row['user']
-            ))
-        
+            activities.append(
+                RecentActivity(
+                    timestamp=row["timestamp"], action=row["action"], details=row["details"], user=row["user"]
+                )
+            )
+
         cursor.close()
         conn.close()
-        
+
         return activities
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")

@@ -26,15 +26,18 @@ class ApprovalItem(BaseModel):
     timestamp: datetime
     details: Optional[Dict[str, Any]] = None
 
+
 class ApprovalQueueSchema(BaseModel):
     items: List[ApprovalItem]
     count: int
+
 
 class ServerStatus(BaseModel):
     server_name: str
     online: int
     offline: int
     total: int
+
 
 class NetworkStatusSchema(BaseModel):
     online: int
@@ -43,10 +46,12 @@ class NetworkStatusSchema(BaseModel):
     servers: List[ServerStatus]
     variance_count: int
 
+
 class PluginSummarySchema(BaseModel):
     total_plugins: int
     needs_update: int
     up_to_date: int
+
 
 class ActivityLogEntry(BaseModel):
     timestamp: datetime
@@ -54,6 +59,7 @@ class ActivityLogEntry(BaseModel):
     description: str
     instance_id: Optional[str] = None
     user: Optional[str] = None
+
 
 class DatapackInfo(BaseModel):
     id: int
@@ -65,12 +71,14 @@ class DatapackInfo(BaseModel):
     file_hash: str
     discovered_at: datetime
 
+
 class OutdatedPlugin(BaseModel):
     plugin_name: str
     current_version: str
     latest_version: str
     instances: List[str]
     last_checked: datetime
+
 
 class CICDEndpoint(BaseModel):
     id: int
@@ -93,14 +101,14 @@ def get_db_connection():
 async def get_approval_queue():
     """
     Get pending approvals (plugin updates and config changes)
-    
+
     **Semantic**: `DashboardService.getApprovalQueue()`
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         # Get pending plugin updates
         update_query = """
             SELECT 
@@ -117,7 +125,7 @@ async def get_approval_queue():
         """
         cursor.execute(update_query)
         plugin_updates = cursor.fetchall()
-        
+
         # Get pending deployments
         deployment_query = """
             SELECT 
@@ -135,40 +143,45 @@ async def get_approval_queue():
         """
         cursor.execute(deployment_query)
         deployments = cursor.fetchall()
-        
+
         # Combine and process
         items = []
-        
+
         for update in plugin_updates:
-            items.append(ApprovalItem(
-                id=update['id'],
-                type=update['type'],
-                plugin_name=update['plugin_name'],
-                current_version=update['current_version'],
-                new_version=update['new_version'],
-                instances=[update['instance_id']],
-                timestamp=update['timestamp']
-            ))
-        
+            items.append(
+                ApprovalItem(
+                    id=update["id"],
+                    type=update["type"],
+                    plugin_name=update["plugin_name"],
+                    current_version=update["current_version"],
+                    new_version=update["new_version"],
+                    instances=[update["instance_id"]],
+                    timestamp=update["timestamp"],
+                )
+            )
+
         for deploy in deployments:
             # Parse JSON instances if available
             import json
-            instances_str = deploy.get('instances_json', '')
+
+            instances_str = deploy.get("instances_json", "")
             try:
                 instances = json.loads(instances_str) if instances_str else []
             except:
                 instances = []
-            
-            items.append(ApprovalItem(
-                id=deploy['id'],
-                type=deploy['type'],
-                plugin_name=deploy['plugin_name'] or 'Deployment',
-                instances=instances,
-                timestamp=deploy['timestamp']
-            ))
-        
+
+            items.append(
+                ApprovalItem(
+                    id=deploy["id"],
+                    type=deploy["type"],
+                    plugin_name=deploy["plugin_name"] or "Deployment",
+                    instances=instances,
+                    timestamp=deploy["timestamp"],
+                )
+            )
+
         return ApprovalQueueSchema(items=items, count=len(items))
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -181,14 +194,14 @@ async def get_approval_queue():
 async def get_network_status():
     """
     Get network status (online/offline instances)
-    
+
     **Semantic**: `DashboardService.getNetworkStatus()`
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         # Get overall stats (using actual schema - no online_status column yet)
         stats_query = """
             SELECT 
@@ -199,7 +212,7 @@ async def get_network_status():
         """
         cursor.execute(stats_query)
         overall = cursor.fetchone()
-        
+
         # Get per-server stats
         server_query = """
             SELECT 
@@ -212,28 +225,28 @@ async def get_network_status():
         """
         cursor.execute(server_query)
         servers = cursor.fetchall()
-        
+
         # Variance count - return 0 for now (table doesn't exist yet)
         variance_count = 0
-        
+
         server_statuses = [
             ServerStatus(
-                server_name=s['server_name'],
-                online=int(s['online'] or 0),
-                offline=int(s['offline'] or 0),
-                total=int(s['total'])
+                server_name=s["server_name"],
+                online=int(s["online"] or 0),
+                offline=int(s["offline"] or 0),
+                total=int(s["total"]),
             )
             for s in servers
         ]
-        
+
         return NetworkStatusSchema(
-            online=int(overall['online'] or 0),
-            offline=int(overall['offline'] or 0),
-            total=int(overall['total']),
+            online=int(overall["online"] or 0),
+            offline=int(overall["offline"] or 0),
+            total=int(overall["total"]),
             servers=server_statuses,
-            variance_count=0
+            variance_count=0,
         )
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -246,14 +259,14 @@ async def get_network_status():
 async def get_plugin_summary():
     """
     Get plugin summary statistics
-    
+
     **Semantic**: `DashboardService.getPluginSummary()`
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         query = """
             SELECT 
                 COUNT(DISTINCT plugin_name) as total_plugins,
@@ -263,13 +276,13 @@ async def get_plugin_summary():
         """
         cursor.execute(query)
         result = cursor.fetchone()
-        
+
         return PluginSummarySchema(
-            total_plugins=int(result['total_plugins'] or 0),
-            needs_update=int(result['needs_update'] or 0),
-            up_to_date=int(result['up_to_date'] or 0)
+            total_plugins=int(result["total_plugins"] or 0),
+            needs_update=int(result["needs_update"] or 0),
+            up_to_date=int(result["up_to_date"] or 0),
         )
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -282,14 +295,14 @@ async def get_plugin_summary():
 async def get_recent_activity(limit: int = 10):
     """
     Get recent activity log entries
-    
+
     **Semantic**: `DashboardService.getRecentActivity(limit)`
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         # Use config_change_history table which exists
         query = """
             SELECT 
@@ -304,20 +317,20 @@ async def get_recent_activity(limit: int = 10):
         """
         cursor.execute(query, (limit,))
         results = cursor.fetchall()
-        
+
         activities = [
             ActivityLogEntry(
-                timestamp=r['timestamp'],
-                event_type=r['event_type'],
-                description=r['description'],
-                instance_id=r.get('instance_id'),
-                user=r.get('user')
+                timestamp=r["timestamp"],
+                event_type=r["event_type"],
+                description=r["description"],
+                instance_id=r.get("instance_id"),
+                user=r.get("user"),
             )
             for r in results
         ]
-        
+
         return activities
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -330,14 +343,14 @@ async def get_recent_activity(limit: int = 10):
 async def get_datapacks(instance_id: Optional[int] = None):
     """
     Get discovered datapacks
-    
+
     **Semantic**: `DatapackService.getDatapacks(instanceId?)`
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         if instance_id is not None:
             query = """
                 SELECT 
@@ -371,23 +384,23 @@ async def get_datapacks(instance_id: Optional[int] = None):
                 ORDER BY i.name, d.datapack_name
             """
             cursor.execute(query)
-        
+
         results = cursor.fetchall()
-        
+
         return [
             DatapackInfo(
-                id=r['id'],
-                instance_id=r['instance_id'],
-                instance_name=r['instance_name'],
-                world_path=r['world_path'],
-                datapack_name=r['datapack_name'],
-                version=r['version'],
-                file_hash=r['file_hash'],
-                discovered_at=r['discovered_at']
+                id=r["id"],
+                instance_id=r["instance_id"],
+                instance_name=r["instance_name"],
+                world_path=r["world_path"],
+                datapack_name=r["datapack_name"],
+                version=r["version"],
+                file_hash=r["file_hash"],
+                discovered_at=r["discovered_at"],
             )
             for r in results
         ]
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -400,14 +413,14 @@ async def get_datapacks(instance_id: Optional[int] = None):
 async def get_outdated_plugins():
     """
     Get plugins with available updates
-    
+
     **Semantic**: `PluginService.getOutdatedPlugins()`
     """
     conn = None
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         query = """
             SELECT 
                 pv.plugin_name,
@@ -423,18 +436,18 @@ async def get_outdated_plugins():
         """
         cursor.execute(query)
         results = cursor.fetchall()
-        
+
         return [
             OutdatedPlugin(
-                plugin_name=r['plugin_name'],
-                current_version=r['current_version'],
-                latest_version=r['latest_version'],
-                instances=r['instances'].split(', ') if r['instances'] else [],
-                last_checked=r['last_checked']
+                plugin_name=r["plugin_name"],
+                current_version=r["current_version"],
+                latest_version=r["latest_version"],
+                instances=r["instances"].split(", ") if r["instances"] else [],
+                last_checked=r["last_checked"],
             )
             for r in results
         ]
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -447,10 +460,10 @@ async def get_outdated_plugins():
 async def get_cicd_endpoints():
     """
     Get CI/CD webhook endpoints
-    
+
     Returns empty list - CICD webhooks not currently configured.
     Future: query cicd_endpoints table when GitHub/GitLab webhooks are set up.
-    
+
     **Semantic**: `CICDService.getEndpoints()`
     """
     return []
@@ -458,15 +471,18 @@ async def get_cicd_endpoints():
 
 # ==================== Additional Bootstrap UI Endpoints ====================
 
+
 class DashboardSummary(BaseModel):
     total_instances: int
     unique_plugins: int
     updates_available: int
     config_drifts: int
 
+
 class ServerInfo(BaseModel):
     server_name: str
     instance_count: int
+
 
 class InstanceInfo(BaseModel):
     instance_id: int
@@ -485,31 +501,33 @@ async def get_dashboard_summary():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
+
         # Total instances
         cursor.execute("SELECT COUNT(*) as count FROM instances")
-        total_instances = cursor.fetchone()['count']
-        
+        total_instances = cursor.fetchone()["count"]
+
         # Unique plugins - use config_variance_cache which actually exists
-        cursor.execute("SELECT COUNT(DISTINCT plugin_name) as count FROM config_variance_cache WHERE config_type = 'plugin'")
+        cursor.execute(
+            "SELECT COUNT(DISTINCT plugin_name) as count FROM config_variance_cache WHERE config_type = 'plugin'"
+        )
         result = cursor.fetchone()
-        unique_plugins = result['count'] if result and result['count'] else 0
-        
+        unique_plugins = result["count"] if result and result["count"] else 0
+
         # Updates available - placeholder until plugin tracking is implemented
         updates_available = 0
-        
+
         # Config drifts - use config_variance_cache
         cursor.execute("SELECT COUNT(*) as count FROM config_variance_cache WHERE is_baseline = FALSE")
         result = cursor.fetchone()
-        config_drifts = result['count'] if result and result['count'] else 0
-        
+        config_drifts = result["count"] if result and result["count"] else 0
+
         return DashboardSummary(
             total_instances=total_instances,
             unique_plugins=unique_plugins,
             updates_available=updates_available,
-            config_drifts=config_drifts
+            config_drifts=config_drifts,
         )
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -525,25 +543,24 @@ async def get_servers():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT 
                 server_name,
                 COUNT(*) as instance_count
             FROM instances
             GROUP BY server_name
             ORDER BY server_name
-        """)
-        
+        """
+        )
+
         servers = []
         for row in cursor.fetchall():
-            servers.append(ServerInfo(
-                server_name=row['server_name'],
-                instance_count=row['instance_count']
-            ))
-        
+            servers.append(ServerInfo(server_name=row["server_name"], instance_count=row["instance_count"]))
+
         return servers
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:
@@ -559,8 +576,9 @@ async def get_all_instances():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
-        
-        cursor.execute("""
+
+        cursor.execute(
+            """
             SELECT 
                 i.instance_id,
                 i.instance_name,
@@ -568,43 +586,52 @@ async def get_all_instances():
                 i.last_seen
             FROM instances i
             ORDER BY i.server_name, i.instance_name
-        """)
-        
+        """
+        )
+
         instances = []
         for row in cursor.fetchall():
             # Get tags for this instance
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT t.tag_name
                 FROM instance_tags it
                 JOIN meta_tags t ON it.tag_id = t.tag_id
                 WHERE it.instance_id = %s
-            """, (row['instance_id'],))
-            tags = [tag_row['tag_name'] for tag_row in cursor.fetchall()]
-            
+            """,
+                (row["instance_id"],),
+            )
+            tags = [tag_row["tag_name"] for tag_row in cursor.fetchall()]
+
             # Get plugin count from config_variance_cache
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT COUNT(DISTINCT plugin_name) as count
                 FROM config_variance_cache
                 WHERE instance_id = %s AND config_type = 'plugin'
-            """, (row['instance_id'],))
+            """,
+                (row["instance_id"],),
+            )
             result = cursor.fetchone()
-            plugin_count = result['count'] if result and result['count'] else 0
-            
+            plugin_count = result["count"] if result and result["count"] else 0
+
             # Updates available - placeholder
             updates = 0
-            
-            instances.append(InstanceInfo(
-                instance_id=row['instance_id'],
-                instance_name=row['instance_name'],
-                server_name=row['server_name'],
-                plugin_count=plugin_count,
-                updates_available=updates,
-                tags=tags,
-                last_seen=row['last_seen']
-            ))
-        
+
+            instances.append(
+                InstanceInfo(
+                    instance_id=row["instance_id"],
+                    instance_name=row["instance_name"],
+                    server_name=row["server_name"],
+                    plugin_count=plugin_count,
+                    updates_available=updates,
+                    tags=tags,
+                    last_seen=row["last_seen"],
+                )
+            )
+
         return instances
-        
+
     except mysql.connector.Error as e:
         raise HTTPException(status_code=500, detail=str(e))
     finally:

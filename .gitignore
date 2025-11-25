@@ -50,6 +50,9 @@ __pycache__/
 *.pyc
 *.pyo
 
+# PAMPA code memory database and cache
+.pampa/
+
 # Temporary files
 temp/
 tmp/

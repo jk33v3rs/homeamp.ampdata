@@ -21,8 +21,10 @@ router = APIRouter(prefix="/api/plugin-configurator", tags=["plugin-configurator
 # Pydantic Models
 # ====================
 
+
 class PluginListItem(BaseModel):
     """Plugin list item for selector"""
+
     plugin_id: int
     plugin_name: str
     friendly_name: Optional[str]
@@ -32,23 +34,29 @@ class PluginListItem(BaseModel):
     has_variances: bool
     update_available: bool
 
+
 class MetaTag(BaseModel):
     """Meta tag for plugin categorization"""
+
     tag_id: int
     tag_name: str
     tag_type: str
     color: Optional[str]
 
+
 class PluginInstance(BaseModel):
     """Plugin instance for deployment targeting"""
+
     instance_id: int
     instance_name: str
     server_name: str
     instance_short: str
     has_plugin: bool
 
+
 class PluginDetails(BaseModel):
     """Detailed plugin information"""
+
     plugin_id: int
     plugin_name: str
     friendly_name: Optional[str]
@@ -60,8 +68,10 @@ class PluginDetails(BaseModel):
     variance_count: int
     meta_tags: List[MetaTag]
 
+
 class ConfigYamlResponse(BaseModel):
     """YAML configuration content"""
+
     plugin_id: int
     plugin_name: str
     instance_id: Optional[int]
@@ -70,8 +80,10 @@ class ConfigYamlResponse(BaseModel):
     is_baseline: bool
     last_modified: Optional[datetime]
 
+
 class VarianceItem(BaseModel):
     """Configuration variance entry"""
+
     variance_id: int
     instance_id: int
     instance_name: str
@@ -82,48 +94,60 @@ class VarianceItem(BaseModel):
     is_intentional: bool
     reason: Optional[str]
 
+
 class SaveConfigRequest(BaseModel):
     """Request to save config changes"""
+
     plugin_id: int
     instance_id: Optional[int]  # None = baseline
     yaml_content: str
     commit_message: Optional[str]
 
+
 class DeployConfigRequest(BaseModel):
     """Request to deploy config to instances"""
+
     plugin_id: int
     target_instances: List[int]
     yaml_content: str
     deployment_notes: Optional[str]
 
+
 class TagAssignmentRequest(BaseModel):
     """Assign/remove tags to plugin"""
+
     plugin_id: int
     tag_ids: List[int]
 
+
 class MarkVarianceRequest(BaseModel):
     """Mark variance as intentional/unintentional"""
+
     variance_id: int
     is_intentional: bool
     reason: Optional[str]
+
 
 # ====================
 # Database Helper
 # ====================
 
+
 def get_db_connection():
     """Get MySQL database connection"""
     return get_db()
+
 
 # ====================
 # Endpoints
 # ====================
 
+
 @router.get("/plugins", response_model=List[PluginListItem])
 async def list_plugins(
     search: Optional[str] = Query(None, description="Search plugin name"),
     category: Optional[str] = Query(None, description="Filter by category"),
-    has_variances: Optional[bool] = Query(None, description="Filter plugins with variances")
+    has_variances: Optional[bool] = Query(None, description="Filter plugins with variances"),
 ):
     """
     List all plugins for selection
@@ -168,7 +192,7 @@ async def list_plugins(
         # Convert to Pydantic models
         plugins = []
         for row in results:
-            if has_variances is not None and row['has_variances'] != has_variances:
+            if has_variances is not None and row["has_variances"] != has_variances:
                 continue
             plugins.append(PluginListItem(**row))
 
@@ -189,7 +213,8 @@ async def get_plugin_details(plugin_id: int):
 
     try:
         # Get plugin details
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 p.plugin_id,
                 p.plugin_name,
@@ -205,22 +230,27 @@ async def get_plugin_details(plugin_id: int):
             LEFT JOIN plugin_instances pi ON p.plugin_id = pi.plugin_id
             WHERE p.plugin_id = %s
             GROUP BY p.plugin_id
-        """, (plugin_id,))
+        """,
+            (plugin_id,),
+        )
 
         plugin = cursor.fetchone()
         if not plugin:
             raise HTTPException(status_code=404, detail="Plugin not found")
 
         # Get meta tags
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT mt.tag_id, mt.tag_name, mt.tag_type, mt.color
             FROM meta_tags mt
             INNER JOIN plugin_meta_tags pmt ON mt.tag_id = pmt.tag_id
             WHERE pmt.plugin_id = %s
-        """, (plugin_id,))
+        """,
+            (plugin_id,),
+        )
 
         tags = [MetaTag(**row) for row in cursor.fetchall()]
-        plugin['meta_tags'] = tags
+        plugin["meta_tags"] = tags
 
         return PluginDetails(**plugin)
 
@@ -231,8 +261,7 @@ async def get_plugin_details(plugin_id: int):
 
 @router.get("/plugins/{plugin_id}/config", response_model=ConfigYamlResponse)
 async def get_plugin_config(
-    plugin_id: int,
-    instance_id: Optional[int] = Query(None, description="Instance ID (None = baseline)")
+    plugin_id: int, instance_id: Optional[int] = Query(None, description="Instance ID (None = baseline)")
 ):
     """
     Get YAML configuration for plugin
@@ -251,56 +280,59 @@ async def get_plugin_config(
 
         if instance_id is None:
             # Return baseline config
-            baseline_path = plugin['baseline_config_path']
+            baseline_path = plugin["baseline_config_path"]
             if not baseline_path:
                 raise HTTPException(status_code=404, detail="Baseline config not found")
 
             # Read baseline config from file
             try:
-                with open(baseline_path, 'r', encoding='utf-8') as f:
+                with open(baseline_path, "r", encoding="utf-8") as f:
                     yaml_content = f.read()
             except FileNotFoundError:
                 raise HTTPException(status_code=404, detail=f"Baseline file not found: {baseline_path}")
 
             return ConfigYamlResponse(
                 plugin_id=plugin_id,
-                plugin_name=plugin['plugin_name'],
+                plugin_name=plugin["plugin_name"],
                 instance_id=None,
                 instance_name=None,
                 yaml_content=yaml_content,
                 is_baseline=True,
-                last_modified=None
+                last_modified=None,
             )
 
         else:
             # Return instance-specific config
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT i.instance_name, pi.config_path, pi.config_hash, pi.last_scanned
                 FROM plugin_instances pi
                 INNER JOIN instances i ON pi.instance_id = i.instance_id
                 WHERE pi.plugin_id = %s AND pi.instance_id = %s
-            """, (plugin_id, instance_id))
+            """,
+                (plugin_id, instance_id),
+            )
 
             instance = cursor.fetchone()
             if not instance:
                 raise HTTPException(status_code=404, detail="Plugin instance not found")
 
             # Read instance config from file
-            config_path = instance['config_path']
+            config_path = instance["config_path"]
             try:
-                with open(config_path, 'r', encoding='utf-8') as f:
+                with open(config_path, "r", encoding="utf-8") as f:
                     yaml_content = f.read()
             except FileNotFoundError:
                 raise HTTPException(status_code=404, detail=f"Config file not found: {config_path}")
 
             return ConfigYamlResponse(
                 plugin_id=plugin_id,
-                plugin_name=plugin['plugin_name'],
+                plugin_name=plugin["plugin_name"],
                 instance_id=instance_id,
-                instance_name=instance['instance_name'],
+                instance_name=instance["instance_name"],
                 yaml_content=yaml_content,
                 is_baseline=False,
-                last_modified=instance['last_scanned']
+                last_modified=instance["last_scanned"],
             )
 
     finally:
@@ -318,7 +350,8 @@ async def get_plugin_instances(plugin_id: int):
     cursor = conn.cursor(dictionary=True)
 
     try:
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT 
                 i.instance_id,
                 i.instance_name,
@@ -328,7 +361,9 @@ async def get_plugin_instances(plugin_id: int):
             FROM instances i
             LEFT JOIN plugin_instances pi ON i.instance_id = pi.instance_id AND pi.plugin_id = %s
             ORDER BY i.server_name, i.instance_name
-        """, (plugin_id,))
+        """,
+            (plugin_id,),
+        )
 
         results = cursor.fetchall()
         return [PluginInstance(**row) for row in results]
@@ -340,8 +375,7 @@ async def get_plugin_instances(plugin_id: int):
 
 @router.get("/plugins/{plugin_id}/variances", response_model=List[VarianceItem])
 async def get_plugin_variances(
-    plugin_id: int,
-    intentional_only: Optional[bool] = Query(None, description="Filter intentional variances")
+    plugin_id: int, intentional_only: Optional[bool] = Query(None, description="Filter intentional variances")
 ):
     """
     Get all configuration variances for a plugin
@@ -407,28 +441,37 @@ async def save_plugin_config(request: SaveConfigRequest):
                 raise HTTPException(status_code=404, detail="Baseline config not found")
 
             baseline_path = result[0]
-            with open(baseline_path, 'w', encoding='utf-8') as f:
+            with open(baseline_path, "w", encoding="utf-8") as f:
                 f.write(request.yaml_content)
 
             # Log audit
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO audit_log (timestamp, user, action, description)
                 VALUES (NOW(), %s, 'config_update', %s)
-            """, ('system', f"Updated baseline config for plugin {request.plugin_id}"))
+            """,
+                ("system", f"Updated baseline config for plugin {request.plugin_id}"),
+            )
 
         else:
             # Create deployment queue entry for instance
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO deployment_queue 
                 (instance_id, plugin_id, config_content, status, created_at, deployment_notes)
                 VALUES (%s, %s, %s, 'pending', NOW(), %s)
-            """, (request.instance_id, request.plugin_id, request.yaml_content, request.commit_message))
+            """,
+                (request.instance_id, request.plugin_id, request.yaml_content, request.commit_message),
+            )
 
             # Log audit
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO audit_log (timestamp, user, action, description)
                 VALUES (NOW(), %s, 'deployment_queued', %s)
-            """, ('system', f"Queued deployment for plugin {request.plugin_id} to instance {request.instance_id}"))
+            """,
+                ("system", f"Queued deployment for plugin {request.plugin_id} to instance {request.instance_id}"),
+            )
 
         conn.commit()
         return {"status": "success", "message": "Configuration saved"}
@@ -456,23 +499,32 @@ async def deploy_plugin_config(request: DeployConfigRequest):
 
         # Create deployment queue entries
         for instance_id in request.target_instances:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO deployment_queue 
                 (instance_id, plugin_id, config_content, status, created_at, deployment_notes)
                 VALUES (%s, %s, %s, 'pending', NOW(), %s)
-            """, (instance_id, request.plugin_id, request.yaml_content, request.deployment_notes))
+            """,
+                (instance_id, request.plugin_id, request.yaml_content, request.deployment_notes),
+            )
 
         # Log audit
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT INTO audit_log (timestamp, user, action, description)
             VALUES (NOW(), %s, 'bulk_deployment', %s)
-        """, ('system', f"Queued deployment for plugin {request.plugin_id} to {len(request.target_instances)} instances"))
+        """,
+            (
+                "system",
+                f"Queued deployment for plugin {request.plugin_id} to {len(request.target_instances)} instances",
+            ),
+        )
 
         conn.commit()
         return {
             "status": "success",
             "message": f"Deployment queued for {len(request.target_instances)} instances",
-            "target_count": len(request.target_instances)
+            "target_count": len(request.target_instances),
         }
 
     finally:
@@ -495,10 +547,13 @@ async def assign_meta_tags(request: TagAssignmentRequest):
 
         # Insert new tags
         for tag_id in request.tag_ids:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO plugin_meta_tags (plugin_id, tag_id, assigned_at)
                 VALUES (%s, %s, NOW())
-            """, (request.plugin_id, tag_id))
+            """,
+                (request.plugin_id, tag_id),
+            )
 
         conn.commit()
         return {"status": "success", "message": f"Assigned {len(request.tag_ids)} tags"}
@@ -517,11 +572,14 @@ async def mark_variance_intentional(request: MarkVarianceRequest):
     cursor = conn.cursor()
 
     try:
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE config_variance_detected
             SET is_intentional = %s, reason = %s, last_updated = NOW()
             WHERE variance_id = %s
-        """, (request.is_intentional, request.reason, request.variance_id))
+        """,
+            (request.is_intentional, request.reason, request.variance_id),
+        )
 
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Variance not found")

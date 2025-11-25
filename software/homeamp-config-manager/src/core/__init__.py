@@ -2,9 +2,4 @@
 
 from .hierarchy_resolver import ConfigHierarchyResolver, ConfigContext, ResolvedConfig, ScopeLevel
 
-__all__ = [
-    'ConfigHierarchyResolver',
-    'ConfigContext',
-    'ResolvedConfig',
-    'ScopeLevel'
-]
+__all__ = ["ConfigHierarchyResolver", "ConfigContext", "ResolvedConfig", "ScopeLevel"]

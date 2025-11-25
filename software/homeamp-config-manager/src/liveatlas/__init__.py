@@ -2,4 +2,4 @@
 
 from .map_config_generator import LiveAtlasConfigGenerator
 
-__all__ = ['LiveAtlasConfigGenerator']
+__all__ = ["LiveAtlasConfigGenerator"]
