@@ -28,7 +28,7 @@ class UpdateApprovalRequest(BaseModel):
     notes: str | None = None
 
 
-@router.get("/available", response_model=List[Dict])
+@router.get("/available")
 async def get_available_updates(
     service: UpdateService = Depends(get_update_service),
 ) -> List[Dict]:

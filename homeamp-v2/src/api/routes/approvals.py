@@ -40,7 +40,7 @@ class CancelRequest(BaseModel):
     cancelled_by: str
 
 
-@router.get("/pending", response_model=List[dict])
+@router.get("/pending")
 async def get_pending_approvals(
     entity_type: str | None = None,
     service: ApprovalService = Depends(get_approval_service),
@@ -158,7 +158,7 @@ async def get_approval_request(
         )
 
 
-@router.get("/{approval_id}/votes", response_model=List[dict])
+@router.get("/{approval_id}/votes")
 async def get_approval_votes(
     approval_id: int,
     service: ApprovalService = Depends(get_approval_service),
