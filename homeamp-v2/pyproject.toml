@@ -48,6 +48,12 @@ homeamp-agent = "homeamp_v2.agent.__main__:main"
 homeamp-api = "homeamp_v2.api.main:app"
 homeamp-tile-watcher = "homeamp_v2.agent.tile_watcher_service:main"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+homeamp_v2 = ["web/templates/*", "web/static/**/*"]
+
 [tool.black]
 line-length = 120
 target-version = ["py311"]
