@@ -4,10 +4,10 @@ import logging
 from typing import List, Optional
 
 from homeamp_v2.core.exceptions import NotFoundError, ValidationError
-from homeamp_v2.data.models.instance import (
-    Instance,
+from homeamp_v2.data.models.instance import Instance
+from homeamp_v2.data.models.instance_group import (
     InstanceGroup,
-    InstanceGroupMembership,
+    InstanceGroupMember as InstanceGroupMembership,
 )
 from homeamp_v2.data.unit_of_work import UnitOfWork
 from sqlalchemy import select
