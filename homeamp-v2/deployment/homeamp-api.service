@@ -5,8 +5,8 @@ Requires=mariadb.service
 
 [Service]
 Type=simple
-User=amp
-Group=amp
+User=webadmin
+Group=webadmin
 WorkingDirectory=/opt/homeamp/homeamp.ampdata/homeamp-v2
 Environment="PATH=/opt/homeamp/venv/bin"
 Environment="PYTHONPATH=/opt/homeamp/homeamp.ampdata/homeamp-v2/src"
