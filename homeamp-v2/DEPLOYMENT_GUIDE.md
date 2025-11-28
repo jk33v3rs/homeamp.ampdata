@@ -19,19 +19,30 @@
 
 ## 1. Initial Server Setup
 
+**Run all commands as webadmin user with sudo access.**
+
 ```bash
 # Update system
 sudo apt update && sudo apt upgrade -y
 
 # Install dependencies
-sudo apt install -y python3.11 python3.11-venv python3-pip git mariadb-server mariadb-client
+sudo apt install -y python3.11 python3.11-venv python3.11-dev python3-pip git mariadb-server mariadb-client build-essential pkg-config default-libmysqlclient-dev
 
 # Create amp user (if doesn't exist)
 sudo useradd -m -s /bin/bash amp
 
-# Create project directory
+# Add amp to necessary groups
+sudo usermod -aG adm amp
+
+# Create project directory with correct ownership from the start
 sudo mkdir -p /opt/homeamp
-sudo chown amp:amp /opt/homeamp
+sudo chown -R amp:amp /opt/homeamp
+sudo chmod -R 755 /opt/homeamp
+
+# Create log directory with correct ownership
+sudo mkdir -p /var/log/homeamp
+sudo chown -R amp:amp /var/log/homeamp
+sudo chmod -R 755 /var/log/homeamp
 ```
 
 ---
@@ -54,49 +65,132 @@ FLUSH PRIVILEGES;
 EXIT;
 ```
 
-**Configure for remote access (if needed):**
+**Configure MariaDB (REQUIRED):**
 
 Edit `/etc/mysql/mariadb.conf.d/50-server.cnf`:
+```ini
+[mysqld]
+# SECURITY: Non-default port (obscurity layer)
+port = 3369
+
+# Bind address (localhost only for security, or 0.0.0.0 if remote access needed)
+bind-address = 127.0.0.1
+```
+
+**If remote access needed from other servers (e.g., OVH):**
 ```ini
 bind-address = 0.0.0.0
 ```
 
-Grant remote access:
+Then grant remote access:
 ```sql
 GRANT ALL PRIVILEGES ON homeamp_v2.* TO 'homeamp'@'%' IDENTIFIED BY 'your_secure_password';
 FLUSH PRIVILEGES;
 ```
 
-Restart MariaDB:
+**Restart MariaDB:**
 ```bash
 sudo systemctl restart mariadb
+
+# Verify it's listening on port 3369
+sudo netstat -tulpn | grep 3369
 ```
 
 ---
 
 ## 3. Clone Repository
 
+**CRITICAL: Run as amp user to ensure correct ownership.**
+
 ```bash
-# As webadmin user
+# Switch to amp user
+sudo -u amp bash
+
+# Clone repository
 cd /opt/homeamp
-sudo -u amp git clone https://github.com/jk33v3rs/homeamp.ampdata.git
-cd homeamp.ampdata/homeamp-v2
-```
-
----
-
+git clone https://github.com/jk33v3rs/homeamp.ampdata.git
 ## 4. Python Environment Setup
 
+**CRITICAL: All commands must run as amp user to avoid permission errors.**
+
 ```bash
+# Switch to amp user
+sudo -u amp bash
+
+# Create virtual environment
+cd /opt/homeamp
+python3.11 -m venv venv
+
+# Verify venv ownership
+ls -la /opt/homeamp/venv
+
+# Upgrade pip
+## 5. Configuration
+
+**Run as amp user to ensure correct file ownership.**
+
+```bash
+# Switch to amp user
+sudo -u amp bash
+
+# Navigate to project
+cd /opt/homeamp/homeamp.ampdata/homeamp-v2
+
+# Copy example config
+cp .env.example .env
+
+# Edit configuration
+nano .env
+
+# After editing, verify ownership
+ls -la .env
+
+# Exit amp user shell
+exit
+```nstall homeamp-v2 in editable mode
+/opt/homeamp/venv/bin/pip install -e .
+
+# Verify installation succeeded
+/opt/homeamp/venv/bin/pip list | grep homeamp
+
+# Exit amp user shell
+exit
+```
+
+**Expected output from pip install:**
+- Should show "Successfully installed homeamp-v2"
+- Should list all dependencies (fastapi, uvicorn, sqlalchemy, etc.)
+- NO permission errors
+- NO build failuresbash
 # As amp user
 sudo -u amp python3.11 -m venv /opt/homeamp/venv
+## 6. Database Migration
 
-# Activate venv
-sudo -u amp /opt/homeamp/venv/bin/pip install --upgrade pip
+**Run as amp user with PYTHONPATH set.**
 
-# Install homeamp-v2 in development mode
+```bash
+# Switch to amp user
+sudo -u amp bash
+
+# Navigate to project
 cd /opt/homeamp/homeamp.ampdata/homeamp-v2
-sudo -u amp /opt/homeamp/venv/bin/pip install -e .
+
+# Set PYTHONPATH and run migrations
+PYTHONPATH=/opt/homeamp/homeamp.ampdata/homeamp-v2/src /opt/homeamp/venv/bin/alembic upgrade head
+
+# Verify migrations succeeded (should show current revision)
+PYTHONPATH=/opt/homeamp/homeamp.ampdata/homeamp-v2/src /opt/homeamp/venv/bin/alembic current
+
+# Exit amp user shell
+exit
+```
+
+**Expected output:**
+- Should show "Running upgrade..." messages
+- Should end with "INFO [alembic.runtime.migration] Running upgrade -> <revision>, <description>"
+- NO "ModuleNotFoundError: No module named 'homeamp_v2'"
+- NO database connection errors
+- NO permission errorso -u amp /opt/homeamp/venv/bin/pip install -e .
 ```
 
 ---
@@ -114,8 +208,10 @@ sudo -u amp nano .env
 **Required `.env` settings:**
 
 ```ini
-# Database
-DATABASE_URL=mysql+pymysql://homeamp:your_secure_password@localhost:3306/homeamp_v2
+# Database - SQLAlchemy URL format (the +pymysql is required)
+# Format: mysql+pymysql://username:password@host:port/database
+# CRITICAL: Port 3369 matches MariaDB configuration from step 2
+DATABASE_URL=mysql+pymysql://homeamp:YOUR_ACTUAL_PASSWORD_HERE@localhost:3369/homeamp_v2
 
 # API Settings
 API_HOST=0.0.0.0
@@ -162,19 +258,34 @@ Description=HomeAMP V2.0 API Service
 After=network.target mariadb.service
 Requires=mariadb.service
 
-[Service]
-Type=notify
-User=amp
-Group=amp
-WorkingDirectory=/opt/homeamp/homeamp.ampdata/homeamp-v2
-Environment="PATH=/opt/homeamp/venv/bin"
-Environment="PYTHONPATH=/opt/homeamp/homeamp.ampdata/homeamp-v2/src"
-ExecStart=/opt/homeamp/venv/bin/uvicorn homeamp_v2.api.main:app --host 0.0.0.0 --port 8000 --workers 4
-Restart=always
-RestartSec=10
+---
 
-# Logging
-StandardOutput=journal
+## 8. Verify Permissions (CRITICAL)
+
+**Before starting services, verify all permissions are correct.**
+
+```bash
+# Check /opt/homeamp ownership (should be amp:amp)
+ls -la /opt/homeamp
+
+# Check repository ownership (should be amp:amp)
+ls -la /opt/homeamp/homeamp.ampdata
+
+# Check venv ownership (should be amp:amp)
+ls -la /opt/homeamp/venv
+
+# Check log directory ownership (should be amp:amp)
+ls -la /var/log/homeamp
+
+# If any ownership is wrong, fix it:
+sudo chown -R amp:amp /opt/homeamp
+sudo chown -R amp:amp /var/log/homeamp
+```
+
+**Expected output:**
+- All files/directories under /opt/homeamp should show "amp amp"
+- All files/directories under /var/log/homeamp should show "amp amp"
+- NO files owned by root, webadmin, or other usersndardOutput=journal
 StandardError=journal
 SyslogIdentifier=homeamp-api
 
@@ -305,38 +416,112 @@ sudo systemctl status homeamp-agent
 
 # Check API is responding
 curl http://localhost:8000/health
+### Service won't start
 
-# Check web UI
-curl http://localhost:8000/
-
-# View logs for errors
-journalctl -u homeamp-api -n 50
-journalctl -u homeamp-agent -n 50
+Check logs:
+```bash
+journalctl -u homeamp-api -n 100 --no-pager
+journalctl -u homeamp-agent -n 100 --no-pager
 ```
 
----
+Common issues:
 
-## 12. Initial Data Load
+**Permission Denied Errors:**
+```bash
+# Fix all ownership
+sudo chown -R amp:amp /opt/homeamp
+sudo chown -R amp:amp /var/log/homeamp
 
-The agent will automatically discover instances on first run. To trigger manually:
+# Verify
+ls -la /opt/homeamp | head -20
+ls -la /opt/homeamp/venv | head -20
+
+# Restart services
+sudo systemctl restart homeamp-api
+sudo systemctl restart homeamp-agent
+```
+
+**Database connection failure:**
+```bash
+# Test database connection as amp user
+sudo -u amp mysql -u homeamp -p homeamp_v2
+
+# Check credentials in .env match database
+cat /opt/homeamp/homeamp.ampdata/homeamp-v2/.env | grep DATABASE_URL
+```
+
+**Port already in use:**
+```bash
+# Check what's using port 8000
+sudo netstat -tulpn | grep 8000
+
+# Kill existing process if needed
+sudo kill <PID>
+```
+
+**Missing dependencies:**
+```bash
+# Reinstall as amp user
+sudo -u amp bash
+cd /opt/homeamp/homeamp.ampdata/homeamp-v2
+/opt/homeamp/venv/bin/pip install -e .
+exit
+```
+
+**Module import errors:**
+```bash
+# Verify PYTHONPATH is set in service file
+grep PYTHONPATH /etc/systemd/system/homeamp-api.service
+grep PYTHONPATH /etc/systemd/system/homeamp-agent.service
+
+## Quick Reference Commands
 
 ```bash
-# Trigger discovery scan
+# Service management
+sudo systemctl start homeamp-api
+sudo systemctl start homeamp-agent
+sudo systemctl stop homeamp-api
+sudo systemctl stop homeamp-agent
+sudo systemctl restart homeamp-api
+sudo systemctl restart homeamp-agent
+sudo systemctl status homeamp-api
+sudo systemctl status homeamp-agent
+
+# Logs (real-time)
+journalctl -u homeamp-api -f
+journalctl -u homeamp-agent -f
+journalctl -u homeamp-api -u homeamp-agent -f
+
+# Logs (last 100 lines)
+journalctl -u homeamp-api -n 100 --no-pager
+journalctl -u homeamp-agent -n 100 --no-pager
+
+# Update deployment (ALWAYS as amp user)
+sudo -u amp bash
+cd /opt/homeamp/homeamp.ampdata
+git pull origin master
+exit
+sudo systemctl restart homeamp-api homeamp-agent
+
+# Database migrations (ALWAYS as amp user with PYTHONPATH)
+sudo -u amp bash
+cd /opt/homeamp/homeamp.ampdata/homeamp-v2
+PYTHONPATH=/opt/homeamp/homeamp.ampdata/homeamp-v2/src /opt/homeamp/venv/bin/alembic upgrade head
+exit
+
+# Manual discovery scan
 curl -X POST http://localhost:8000/api/instances/scan
-```
 
-Expected behavior:
-- Agent scans AMP instances directory
-- Discovers all instances (servers, plugins, datapacks)
-- Populates database
-- Checks for plugin updates
+# Check permissions (if anything breaks)
+sudo chown -R amp:amp /opt/homeamp
+sudo chown -R amp:amp /var/log/homeamp
+ls -la /opt/homeamp | head -20
+ls -la /opt/homeamp/venv | head -20
 
----
-
-## 13. Access the UI
-
-**Local access:**
-- Direct API: `http://135.181.212.169:8000`
+# Verify services are actually running
+ps aux | grep homeamp
+sudo netstat -tulpn | grep 8000
+```irect API: `http://135.181.212.169:8000`
 - With Nginx: `http://archivesmp.site`
 
 **Available endpoints:**

@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 
     # Database
-    database_url: str = Field(default="mysql+pymysql://webadmin:password@localhost:3369/homeamp")
+    database_url: str = Field(default="mysql+pymysql://homeamp:password@localhost:3369/homeamp_v2")
     database_pool_size: int = Field(default=10, ge=1, le=100)
     database_max_overflow: int = Field(default=20, ge=0, le=100)
     database_echo: bool = Field(default=False)
