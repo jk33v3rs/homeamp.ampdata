@@ -39,4 +39,5 @@ print("All imports successful!")
 print("\nStarting test server on http://0.0.0.0:8077...")
 
 import uvicorn
+
 uvicorn.run(app, host="0.0.0.0", port=8077, log_level="info")
