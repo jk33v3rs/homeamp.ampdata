@@ -1,0 +1,134 @@
+/* HomeAMP V2.0 - Dashboard Specific Styles */
+
+/* Dashboard Grid */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Stats */
+.stat-card h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+/* Network Status */
+#network-status-container .server-group {
+    margin-bottom: 1.5rem;
+}
+
+.server-group-title {
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--bs-secondary);
+    margin-bottom: 0.75rem;
+}
+
+.instance-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+.instance-status:last-child {
+    border-bottom: none;
+}
+
+.instance-status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.instance-status-indicator.online {
+    background-color: var(--success);
+    box-shadow: 0 0 8px var(--success);
+}
+
+.instance-status-indicator.offline {
+    background-color: var(--danger);
+}
+
+.instance-status-indicator.unknown {
+    background-color: var(--secondary);
+}
+
+/* Recent Activity */
+#recent-activity-container .activity-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--bs-border-color);
+}
+
+#recent-activity-container .activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-time {
+    font-size: 0.75rem;
+    color: var(--bs-secondary);
+}
+
+.activity-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+}
+
+.activity-icon.deploy {
+    background-color: rgba(13, 110, 253, 0.1);
+    color: var(--primary);
+}
+
+.activity-icon.update {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: var(--warning);
+}
+
+.activity-icon.config {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: var(--success);
+}
+
+.activity-icon.error {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: var(--danger);
+}
+
+/* Plugin Chart */
+#plugin-chart {
+    max-height: 300px;
+}
+
+/* Approval Queue */
+.approval-item {
+    padding: 0.75rem;
+    border-left: 3px solid var(--warning);
+    margin-bottom: 0.5rem;
+    background-color: rgba(255, 193, 7, 0.05);
+}
+
+.approval-item.approved {
+    border-left-color: var(--success);
+    background-color: rgba(25, 135, 84, 0.05);
+}
+
+.approval-item.rejected {
+    border-left-color: var(--danger);
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.vote-progress {
+    height: 6px;
+    margin-top: 0.5rem;
+}

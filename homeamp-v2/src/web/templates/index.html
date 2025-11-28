@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - HomeAMP V2.0{% endblock %}
+
+{% block content %}
+<!-- Dashboard View -->
+<div id="dashboard-view" class="view-container">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Instances</h6>
+                            <h2 class="mb-0" id="stat-instances">--</h2>
+                            <small class="text-muted" id="stat-instances-detail">Loading...</small>
+                        </div>
+                        <div class="stat-icon text-primary">
+                            <i data-feather="server" class="icon-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Active Plugins</h6>
+                            <h2 class="mb-0" id="stat-plugins">--</h2>
+                            <small class="text-muted" id="stat-plugins-detail">Loading...</small>
+                        </div>
+                        <div class="stat-icon text-success">
+                            <i data-feather="package" class="icon-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Updates Available</h6>
+                            <h2 class="mb-0" id="stat-updates">--</h2>
+                            <small class="text-muted" id="stat-updates-detail">Loading...</small>
+                        </div>
+                        <div class="stat-icon text-warning">
+                            <i data-feather="download-cloud" class="icon-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card stat-card border-danger">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Config Variances</h6>
+                            <h2 class="mb-0" id="stat-variances">--</h2>
+                            <small class="text-muted" id="stat-variances-detail">Loading...</small>
+                        </div>
+                        <div class="stat-icon text-danger">
+                            <i data-feather="alert-triangle" class="icon-lg"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Network Status & Recent Activity -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="cpu" class="icon-sm me-2"></i>
+                        Network Status
+                    </h5>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadNetworkStatus()">
+                        <i data-feather="refresh-cw" class="icon-sm"></i>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="network-status-container">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i data-feather="clock" class="icon-sm me-2"></i>
+                        Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="recent-activity-container" style="max-height: 400px; overflow-y: auto;">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Plugin Distribution & Pending Approvals -->
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <h5 class="mb-0">
+                        <i data-feather="pie-chart" class="icon-sm me-2"></i>
+                        Plugin Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="plugin-chart" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i data-feather="alert-circle" class="icon-sm me-2"></i>
+                        Pending Approvals
+                    </h5>
+                    <a href="#" class="btn btn-sm btn-outline-primary" data-view="approvals">
+                        View All
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div id="approval-queue-container">
+                        <div class="text-center py-5">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Other Views (Hidden by default) -->
+<div id="instances-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Instances</h5>
+            <div>
+                <button class="btn btn-primary btn-sm" onclick="triggerScan()">
+                    <i data-feather="refresh-cw" class="icon-sm"></i> Scan All
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <table id="instances-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Instance</th>
+                        <th>Server</th>
+                        <th>Platform</th>
+                        <th>Version</th>
+                        <th>Plugins</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="plugins-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Plugin Catalog</h5>
+        </div>
+        <div class="card-body">
+            <table id="plugins-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Plugin</th>
+                        <th>Platform</th>
+                        <th>Version</th>
+                        <th>Latest</th>
+                        <th>Installs</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="deployments-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Deployment Queue</h5>
+        </div>
+        <div class="card-body">
+            <table id="deployments-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Instance</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="updates-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Available Updates</h5>
+            <button class="btn btn-primary btn-sm" onclick="checkUpdates()">
+                <i data-feather="refresh-cw" class="icon-sm"></i> Check Updates
+            </button>
+        </div>
+        <div class="card-body">
+            <table id="updates-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Plugin</th>
+                        <th>Current</th>
+                        <th>Available</th>
+                        <th>Source</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="approvals-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Approval Workflow</h5>
+        </div>
+        <div class="card-body">
+            <table id="approvals-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Request</th>
+                        <th>Type</th>
+                        <th>Requester</th>
+                        <th>Votes</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="audit-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Audit Log</h5>
+        </div>
+        <div class="card-body">
+            <table id="audit-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="groups-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Instance Groups</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                <i data-feather="plus" class="icon-sm"></i> Create Group
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="groups-container"></div>
+        </div>
+    </div>
+</div>
+
+<div id="datapacks-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Datapacks</h5>
+            <button class="btn btn-primary btn-sm">
+                <i data-feather="upload" class="icon-sm"></i> Upload Datapack
+            </button>
+        </div>
+        <div class="card-body">
+            <table id="datapacks-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Datapack</th>
+                        <th>Category</th>
+                        <th>Version</th>
+                        <th>Instances</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="tags-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Tag Management</h5>
+        </div>
+        <div class="card-body">
+            <div id="tags-container"></div>
+        </div>
+    </div>
+</div>
+
+<div id="settings-view" class="view-container d-none">
+    <div class="card">
+        <div class="card-header bg-transparent">
+            <h5 class="mb-0">Settings</h5>
+        </div>
+        <div class="card-body">
+            <h6>Agent Configuration</h6>
+            <p class="text-muted">Configure agent behavior and scan intervals.</p>
+            <hr>
+            <h6>API Settings</h6>
+            <p class="text-muted">Manage API keys and external integrations.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/components/dashboard.js"></script>
+<script src="/static/js/components/instances.js"></script>
+<script src="/static/js/components/plugins.js"></script>
+<script src="/static/js/components/deployments.js"></script>
+<script src="/static/js/components/updates.js"></script>
+<script src="/static/js/components/approvals.js"></script>
+<script src="/static/js/components/audit.js"></script>
+<script src="/static/js/components/groups.js"></script>
+<script src="/static/js/components/datapacks.js"></script>
+{% endblock %}

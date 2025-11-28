@@ -1,0 +1,255 @@
+/* HomeAMP V2.0 - Main Styles */
+
+:root {
+    --primary: #0d6efd;
+    --secondary: #6c757d;
+    --success: #198754;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --info: #0dcaf0;
+    --light: #f8f9fa;
+    --dark: #212529;
+}
+
+/* Dark theme variables */
+[data-bs-theme="dark"] {
+    --bs-body-bg: #1a1d20;
+    --bs-body-color: #dee2e6;
+    --bs-card-bg: #212529;
+    --bs-border-color: #495057;
+}
+
+/* Layout */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 14px;
+}
+
+.container-fluid {
+    max-width: 1920px;
+}
+
+/* Icons */
+.icon-sm {
+    width: 16px;
+    height: 16px;
+}
+
+.icon-md {
+    width: 24px;
+    height: 24px;
+}
+
+.icon-lg {
+    width: 48px;
+    height: 48px;
+}
+
+/* Stat Cards */
+.stat-card {
+    border-left: 4px solid;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.stat-card.border-primary {
+    border-left-color: var(--primary);
+}
+
+.stat-card.border-success {
+    border-left-color: var(--success);
+}
+
+.stat-card.border-warning {
+    border-left-color: var(--warning);
+}
+
+.stat-card.border-danger {
+    border-left-color: var(--danger);
+}
+
+.stat-icon {
+    opacity: 0.3;
+}
+
+/* Navigation */
+.navbar-brand {
+    font-size: 1.25rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-link.active {
+    font-weight: 600;
+}
+
+/* Breadcrumb */
+.breadcrumb {
+    margin-bottom: 0;
+}
+
+/* Tables */
+.table {
+    font-size: 0.875rem;
+}
+
+.table th {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* Status Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Cards */
+.card {
+    border: 1px solid rgba(0,0,0,0.125);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.card-header {
+    font-weight: 600;
+}
+
+/* View Containers */
+.view-container {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading States */
+.skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Activity Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--bs-border-color);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -26px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 2px solid var(--bs-body-bg);
+}
+
+/* Server Cards */
+.server-card {
+    border-left: 4px solid var(--success);
+    transition: all 0.2s ease;
+}
+
+.server-card:hover {
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.server-card.offline {
+    border-left-color: var(--danger);
+    opacity: 0.7;
+}
+
+/* Instance Grid */
+.instance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.instance-card {
+    border-left: 4px solid var(--info);
+}
+
+.instance-card.production {
+    border-left-color: var(--danger);
+}
+
+/* Plugin Cards */
+.plugin-card {
+    transition: all 0.2s ease;
+}
+
+.plugin-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.plugin-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stat-icon {
+        display: none;
+    }
+    
+    .instance-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Utilities */
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.text-break-word {
+    word-break: break-word;
+}
