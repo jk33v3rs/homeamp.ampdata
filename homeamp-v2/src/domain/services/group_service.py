@@ -7,6 +7,8 @@ from homeamp_v2.core.exceptions import NotFoundError, ValidationError
 from homeamp_v2.data.models.instance import Instance
 from homeamp_v2.data.models.instance_group import (
     InstanceGroup,
+)
+from homeamp_v2.data.models.instance_group import (
     InstanceGroupMember as InstanceGroupMembership,
 )
 from homeamp_v2.data.unit_of_work import UnitOfWork
