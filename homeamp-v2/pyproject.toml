@@ -50,6 +50,10 @@ homeamp-tile-watcher = "homeamp_v2.agent.tile_watcher_service:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+namespaces = false
+
+[tool.setuptools]
+package-dir = {"homeamp_v2" = "src"}
 
 [tool.setuptools.package-data]
 homeamp_v2 = ["web/templates/*", "web/static/**/*"]
