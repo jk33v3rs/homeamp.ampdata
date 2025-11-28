@@ -8,7 +8,7 @@ Type=simple
 User=webadmin
 Group=webadmin
 WorkingDirectory=/opt/homeamp/homeamp.ampdata/homeamp-v2
-ExecStart=/usr/bin/python3 -m homeamp_v2.agent
+ExecStart=/opt/homeamp/venv/bin/python -m homeamp_v2.agent
 Restart=always
 RestartSec=30
 
