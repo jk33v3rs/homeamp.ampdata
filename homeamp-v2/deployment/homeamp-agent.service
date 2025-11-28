@@ -1,0 +1,23 @@
+[Unit]
+Description=HomeAMP V2.0 Discovery Agent
+After=network.target mariadb.service homeamp-api.service
+Requires=mariadb.service
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/homeamp/homeamp.ampdata/homeamp-v2
+Environment="PATH=/opt/homeamp/venv/bin"
+Environment="PYTHONPATH=/opt/homeamp/homeamp.ampdata/homeamp-v2/src"
+ExecStart=/opt/homeamp/venv/bin/python -m homeamp_v2.agent
+Restart=always
+RestartSec=30
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=homeamp-agent
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,23 @@
+[Unit]
+Description=HomeAMP V2.0 API Service
+After=network.target mariadb.service
+Requires=mariadb.service
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/homeamp/homeamp.ampdata/homeamp-v2
+Environment="PATH=/opt/homeamp/venv/bin"
+Environment="PYTHONPATH=/opt/homeamp/homeamp.ampdata/homeamp-v2/src"
+ExecStart=/opt/homeamp/venv/bin/uvicorn homeamp_v2.api.main:app --host 0.0.0.0 --port 8000 --workers 4
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=homeamp-api
+
+[Install]
+WantedBy=multi-user.target
