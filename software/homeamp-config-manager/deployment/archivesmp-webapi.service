@@ -1,0 +1,41 @@
+[Unit]
+Description=ArchiveSMP Web API Service
+Documentation=https://github.com/jk33v3rs/homeamp.ampdata
+After=network-online.target homeamp-agent.service
+Wants=network-online.target
+Requires=homeamp-agent.service
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/archivesmp-config-manager
+Environment="PYTHONPATH=/opt/archivesmp-config-manager"
+Environment="ARCHIVESMP_WEB_HOST=0.0.0.0"
+Environment="ARCHIVESMP_WEB_PORT=8000"
+EnvironmentFile=-/etc/archivesmp/secrets.env
+
+# Start web API with uvicorn
+ExecStart=/opt/archivesmp-config-manager/venv/bin/python -m uvicorn src.web.api:app --host ${ARCHIVESMP_WEB_HOST} --port ${ARCHIVESMP_WEB_PORT} --workers 4
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=archivesmp-webapi
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=4G
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

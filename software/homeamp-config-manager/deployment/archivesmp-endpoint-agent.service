@@ -1,0 +1,25 @@
+[Unit]
+Description=ArchiveSMP Configuration Management Endpoint Agent
+After=network.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/archivesmp-config-manager
+Environment="PYTHONPATH=/opt/archivesmp-config-manager"
+ExecStart=/opt/archivesmp-config-manager/.venv/bin/python -m src.agent.endpoint_agent \
+    --server=SERVER_NAME_PLACEHOLDER \
+    --db-host=135.181.212.169 \
+    --db-port=3369 \
+    --db-user=sqlworkerSMP \
+    --db-password=SQLdb2024!
+
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

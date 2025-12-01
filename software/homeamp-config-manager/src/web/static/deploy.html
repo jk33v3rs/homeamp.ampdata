@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Drift & Deployment - ArchiveSMP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #4ec9b0;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #858585;
+            margin-bottom: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3c3c3c;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: #2d2d2d;
+            border: none;
+            color: #d4d4d4;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            transition: background 0.3s;
+        }
+        
+        .tab:hover {
+            background: #3c3c3c;
+        }
+        
+        .tab.active {
+            background: #4ec9b0;
+            color: #1e1e1e;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .status-bar {
+            background: #2d2d2d;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .status-card {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 3px;
+            border-left: 4px solid #4ec9b0;
+        }
+        
+        .status-card h3 {
+            font-size: 14px;
+            color: #858585;
+            margin-bottom: 10px;
+        }
+        
+        .status-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4ec9b0;
+        }
+        
+        .status-card.warning {
+            border-left-color: #ce9178;
+        }
+        
+        .status-card.warning .value {
+            color: #ce9178;
+        }
+        
+        .status-card.error {
+            border-left-color: #f48771;
+        }
+        
+        .status-card.error .value {
+            color: #f48771;
+        }
+        
+        .instance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .instance-checkbox {
+            background: #2d2d2d;
+            padding: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .instance-checkbox:hover {
+            background: #3c3c3c;
+        }
+        
+        .instance-checkbox input {
+            margin-right: 8px;
+        }
+        
+        .instance-checkbox.needs-restart {
+            border: 2px solid #ce9178;
+        }
+        
+        .controls {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: #4ec9b0;
+            color: #1e1e1e;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #5fd9c0;
+        }
+        
+        button.secondary {
+            background: #3c3c3c;
+            color: #d4d4d4;
+        }
+        
+        button.secondary:hover {
+            background: #4c4c4c;
+        }
+        
+        button.danger {
+            background: #f48771;
+        }
+        
+        button.danger:hover {
+            background: #ff9781;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #858585;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 ArchiveSMP Config Deployment & Restart</h1>
+        <p class="subtitle">Expectations vs Reality • Drift Detection • Deployment Control</p>
+        
+        <div class="status-bar" id="statusBar">
+            <div class="status-grid">
+                <div class="status-card">
+                    <h3>Total Instances</h3>
+                    <div class="value" id="totalInstances">--</div>
+                </div>
+                <div class="status-card warning">
+                    <h3>Needs Restart</h3>
+                    <div class="value" id="needsRestart">--</div>
+                </div>
+                <div class="status-card">
+                    <h3>Hetzner Instances</h3>
+                    <div class="value" id="hetznerCount">--</div>
+                </div>
+                <div class="status-card">
+                    <h3>OVH Instances</h3>
+                    <div class="value" id="ovhCount">--</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('deploy')">Deploy Configs</button>
+            <button class="tab" onclick="switchTab('restart')">Restart Instances</button>
+            <button class="tab" onclick="switchTab('maps')">Pl3xMap Sync</button>
+        </div>
+        
+        <!-- Deploy Configs Tab -->
+        <div id="deploy-tab" class="tab-content active">
+            <div class="controls">
+                <h2>Select Instances to Deploy To:</h2>
+                <p style="color: #858585; margin: 10px 0;">Select instances where you want to deploy config changes.</p>
+                <div class="instance-grid" id="deployInstanceGrid">
+                    <div class="loading">Loading instances...</div>
+                </div>
+                
+                <div class="actions">
+                    <button onclick="deployConfigs()">Deploy Selected Configs</button>
+                    <button class="secondary" onclick="selectAllInstances('deploy')">Select All</button>
+                    <button class="secondary" onclick="deselectAllInstances('deploy')">Deselect All</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Restart Tab -->
+        <div id="restart-tab" class="tab-content">
+            <div class="controls">
+                <h2>Select Instances to Restart:</h2>
+                <p style="color: #858585; margin: 10px 0;">Instances with orange borders need restart after config/plugin changes.</p>
+                <div class="instance-grid" id="restartInstanceGrid">
+                    <div class="loading">Loading instances...</div>
+                </div>
+                
+                <div class="actions">
+                    <button onclick="restartSelected()">Restart Selected</button>
+                    <button class="danger" onclick="restartAll()">Restart All Instances</button>
+                    <button class="secondary" onclick="restartNeedsRestart()">Restart Flagged Only</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pl3xMap Sync Tab -->
+        <div id="maps-tab" class="tab-content">
+            <div class="controls">
+                <h2>🗺️ Pl3xMap & LiveAtlas Management</h2>
+                <p style="color: #858585; margin: 10px 0;">Manage map tile sync and LiveAtlas aggregation</p>
+                
+                <div class="status-bar" style="margin-top: 20px;">
+                    <h3 style="margin-bottom: 15px;">Tile Sync Status</h3>
+                    <div class="status-grid">
+                        <div class="status-card">
+                            <h3>Public Instances</h3>
+                            <div class="value" id="publicMapCount">12</div>
+                            <div style="color: #858585; font-size: 12px; margin-top: 5px;">maps.archivesmp.com</div>
+                        </div>
+                        <div class="status-card warning">
+                            <h3>Private Instances</h3>
+                            <div class="value" id="privateMapCount">4</div>
+                            <div style="color: #858585; font-size: 12px; margin-top: 5px;">admaps.archivesmp.com</div>
+                        </div>
+                        <div class="status-card">
+                            <h3>Tile Sync Service</h3>
+                            <div class="value" id="tileSyncStatus" style="font-size: 18px;">...</div>
+                        </div>
+                        <div class="status-card">
+                            <h3>Last Sync</h3>
+                            <div class="value" id="lastSyncTime" style="font-size: 18px;">...</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px;">
+                    <h3>Deployment Steps</h3>
+                    <p style="color: #858585; margin: 10px 0 20px 0;">Follow these steps to deploy Pl3xMap + LiveAtlas integration</p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Step 1 -->
+                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #4ec9b0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #4ec9b0; margin-bottom: 5px;">Step 1: Deploy Pl3xMap Configs</h4>
+                                    <p style="color: #858585; font-size: 14px;">Deploy public and private configs to all instances</p>
+                                </div>
+                                <button onclick="deployPlxMapConfigs()" style="white-space: nowrap;">Deploy Configs</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 2 -->
+                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #569cd6;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #569cd6; margin-bottom: 5px;">Step 2: Restart Instances</h4>
+                                    <p style="color: #858585; font-size: 14px;">Restart all 16 instances to load Pl3xMap configs</p>
+                                </div>
+                                <button onclick="restartMapInstances()" style="white-space: nowrap;">Restart Instances</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 3 -->
+                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #dcdcaa;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #dcdcaa; margin-bottom: 5px;">Step 3: Start Tile Sync (Hetzner)</h4>
+                                    <p style="color: #858585; font-size: 14px;">Enable tile watcher service on Hetzner server</p>
+                                </div>
+                                <button onclick="startTileSyncHetzner()" style="white-space: nowrap;">Start Hetzner Sync</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 4 -->
+                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #dcdcaa;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #dcdcaa; margin-bottom: 5px;">Step 4: Start Tile Sync (OVH)</h4>
+                                    <p style="color: #858585; font-size: 14px;">Enable tile watcher service on OVH server</p>
+                                </div>
+                                <button onclick="startTileSyncOVH()" style="white-space: nowrap;">Start OVH Sync</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 5 -->
+                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #ce9178;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #ce9178; margin-bottom: 5px;">Step 5: Start YunoHost Map Sync</h4>
+                                    <p style="color: #858585; font-size: 14px;">Enable map download service on YunoHost</p>
+                                </div>
+                                <button onclick="startYunohostSync()" style="white-space: nowrap;">Start YunoHost Sync</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Step 6 -->
+                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #c586c0;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <h4 style="color: #c586c0; margin-bottom: 5px;">Step 6: Verify Tile Sync</h4>
+                                    <p style="color: #858585; font-size: 14px;">Check that tiles are syncing from servers to YunoHost</p>
+                                </div>
+                                <button onclick="verifyTileSync()" class="secondary" style="white-space: nowrap;">Check Status</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Manual Actions -->
+                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #858585; margin-top: 20px;">
+                            <h4 style="color: #858585; margin-bottom: 10px;">📋 Manual Steps (YunoHost)</h4>
+                            <ul style="color: #858585; font-size: 14px; line-height: 1.8; margin-left: 20px;">
+                                <li>Configure domains in YunoHost: <code>maps.archivesmp.com</code> and <code>admaps.archivesmp.com</code></li>
+                                <li>Install LiveAtlas to both domains</li>
+                                <li>Enable SSO authentication on <code>admaps.archivesmp.com</code></li>
+                                <li>Verify configs auto-generated at <code>/var/www/.../config.json</code></li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="actions" style="margin-top: 30px;">
+                        <button onclick="deployAllMapSteps()" style="background: #4ec9b0;">🚀 Run All Steps</button>
+                        <button onclick="checkMapHealth()" class="secondary">Check Health</button>
+                        <button onclick="viewMapLogs()" class="secondary">View Logs</button>
+                        <button onclick="stopAllMapSync()" class="danger">Stop All Sync</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; background: #2d2d2d; padding: 20px; border-radius: 5px;">
+                    <h3 style="margin-bottom: 15px;">Instance Classification</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h4 style="color: #4ec9b0; margin-bottom: 10px;">🌍 Public Maps (maps.archivesmp.com)</h4>
+                            <div style="color: #858585; font-size: 14px; line-height: 1.8;">
+                                <div>BENT01 • CLIP01 • CREA01 • DEV01</div>
+                                <div>EMAD01 • EVO01 • HARD01 • MINE01</div>
+                                <div>MIN01 • SMP101 • SMP201 • TOW01</div>
+                                <div style="margin-top: 10px; color: #4ec9b0;">Player tracking: <strong>Enabled</strong></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 style="color: #ce9178; margin-bottom: 10px;">🔒 Private Maps (admaps.archivesmp.com)</h4>
+                            <div style="color: #858585; font-size: 14px; line-height: 1.8;">
+                                <div>ROY01 (Battle Royale)</div>
+                                <div>CSMC01 (Counter-Strike MC)</div>
+                                <div>PRI01 (Minigames)</div>
+                                <div>BIG01 (BiggerGames)</div>
+                                <div style="margin-top: 10px; color: #ce9178;">Player tracking: <strong>Disabled</strong></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let instancesStatus = {};
+        
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            
+            if (tabName === 'deploy') {
+                loadInstancesForDeploy();
+            } else if (tabName === 'restart') {
+                loadInstancesForRestart();
+            }
+        }
+        
+        // Load instance status
+        async function loadInstanceStatus() {
+            try {
+                const response = await fetch('/api/instances/status');
+                instancesStatus = await response.json();
+                
+                // Update status cards
+                document.getElementById('needsRestart').textContent = 
+                    instancesStatus.all_needs_restart?.length || 0;
+                
+                const hetznerInstances = instancesStatus.servers?.Hetzner?.instances || [];
+                const ovhInstances = instancesStatus.servers?.OVH?.instances || [];
+                
+                document.getElementById('hetznerCount').textContent = hetznerInstances.length;
+                document.getElementById('ovhCount').textContent = ovhInstances.length;
+                document.getElementById('totalInstances').textContent = 
+                    hetznerInstances.length + ovhInstances.length;
+                
+                // Refresh grids if visible
+                const activeTab = document.querySelector('.tab.active').textContent;
+                if (activeTab.includes('Deploy')) {
+                    loadInstancesForDeploy();
+                } else if (activeTab.includes('Restart')) {
+                    loadInstancesForRestart();
+                }
+                
+            } catch (error) {
+                console.error('Failed to load instance status:', error);
+                alert('Failed to connect to server. Make sure the API is running.');
+            }
+        }
+        
+        // Deploy functions
+        function loadInstancesForDeploy() {
+            const grid = document.getElementById('deployInstanceGrid');
+            const instances = getAllInstances();
+            
+            if (instances.length === 0) {
+                grid.innerHTML = '<div class="loading"><p>No instances found</p></div>';
+                return;
+            }
+            
+            grid.innerHTML = instances.map(instance => `
+                <label class="instance-checkbox ${instancesStatus.all_needs_restart?.includes(instance) ? 'needs-restart' : ''}">
+                    <input type="checkbox" value="${instance}">
+                    ${instance}
+                </label>
+            `).join('');
+        }
+        
+        function loadInstancesForRestart() {
+            const grid = document.getElementById('restartInstanceGrid');
+            const instances = getAllInstances();
+            
+            if (instances.length === 0) {
+                grid.innerHTML = '<div class="loading"><p>No instances found</p></div>';
+                return;
+            }
+            
+            grid.innerHTML = instances.map(instance => `
+                <label class="instance-checkbox ${instancesStatus.all_needs_restart?.includes(instance) ? 'needs-restart' : ''}">
+                    <input type="checkbox" value="${instance}">
+                    ${instance}
+                </label>
+            `).join('');
+        }
+        
+        function getAllInstances() {
+            const hetzner = instancesStatus.servers?.Hetzner?.instances || [];
+            const ovh = instancesStatus.servers?.OVH?.instances || [];
+            return [...hetzner, ...ovh].sort();
+        }
+        
+        function selectAllInstances(tab) {
+            document.querySelectorAll(`#${tab}InstanceGrid input[type="checkbox"]`)
+                .forEach(cb => cb.checked = true);
+        }
+        
+        function deselectAllInstances(tab) {
+            document.querySelectorAll(`#${tab}InstanceGrid input[type="checkbox"]`)
+                .forEach(cb => cb.checked = false);
+        }
+        
+        async function deployConfigs() {
+            const selected = Array.from(
+                document.querySelectorAll('#deployInstanceGrid input[type="checkbox"]:checked')
+            ).map(cb => cb.value);
+            
+            if (selected.length === 0) {
+                alert('Please select at least one instance');
+                return;
+            }
+            
+            if (!confirm(`Deploy configs to ${selected.length} instance(s)?\n\nThis will apply config changes to:\n${selected.join(', ')}`)) {
+                return;
+            }
+            
+            alert('Config deployment functionality requires drift detection data.\n\nPlease run drift detection first to identify configs needing deployment.');
+        }
+        
+        async function restartSelected() {
+            const selected = Array.from(
+                document.querySelectorAll('#restartInstanceGrid input[type="checkbox"]:checked')
+            ).map(cb => cb.value);
+            
+            if (selected.length === 0) {
+                alert('Please select at least one instance');
+                return;
+            }
+            
+            if (!confirm(`Restart ${selected.length} instance(s)? This will briefly interrupt gameplay.\n\nInstances to restart:\n${selected.join(', ')}`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/restart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instances: selected,
+                        restart_all: false,
+                        server: 'Both'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Restart completed successfully!');
+                    loadInstanceStatus();
+                } else {
+                    alert('Restart failed:\n\n' + JSON.stringify(result.results, null, 2));
+                }
+            } catch (error) {
+                alert('Restart failed: ' + error.message);
+            }
+        }
+        
+        async function restartAll() {
+            if (!confirm('⚠️ WARNING ⚠️\n\nRestart ALL instances on BOTH Hetzner and OVH servers?\n\nThis will interrupt gameplay on the entire network!\n\nAre you sure?')) {
+                return;
+            }
+            
+            if (!confirm('FINAL CONFIRMATION:\n\nYou are about to restart ALL ' + getAllInstances().length + ' instances.\n\nType YES in your mind and click OK to proceed.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/restart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instances: [],
+                        restart_all: true,
+                        server: 'Both'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('All instances restarted successfully!');
+                    loadInstanceStatus();
+                } else {
+                    alert('Restart failed:\n\n' + JSON.stringify(result.results, null, 2));
+                }
+            } catch (error) {
+                alert('Restart failed: ' + error.message);
+            }
+        }
+        
+        async function restartNeedsRestart() {
+            const needsRestart = instancesStatus.all_needs_restart || [];
+            
+            if (needsRestart.length === 0) {
+                alert('No instances flagged for restart');
+                return;
+            }
+            
+            if (!confirm(`Restart ${needsRestart.length} flagged instance(s)?\n\nThese instances have pending config or plugin changes:\n${needsRestart.join(', ')}`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/restart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instances: needsRestart,
+                        restart_all: false,
+                        server: 'Both'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Restart completed successfully!');
+                    loadInstanceStatus();
+                } else {
+                    alert('Restart failed:\n\n' + JSON.stringify(result.results, null, 2));
+                }
+            } catch (error) {
+                alert('Restart failed: ' + error.message);
+            }
+        }
+        
+        // Pl3xMap deployment functions
+        const PUBLIC_INSTANCES = ['BENT01', 'CLIP01', 'CREA01', 'DEV01', 'EMAD01', 'EVO01', 'HARD01', 'MINE01', 'MIN01', 'SMP101', 'SMP201', 'TOW01'];
+        const PRIVATE_INSTANCES = ['ROY01', 'CSMC01', 'PRI01', 'BIG01'];
+        
+        async function deployPlxMapConfigs() {
+            if (!confirm('Deploy Pl3xMap configs to all 16 instances?\n\nPublic (12): Player tracking ON\nPrivate (4): Player tracking OFF')) {
+                return;
+            }
+            
+            try {
+                // Deploy public configs
+                const publicResponse = await fetch('/api/deploy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instance_names: PUBLIC_INSTANCES,
+                        plugin_name: 'Pl3xMap',
+                        config_variant: 'public'
+                    })
+                });
+                
+                // Deploy private configs
+                const privateResponse = await fetch('/api/deploy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instance_names: PRIVATE_INSTANCES,
+                        plugin_name: 'Pl3xMap',
+                        config_variant: 'private'
+                    })
+                });
+                
+                const publicResult = await publicResponse.json();
+                const privateResult = await privateResponse.json();
+                
+                alert('✓ Pl3xMap configs deployed!\n\nPublic: ' + publicResult.message + '\nPrivate: ' + privateResult.message);
+            } catch (error) {
+                alert('Deployment failed: ' + error.message);
+            }
+        }
+        
+        async function restartMapInstances() {
+            const allInstances = [...PUBLIC_INSTANCES, ...PRIVATE_INSTANCES];
+            
+            if (!confirm(`Restart all 16 instances to load Pl3xMap?\n\n${allInstances.join(', ')}`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/restart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        instance_names: allInstances,
+                        restart_type: 'instances'
+                    })
+                });
+                
+                const result = await response.json();
+                alert('✓ Instances restarting!\n\n' + result.message);
+                loadInstanceStatus();
+            } catch (error) {
+                alert('Restart failed: ' + error.message);
+            }
+        }
+        
+        async function startTileSyncHetzner() {
+            if (!confirm('Start tile sync service on Hetzner server?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/maps/start-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ server: 'hetzner' })
+                });
+                
+                const result = await response.json();
+                alert('✓ Hetzner tile sync: ' + result.message);
+                updateMapStatus();
+            } catch (error) {
+                alert('Failed: ' + error.message + '\n\nManual command:\nssh root@archivesmp.site "systemctl start pl3xmap-tile-sync"');
+            }
+        }
+        
+        async function startTileSyncOVH() {
+            if (!confirm('Start tile sync service on OVH server?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/maps/start-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ server: 'ovh' })
+                });
+                
+                const result = await response.json();
+                alert('✓ OVH tile sync: ' + result.message);
+                updateMapStatus();
+            } catch (error) {
+                alert('Failed: ' + error.message + '\n\nManual command:\nssh root@archivesmp.online "systemctl start pl3xmap-tile-sync"');
+            }
+        }
+        
+        async function startYunohostSync() {
+            if (!confirm('Start map sync service on YunoHost?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/maps/start-yunohost-sync', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                alert('✓ YunoHost sync: ' + result.message);
+                updateMapStatus();
+            } catch (error) {
+                alert('Failed: ' + error.message + '\n\nManual command:\nssh yunohost "systemctl start yunohost-map-sync"');
+            }
+        }
+        
+        async function verifyTileSync() {
+            try {
+                const response = await fetch('/api/maps/status');
+                const status = await response.json();
+                
+                const message = `Tile Sync Status:\n\n` +
+                    `Hetzner: ${status.hetzner?.status || 'Unknown'}\n` +
+                    `OVH: ${status.ovh?.status || 'Unknown'}\n` +
+                    `YunoHost: ${status.yunohost?.status || 'Unknown'}\n\n` +
+                    `Synced Files: ${status.synced_files || 0}\n` +
+                    `Last Sync: ${status.last_sync || 'Never'}`;
+                
+                alert(message);
+            } catch (error) {
+                alert('Status check failed: ' + error.message);
+            }
+        }
+        
+        async function deployAllMapSteps() {
+            if (!confirm('Run all deployment steps?\n\n1. Deploy configs\n2. Restart instances\n3-5. Start sync services\n\nThis will take several minutes.')) {
+                return;
+            }
+            
+            try {
+                // Step 1
+                alert('Step 1/5: Deploying Pl3xMap configs...');
+                await deployPlxMapConfigs();
+                
+                // Step 2
+                alert('Step 2/5: Restarting instances...');
+                await restartMapInstances();
+                
+                // Wait for restarts
+                alert('Waiting 60 seconds for instances to restart...');
+                await new Promise(resolve => setTimeout(resolve, 60000));
+                
+                // Step 3
+                alert('Step 3/5: Starting Hetzner tile sync...');
+                await startTileSyncHetzner();
+                
+                // Step 4
+                alert('Step 4/5: Starting OVH tile sync...');
+                await startTileSyncOVH();
+                
+                // Step 5
+                alert('Step 5/5: Starting YunoHost sync...');
+                await startYunohostSync();
+                
+                alert('✓ All automated steps complete!\n\nNext:\n- Configure YunoHost domains\n- Install LiveAtlas\n- Enable SSO on admaps.archivesmp.com');
+            } catch (error) {
+                alert('Deployment interrupted: ' + error.message);
+            }
+        }
+        
+        async function checkMapHealth() {
+            try {
+                const response = await fetch('/api/maps/health');
+                const health = await response.json();
+                
+                const message = `Map System Health:\n\n` +
+                    `✓ Services Running: ${health.services_running}/${health.total_services}\n` +
+                    `✓ Instances Syncing: ${health.instances_syncing}/${health.total_instances}\n` +
+                    `✓ Public Maps: ${health.public_maps}\n` +
+                    `✓ Private Maps: ${health.private_maps}\n\n` +
+                    `Issues: ${health.issues.length > 0 ? health.issues.join(', ') : 'None'}`;
+                
+                alert(message);
+            } catch (error) {
+                alert('Health check failed: ' + error.message);
+            }
+        }
+        
+        async function viewMapLogs() {
+            try {
+                const response = await fetch('/api/maps/logs?lines=50');
+                const logs = await response.json();
+                
+                const logWindow = window.open('', 'Map Sync Logs', 'width=800,height=600');
+                logWindow.document.write('<pre>' + logs.logs.join('\n') + '</pre>');
+            } catch (error) {
+                alert('Failed to load logs: ' + error.message);
+            }
+        }
+        
+        async function stopAllMapSync() {
+            if (!confirm('Stop all map sync services?\n\nThis will stop tile syncing on all servers.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/maps/stop-all', { method: 'POST' });
+                const result = await response.json();
+                
+                alert('✓ All map sync services stopped:\n\n' + result.message);
+                updateMapStatus();
+            } catch (error) {
+                alert('Failed: ' + error.message);
+            }
+        }
+        
+        async function updateMapStatus() {
+            try {
+                const response = await fetch('/api/maps/status');
+                const status = await response.json();
+                
+                document.getElementById('tileSyncStatus').textContent = status.running ? '✓ Running' : '✗ Stopped';
+                document.getElementById('lastSyncTime').textContent = status.last_sync || 'Never';
+            } catch (error) {
+                console.error('Failed to update map status:', error);
+            }
+        }
+        
+        // Initialize
+        loadInstanceStatus();
+        updateMapStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            loadInstanceStatus();
+            if (document.getElementById('maps-tab').classList.contains('active')) {
+                updateMapStatus();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>
+

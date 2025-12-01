@@ -1,0 +1,8 @@
+{
+  "Geyser-Recipe-Fix": {
+    "anvil.forward": true,
+    "anvil.mode": "ENABLED",
+    "debug": false,
+    "smithing.mode": "ENABLED"
+  }
+}

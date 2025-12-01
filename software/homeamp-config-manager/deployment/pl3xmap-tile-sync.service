@@ -1,0 +1,34 @@
+[Unit]
+Description=Archive SMP Pl3xMap Tile Sync Service
+After=network-online.target minio.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/archivesmp-config-manager
+
+# MinIO connection settings
+Environment="MINIO_ENDPOINT=localhost:9000"
+Environment="MINIO_ACCESS_KEY=archivesmp"
+Environment="MINIO_SECRET_KEY=CHANGEME"
+
+# Python environment
+ExecStart=/opt/archivesmp-config-manager/.venv/bin/python -m src.agent.tile_watcher
+
+# Restart on failure
+Restart=always
+RestartSec=10
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pl3xmap-tile-sync
+
+# Resource limits
+LimitNOFILE=65536
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

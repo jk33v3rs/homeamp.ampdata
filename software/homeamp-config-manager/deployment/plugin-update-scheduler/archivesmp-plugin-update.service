@@ -1,0 +1,20 @@
+[Unit]
+Description=ArchiveSMP Plugin Update Checker
+After=network.target
+
+[Service]
+Type=oneshot
+User=webadmin
+Group=amp
+WorkingDirectory=\opt\archivesmp-config-manager
+ExecStart=/usr/bin/python3 -m src.automation.pulumi_update_monitor
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=archivesmp-plugin-update
+Environment="PYTHONPATH=\opt\archivesmp-config-manager"
+Environment="PLUGIN_REGISTRY=/etc/archivesmp/plugin_registry.yaml"
+Environment="STAGING_PATH=/var/lib/archivesmp/plugin-staging"
+Environment="EXCEL_PATH=/var/lib/archivesmp/reports/plugin_updates.xlsx"
+
+[Install]
+WantedBy=multi-user.target

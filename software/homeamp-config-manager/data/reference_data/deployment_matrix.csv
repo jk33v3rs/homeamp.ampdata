@@ -1,0 +1,137 @@
+plugin_name,plugin_type,auto_update,update_source,server_GEYSER,server_VEL01,server_SMP201,server_HUB01,server_EMAD01,server_SMPC01,server_NEOC01,server_BENT01,server_CLIP01,server_CSMC01,server_HC01,server_MINE01,server_EVO01,server_TOWER01,server_DEV01,server_MINI01,server_BIGG01,server_FORT01,server_PRIV01,server_CRAF01
+"1p death, all death",bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-Discount,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-DisplayControl,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-Limited,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-List,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-List,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-List,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-Plan,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Addon-ShopItemOnly,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Axiom,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+BentoBox,bukkit/paper,False,manual,False,False,False,False,False,False,False,True,False,False,False,False,False,False,False,False,False,False,False,False
+BetterForms,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+BetterStructures,bukkit/paper,True,modrinth,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Block Party,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+CMI,bukkit/paper,True,spigot,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+CMI Velocity,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+CMILib,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ChatGames,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Chunky,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ChunkyBorder,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Citizens,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+CombatPets,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+CommunityQuests,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Compat-EliteMobs,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Compat-WorldEdit,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Compat-WorldGuard,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+CoreProtect,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Craftbook,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+DamageIndicator,bukkit/paper,True,github_releases,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+DeluxeMenus,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Duels,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+EliteMobs,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Eternal Tower Defense,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ExcellentChallenges-Renewed,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ExcellentEnchants,bukkit/paper,True,spigot,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ExcellentJobs,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+FreeMinecraftModels,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Friendly Name,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Friendly Name,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+GeyserExtras-Velocity,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+GlowingItems,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+HandsOffMyBook,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Hurricane (spigot plugin for geyser bedrock feature parity),bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+HuskChat,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+HuskSync,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+HuskTowns,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ImageFrame,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+JobListings,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+JobsReborn,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LevelledMobs,bukkit/paper,True,github_releases,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LibertyBans,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LibertyBans,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LibsDisguises,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LiveAtlas (Pl3xmap combiner),bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LiveAtlas (Pl3xmap combiner),bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Lootin,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LuckPerms-Bukkit,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+LuckPerms-Velocity,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+MC Tennis,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Minetorio,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Night Market,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PAPIPProxyBridge-Bukkit,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PAPIPProxyBridge-Velocity,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PLAN,bukkit/paper,True,modrinth,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PLAN,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PLUGINS,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PaperTweaks,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PaperTweaks,bukkit/paper,True,github_releases,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Pl3xMap,bukkit/paper,True,modrinth,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Pl3xMapExtras,bukkit/paper,True,modrinth,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+PlaceholderAPI,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ProtocolLib,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Quests,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+QuickShop-Hikari,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+QuickShop-Hikari - COMPAT VELOCITY ADD-IN,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ResourcePackManager,bukkit/paper,True,modrinth,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ResurrectionChest,bukkit/paper,True,spigot,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Shop Search (QSlimefindItemAddOn),bukkit/paper,True,github_releases,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+SignedVelocity,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Slimefun4,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+TNE-VelocityCore-0.1.4.0,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+TheNewEconomy,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+TreeFeller,bukkit/paper,True,modrinth,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+VPacketEvents,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+VaultUnlocked,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Velocitab,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Velocity-Tools,velocity,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ViaBackwards,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+ViaVersion,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+VillagerOptimiser,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+WorldBorder,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+Worldedit,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+airport,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+bedwars +,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+betterGUI,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+bingo (many types),bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+boatracing,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+chained,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+chat games,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+chess,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+community events,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+creative suite,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+eShulkerBox,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+economy-bridge,bukkit/paper,True,github_releases,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+floodgate,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+fun gun,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+gpt god,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+great impostor,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+gregorail,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+heroes 2,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+holiday hunt,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+https://modrinth.com/plugin/trickier-trials,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+lifesteal,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+mcMMO,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+minecraft but... challenges,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+"mutils (paid, 15eu)",bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+naked and afraid,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+nightcore,bukkit/paper,True,modrinth,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+outposts,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+p2,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+packetevents-spigot,bukkit/paper,True,jenkins,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+paperspeed zero,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+pickpack,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+profitable,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+quake3,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+sea of steves,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+serverside bot players,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+serverwide first to ... events,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+simple portals,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+stacker,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+timedrain,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+trivia,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+uhc,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+unleashed smp,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+water rising,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False
+worldguard-bukkit,bukkit/paper,False,manual,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False,False

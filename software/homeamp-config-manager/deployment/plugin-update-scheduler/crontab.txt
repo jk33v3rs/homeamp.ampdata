@@ -1,0 +1,2 @@
+# ArchiveSMP Plugin Update Checker - Runs hourly
+0 * * * * cd \opt\archivesmp-config-manager && /usr/bin/python3 -m src.automation.pulumi_update_monitor >> /var/log/archivesmp/plugin-update.log 2>&1

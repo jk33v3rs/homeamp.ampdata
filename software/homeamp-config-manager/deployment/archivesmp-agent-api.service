@@ -1,0 +1,39 @@
+[Unit]
+Description=ArchiveSMP Agent API Service (Local Agent Communication)
+Documentation=https://github.com/jk33v3rs/homeamp.ampdata
+After=network-online.target homeamp-agent.service
+Wants=network-online.target
+Requires=homeamp-agent.service
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/archivesmp-config-manager
+Environment="PYTHONPATH=/opt/archivesmp-config-manager"
+EnvironmentFile=-/etc/archivesmp/secrets.env
+
+# Agent API for local instance management (port 8001)
+ExecStart=/opt/archivesmp-config-manager/venv/bin/python -m uvicorn src.agent.api:app --host 0.0.0.0 --port 8001
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=archivesmp-agent-api
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=1G
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,39 @@
+# ArchiveSMP Configuration Manager - Python Dependencies
+# Generated: 2025-11-14
+
+# Web Framework & API
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6  # For file uploads in FastAPI
+
+# HTTP Clients
+httpx==0.25.1
+requests==2.31.0
+aiohttp==3.9.0
+
+# Cloud Storage
+minio==7.2.0
+
+# Data Processing
+pandas==2.1.3
+openpyxl==3.1.2  # Excel file support for pandas
+
+# Configuration & Serialization  
+pyyaml==6.0.1
+
+# File System Monitoring
+watchdog==3.0.0
+
+# Monitoring & Metrics (optional but imported)
+prometheus-client==0.19.0
+
+# Infrastructure as Code (optional - only if using Pulumi features)
+# pulumi>=3.0.0
+# pulumi-aws>=6.0.0
+
+# Development Dependencies (not needed in production)
+# pytest==7.4.3
+# pytest-asyncio==0.21.1
+# black==23.11.0
+# mypy==1.7.1

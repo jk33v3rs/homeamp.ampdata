@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeAMP Configuration Manager</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🎮 HomeAMP Configuration Manager</h1>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- View Selector -->
+        <div class="view-selector">
+            <label>View Level:</label>
+            <select id="viewLevel" title="Select view level" onchange="changeViewLevel()">
+                <option value="global">Global Network</option>
+                <option value="server">Per-Server</option>
+                <option value="instance">Per-Instance</option>
+            </select>
+            
+            <select id="serverSelect" class="server-select-hidden" title="Select server" onchange="loadServerView()">
+                <option value="">Select Server...</option>
+            </select>
+            
+            <select id="instanceSelect" class="server-select-hidden" title="Select instance" onchange="loadInstanceView()" style="display: none;">
+                <option value="">Select Instance...</option>
+            </select>
+            
+            <button onclick="refreshData()" class="refresh-button">🔄 Refresh</button>
+        </div>
+        
+        <!-- Stats Dashboard -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <h3>Total Deviations</h3>
+                <div class="value" id="totalDeviations">-</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>Pending Review</h3>
+                <div class="value" id="pendingReview">-</div>
+            </div>
+            <div class="stat-card danger">
+                <h3>Flagged Bad</h3>
+                <div class="value" id="flaggedBad">-</div>
+            </div>
+            <div class="stat-card success">
+                <h3>Approved Good</h3>
+                <div class="value" id="approvedGood">-</div>
+            </div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('deviations')">Deviation Review</button>
+            <button class="tab" onclick="switchTab('plugins')">Plugin Updates</button>
+            <button class="tab" onclick="switchTab('bedrock')">🎮 Bedrock Update</button>
+            <button class="tab" onclick="switchTab('upload')">Upload Changes</button>
+            <button class="tab" onclick="switchTab('history')">Change History</button>
+        </div>
+        
+        <!-- Deviation Review Panel -->
+        <div id="deviations" class="panel active">
+            <h2>Configuration Deviations</h2>
+            <div id="deviationsContent" class="loading">Loading deviations...</div>
+        </div>
+        
+        <!-- Plugin Updates Panel -->
+        <div id="plugins" class="panel">
+            <h2>Out-of-Date Plugins</h2>
+            <div id="pluginsContent" class="loading">Loading plugin information...</div>
+        </div>
+        
+        <!-- Bedrock Update Panel -->
+        <div id="bedrock" class="panel">
+            <h2>🎮 Bedrock Compatibility Update</h2>
+            <p class="description">
+                Fast-track updates for Bedrock compatibility plugins after version changes.
+                Updates in priority order: ViaVersion/ViaBackwards → Geyser → Floodgate
+            </p>
+            
+            <!-- Version Check Section -->
+            <div class="bedrock-section">
+                <h3>📋 Current Versions</h3>
+                <button class="primary" onclick="checkBedrockVersions()">
+                    🔍 Check Versions
+                </button>
+                <div id="bedrockVersions" class="result-container"></div>
+            </div>
+            
+            <!-- Quick Update Buttons -->
+            <div class="bedrock-section">
+                <h3>⚡ Quick Updates</h3>
+                <div class="button-group">
+                    <button class="primary large" onclick="bedrockFullUpdate()">
+                        🚀 Full Bedrock Update
+                    </button>
+                    <button class="secondary" onclick="bedrockUpdateComponent('geyser')">
+                        📦 Update Geyser
+                    </button>
+                    <button class="secondary" onclick="bedrockUpdateComponent('via')">
+                        🔄 Update ViaVersion/ViaBackwards
+                    </button>
+                    <button class="secondary" onclick="bedrockUpdateComponent('floodgate')">
+                        🔐 Update Floodgate
+                    </button>
+                </div>
+                <div id="bedrockUpdateResult" class="result-container"></div>
+            </div>
+            
+            <!-- Network Topology Info -->
+            <div class="bedrock-section">
+                <h3>🌐 Network Topology</h3>
+                <div class="topology-info">
+                    <div class="topology-box">
+                        <h4>Velocity01 (Proxy)</h4>
+                        <ul>
+                            <li>✓ ViaVersion (Hangar snapshots)</li>
+                            <li>✓ ViaBackwards (Hangar snapshots)</li>
+                        </ul>
+                    </div>
+                    <div class="topology-box">
+                        <h4>Geyser01 (Proxy)</h4>
+                        <ul>
+                            <li>✓ Geyser Standalone</li>
+                            <li>✓ Floodgate Standalone</li>
+                        </ul>
+                    </div>
+                    <div class="topology-box">
+                        <h4>Network Servers</h4>
+                        <ul>
+                            <li>✓ Floodgate Spigot (all servers)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Upload Changes Panel -->
+        <div id="upload" class="panel">
+            <h2>Upload Configuration Changes</h2>
+            <div class="upload-section">
+                <p class="description">
+                    Upload a change request JSON file (expected_changes_template.json format).
+                    Changes will be queued for approval, not applied automatically.
+                </p>
+                
+                <div class="file-input-wrapper">
+                    <input type="file" id="changeFile" accept=".json" onchange="fileSelected()">
+                    <label for="changeFile" class="file-label">📁 Select File</label>
+                    <span class="file-name" id="fileName">No file selected</span>
+                    <button class="primary" id="uploadBtn" onclick="uploadChangeFile()" disabled>
+                        ⬆️ Upload
+                    </button>
+                </div>
+                
+                <div id="uploadResult" class="result-container"></div>
+            </div>
+            
+            <h2 class="section-heading">Generate Fixes from Flagged Deviations</h2>
+            <div class="upload-section">
+                <p class="description">
+                    Generate a change request JSON from all deviations flagged as "bad".
+                </p>
+                <button class="primary" onclick="generateFixes()">
+                    🔧 Generate Fix Changes
+                </button>
+                <div id="generateResult" class="result-container"></div>
+            </div>
+        </div>
+        
+        <!-- Change History Panel -->
+        <div id="history" class="panel">
+            <h2>Change History</h2>
+            <div id="historyContent" class="loading">Loading change history...</div>
+        </div>
+    </div>
+    
+    <script>
+        // Current state
+        let currentView = 'global';
+        let currentTab = 'deviations';
+        let deviationsData = [];
+        let selectedServer = null;
+        let selectedInstance = null;
+        let allInstances = [];
+        
+        // Initialize
+        window.onload = () => {
+            loadServersAndInstances();
+            refreshData();
+        };
+        
+        // Load server and instance lists from API
+        async function loadServersAndInstances() {
+            try {
+                // Load all instances
+                const instancesResponse = await fetch('/api/instances');
+                const instancesData = await instancesResponse.json();
+                allInstances = instancesData.instances || [];
+                
+                // Extract unique server names
+                const serverNames = [...new Set(allInstances.map(i => i.server_name))];
+                
+                // Populate server dropdown
+                const serverSelect = document.getElementById('serverSelect');
+                serverNames.forEach(server => {
+                    const option = document.createElement('option');
+                    option.value = server;
+                    option.textContent = server;
+                    serverSelect.appendChild(option);
+                });
+                
+                // Populate instance dropdown with all instances initially
+                updateInstanceDropdown();
+            } catch (error) {
+                console.error('Error loading servers/instances:', error);
+            }
+        }
+        
+        // Update instance dropdown based on selected server
+        function updateInstanceDropdown(serverFilter = null) {
+            const instanceSelect = document.getElementById('instanceSelect');
+            instanceSelect.innerHTML = '<option value="">Select Instance...</option>';
+            
+            const instances = serverFilter 
+                ? allInstances.filter(i => i.server_name === serverFilter)
+                : allInstances;
+            
+            instances.forEach(instance => {
+                const option = document.createElement('option');
+                option.value = instance.instance_id;
+                option.textContent = `${instance.instance_id} (${instance.server_name})`;
+                instanceSelect.appendChild(option);
+            });
+        }
+        
+        // Change view level
+        function changeViewLevel() {
+            const level = document.getElementById('viewLevel').value;
+            const serverSelect = document.getElementById('serverSelect');
+            const instanceSelect = document.getElementById('instanceSelect');
+            
+            // Reset selections
+            selectedServer = null;
+            selectedInstance = null;
+            
+            if (level === 'server') {
+                serverSelect.style.display = 'inline-block';
+                instanceSelect.style.display = 'none';
+                serverSelect.value = '';
+            } else if (level === 'instance') {
+                serverSelect.style.display = 'none';
+                instanceSelect.style.display = 'inline-block';
+                instanceSelect.value = '';
+                updateInstanceDropdown(); // Show all instances
+            } else {
+                serverSelect.style.display = 'none';
+                instanceSelect.style.display = 'none';
+            }
+            
+            currentView = level;
+            refreshData();
+        }
+        
+        // Switch tabs
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            currentTab = tabName;
+            
+            if (tabName === 'plugins') loadPluginUpdates();
+            if (tabName === 'bedrock') checkBedrockVersions();
+            if (tabName === 'history') loadChangeHistory();
+        }
+        
+        // Refresh all data
+        async function refreshData() {
+            await loadDeviations();
+            updateStats();
+        }
+        
+        // Load deviations
+        async function loadDeviations() {
+            try {
+                let url = '/api/deviations';
+                if (selectedServer) {
+                    url = `/api/deviations/server/${selectedServer}`;
+                }
+                
+                const response = await fetch(url);
+                deviationsData = await response.json();
+                renderDeviations();
+            } catch (error) {
+                console.error('Error loading deviations:', error);
+                document.getElementById('deviationsContent').innerHTML = 
+                    '<p class="status-error">Error loading deviations</p>';
+            }
+        }
+        
+        // Render deviations table
+        function renderDeviations() {
+            const content = document.getElementById('deviationsContent');
+            
+            if (deviationsData.length === 0) {
+                content.innerHTML = '<p class="status-loading">No deviations found</p>';
+                return;
+            }
+            
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Server</th>
+                            <th>Plugin</th>
+                            <th>Config File</th>
+                            <th>Key Path</th>
+                            <th>Value</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            deviationsData.forEach((dev, idx) => {
+                const statusClass = {
+                    'pending_review': 'pending',
+                    'approved_good': 'good',
+                    'flagged_bad': 'bad',
+                    'fixed': 'fixed'
+                }[dev.status] || 'pending';
+                
+                html += `
+                    <tr>
+                        <td>${dev.server}</td>
+                        <td>${dev.plugin}</td>
+                        <td><code>${dev.config_file}</code></td>
+                        <td><code>${dev.key_path}</code></td>
+                        <td><code>${JSON.stringify(dev.value)}</code></td>
+                        <td><span class="badge badge-${statusClass}">${dev.status}</span></td>
+                        <td>
+                            ${dev.status === 'pending_review' ? `
+                                <button onclick="reviewDeviation(${idx}, 'good')">✓ Good</button>
+                                <button onclick="reviewDeviation(${idx}, 'bad')">✗ Bad</button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            content.innerHTML = html;
+        }
+        
+        // Update stats
+        function updateStats() {
+            const stats = {
+                total: deviationsData.length,
+                pending: deviationsData.filter(d => d.status === 'pending_review').length,
+                bad: deviationsData.filter(d => d.status === 'flagged_bad').length,
+                good: deviationsData.filter(d => d.status === 'approved_good').length
+            };
+            
+            document.getElementById('totalDeviations').textContent = stats.total;
+            document.getElementById('pendingReview').textContent = stats.pending;
+            document.getElementById('flaggedBad').textContent = stats.bad;
+            document.getElementById('approvedGood').textContent = stats.good;
+        }
+        
+        // Review deviation
+        async function reviewDeviation(idx, action) {
+            const dev = deviationsData[idx];
+            const status = action === 'good' ? 'approved_good' : 'flagged_bad';
+            
+            let replacementValue = null;
+            if (action === 'bad') {
+                const input = prompt(`Flagging as BAD. Enter correct value for ${dev.key_path}:`, 
+                                    JSON.stringify(dev.universal_value || dev.value));
+                if (!input) return;
+                try {
+                    replacementValue = JSON.parse(input);
+                } catch {
+                    replacementValue = input;
+                }
+            }
+            
+            const review = {
+                deviation_id: `${dev.plugin}_${dev.config_file}_${dev.key_path}_${dev.server}`,
+                status: status,
+                replacement_value: replacementValue,
+                notes: '',
+                flagged_by: 'admin'
+            };
+            
+            try {
+                const response = await fetch('/api/deviations/review', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(review)
+                });
+                
+                if (response.ok) {
+                    dev.status = status;
+                    if (replacementValue) dev.replacement_value = replacementValue;
+                    renderDeviations();
+                    updateStats();
+                } else {
+                    alert('Error submitting review');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error submitting review');
+            }
+        }
+        
+        // File upload functions
+        function fileSelected() {
+            const input = document.getElementById('changeFile');
+            const fileName = document.getElementById('fileName');
+            const uploadBtn = document.getElementById('uploadBtn');
+            
+            if (input.files.length > 0) {
+                fileName.textContent = input.files[0].name;
+                uploadBtn.disabled = false;
+            } else {
+                fileName.textContent = 'No file selected';
+                uploadBtn.disabled = true;
+            }
+        }
+        
+        async function uploadChangeFile() {
+            const input = document.getElementById('changeFile');
+            const result = document.getElementById('uploadResult');
+            
+            if (input.files.length === 0) return;
+            
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+            
+            try {
+                result.innerHTML = '<p class="status-loading">Uploading...</p>';
+                
+                const response = await fetch('/api/changes/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML = `
+                        <p class="status-success">✓ Upload successful!</p>
+                        <p class="status-loading">Change ID: ${data.change_id}</p>
+                        <p class="status-loading">Changes: ${data.changes_count}</p>
+                        <a href="${data.preview_url}" class="status-info">Preview Changes</a>
+                    `;
+                } else {
+                    result.innerHTML = `<p class="status-error">Error: ${data.detail}</p>`;
+                }
+            } catch (error) {
+                result.innerHTML = `<p class="status-error">Error uploading file</p>`;
+            }
+        }
+        
+        async function generateFixes() {
+            const result = document.getElementById('generateResult');
+            
+            try {
+                result.innerHTML = '<p class="status-loading">Generating...</p>';
+                
+                const response = await fetch('/api/deviations/generate-fixes');
+                const data = await response.json();
+                
+                result.innerHTML = `
+                    <p class="status-success">✓ Generated fix changes</p>
+                    <pre class="code-block">
+${JSON.stringify(data, null, 2)}
+                    </pre>
+                `;
+            } catch (error) {
+                result.innerHTML = `<p class="status-error">Error generating fixes</p>`;
+            }
+        }
+        
+        // Plugin updates
+        async function loadPluginUpdates() {
+            const content = document.getElementById('pluginsContent');
+            
+            try {
+                content.innerHTML = '<p class="status-loading">Loading plugin updates...</p>';
+                
+                const response = await fetch('/api/plugins/outdated');
+                const data = await response.json();
+                
+                if (data.count === 0) {
+                    content.innerHTML = '<p class="status-success">✓ All plugins are up to date!</p>';
+                    return;
+                }
+                
+                let html = `
+                    <!-- Instance Update Settings -->
+                    <div class="instance-settings-panel" style="background: #161b22; padding: 20px; border-radius: 6px; margin-bottom: 30px;">
+                        <h3 style="margin-top: 0;">⚙️ Instance Update Settings <button onclick="loadInstanceSettings()" style="float: right; font-size: 12px;">🔄 Refresh Settings</button></h3>
+                        <p style="color: #8b949e; margin-bottom: 15px;">Configure automatic update behavior per instance</p>
+                        <div id="instance-settings-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px;">
+                            <p style="color: #8b949e;">Loading settings...</p>
+                        </div>
+                    </div>
+                    
+                    <hr style="border: 1px solid #30363d; margin: 30px 0;">
+                    
+                    <!-- Warning Header -->
+                    <div class="warning-header">
+                        <p class="warning-text">${data.count} plugins have available updates</p>
+                        <button onclick="refreshPluginUpdates()" class="refresh-button">🔄 Refresh</button>
+                    </div>
+                    
+                    <!-- Summary Cards -->
+                    <div class="update-summary">
+                        <div class="summary-card risk-high">
+                            <div class="summary-number">${countByRisk(data.plugins, 'high')}</div>
+                            <div class="summary-label">High Risk</div>
+                        </div>
+                        <div class="summary-card risk-medium">
+                            <div class="summary-number">${countByRisk(data.plugins, 'medium')}</div>
+                            <div class="summary-label">Medium Risk</div>
+                        </div>
+                        <div class="summary-card risk-low">
+                            <div class="summary-number">${countByRisk(data.plugins, 'low')}</div>
+                            <div class="summary-label">Low Risk</div>
+                        </div>
+                    </div>
+                    
+                    <table class="update-table">
+                        <thead>
+                            <tr>
+                                <th>Plugin</th>
+                                <th>Servers</th>
+                                <th>Current Version</th>
+                                <th>Latest Version</th>
+                                <th>Source</th>
+                                <th>Risk Level</th>
+                                <th>Released</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                for (const [pluginName, plugin] of Object.entries(data.plugins)) {
+                    const servers = Object.keys(plugin.current_versions).join(', ');
+                    const currentVersions = Object.values(plugin.current_versions);
+                    const uniqueVersions = [...new Set(currentVersions)];
+                    const currentVersionText = uniqueVersions.length === 1 ? uniqueVersions[0] : 'Mixed';
+                    
+                    const riskClass = {
+                        'low': 'risk-low',
+                        'medium': 'risk-medium',
+                        'high': 'risk-high',
+                        'critical': 'risk-high'
+                    }[plugin.risk_level] || 'risk-medium';
+                    
+                    // Format version display
+                    let latestVersionDisplay = plugin.latest_version;
+                    if (plugin.build_number) {
+                        latestVersionDisplay += ` <span class="build-badge">Build #${plugin.build_number}</span>`;
+                    }
+                    
+                    // Format release date
+                    let releaseDateDisplay = 'Unknown';
+                    if (plugin.release_date) {
+                        try {
+                            const date = new Date(plugin.release_date);
+                            const now = new Date();
+                            const diffDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+                            if (diffDays === 0) releaseDateDisplay = 'Today';
+                            else if (diffDays === 1) releaseDateDisplay = 'Yesterday';
+                            else if (diffDays < 7) releaseDateDisplay = `${diffDays}d ago`;
+                            else if (diffDays < 30) releaseDateDisplay = `${Math.floor(diffDays / 7)}w ago`;
+                            else releaseDateDisplay = date.toLocaleDateString();
+                        } catch(e) {
+                            releaseDateDisplay = 'Unknown';
+                        }
+                    }
+                    
+                    // Source with icon
+                    const sourceIcons = {
+                        'jenkins': '🔨',
+                        'modrinth': '📦',
+                        'github': '🐙',
+                        'spigot': '🔌',
+                        'hangar': '🪂'
+                    };
+                    const sourceIcon = sourceIcons[plugin.source] || '📥';
+                    const sourceDisplay = `${sourceIcon} ${(plugin.source || 'Unknown').toUpperCase()}`;
+                    
+                    // Game versions support (for Modrinth)
+                    let gameVersionsHint = '';
+                    if (plugin.game_versions && plugin.game_versions.length > 0) {
+                        gameVersionsHint = ` <span class="version-hint" title="${plugin.game_versions.join(', ')}">[${plugin.game_versions[0]}${plugin.game_versions.length > 1 ? '...' : ''}]</span>`;
+                    }
+                    
+                    html += `
+                        <tr>
+                            <td><strong>${pluginName}</strong></td>
+                            <td><small>${servers}</small></td>
+                            <td><code>${currentVersionText}</code></td>
+                            <td><code>${latestVersionDisplay}${gameVersionsHint}</code></td>
+                            <td>${sourceDisplay}</td>
+                            <td><span class="${riskClass}">${plugin.risk_level.toUpperCase()}</span></td>
+                            <td><small>${releaseDateDisplay}</small></td>
+                            <td>
+                                <a href="${plugin.download_url}" target="_blank" class="download-link">Download</a>
+                                ${plugin.changelog || plugin.parsed_changelog ? `<br><small><a href="#" onclick="showChangelog('${pluginName}')" class="changelog-link">Changelog</a></small>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }
+                
+                html += '</tbody></table>';
+                
+                // Add changelog modal (hidden)
+                html += `
+                    <div id="changelogModal" class="modal">
+                        <div class="modal-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <h3 id="changelogTitle"></h3>
+                                <button onclick="closeChangelog()" class="modal-close">×</button>
+                            </div>
+                            <div id="changelogContent"></div>
+                        </div>
+                    </div>
+                `;
+                
+                content.innerHTML = html;
+                
+                // Store plugin data for changelog modal
+                window.pluginData = data.plugins;
+                
+                // Load instance settings after main content
+                loadInstanceSettings();
+                
+            } catch (error) {
+                console.error('Error loading plugin updates:', error);
+                content.innerHTML = '<p style="color: #f85149;">Error loading plugin updates</p>';
+            }
+        }
+        
+        function countByRisk(plugins, riskLevel) {
+            return Object.values(plugins).filter(p => p.risk_level === riskLevel).length;
+        }
+        
+        function refreshPluginUpdates() {
+            loadPluginUpdates();
+        }
+        
+        // Instance Settings Management
+        async function loadInstanceSettings() {
+            const grid = document.getElementById('instance-settings-grid');
+            if (!grid) return;
+            
+            try {
+                grid.innerHTML = '<p style="color: #8b949e;">Loading settings...</p>';
+                
+                const response = await fetch('/api/instances/settings');
+                const allSettings = await response.json();
+                
+                if (Object.keys(allSettings).length === 0) {
+                    grid.innerHTML = '<p style="color: #8b949e;">No instances found</p>';
+                    return;
+                }
+                
+                // Filter settings based on current view
+                let filteredSettings = allSettings;
+                if (currentView === 'server' && selectedServer) {
+                    // Filter to only show instances from selected server
+                    const serverInstances = allInstances
+                        .filter(i => i.server_name === selectedServer)
+                        .map(i => i.instance_id);
+                    filteredSettings = Object.fromEntries(
+                        Object.entries(allSettings).filter(([name, _]) => serverInstances.includes(name))
+                    );
+                } else if (currentView === 'instance' && selectedInstance) {
+                    // Filter to only show the selected instance
+                    filteredSettings = selectedInstance in allSettings 
+                        ? { [selectedInstance]: allSettings[selectedInstance] }
+                        : {};
+                }
+                
+                if (Object.keys(filteredSettings).length === 0) {
+                    grid.innerHTML = '<p style="color: #8b949e;">No instances in this view</p>';
+                    return;
+                }
+                
+                let html = '';
+                for (const [instanceName, settings] of Object.entries(filteredSettings)) {
+                    const modeDisplay = {
+                        'manual': '🔒 Manual Only',
+                        'semi_auto': '⚡ Semi-Automatic',
+                        'full_auto': '🚀 Fully Automatic'
+                    }[settings.update_mode] || settings.update_mode;
+                    
+                    const modeColor = {
+                        'manual': '#58a6ff',
+                        'semi_auto': '#f0883e',
+                        'full_auto': '#56d364'
+                    }[settings.update_mode] || '#8b949e';
+                    
+                    html += `
+                        <div class="instance-setting-card" style="background: #0d1117; padding: 15px; border-radius: 6px; border: 1px solid #30363d;">
+                            <h4 style="margin: 0 0 10px 0; color: ${modeColor};">${instanceName}</h4>
+                            <div style="margin-bottom: 10px;">
+                                <label style="display: block; color: #8b949e; font-size: 12px; margin-bottom: 5px;">Update Mode:</label>
+                                <select onchange="updateInstanceSetting('${instanceName}', 'update_mode', this.value)" style="width: 100%; padding: 5px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px;">
+                                    <option value="manual" ${settings.update_mode === 'manual' ? 'selected' : ''}>🔒 Manual Only</option>
+                                    <option value="semi_auto" ${settings.update_mode === 'semi_auto' ? 'selected' : ''}>⚡ Semi-Automatic</option>
+                                    <option value="full_auto" ${settings.update_mode === 'full_auto' ? 'selected' : ''}>🚀 Fully Automatic</option>
+                                </select>
+                            </div>
+                            
+                            <div style="margin: 10px 0; padding: 10px; background: #161b22; border-radius: 4px; font-size: 12px;">
+                                <label style="display: block; margin-bottom: 5px;">
+                                    <input type="checkbox" ${settings.auto_deploy_low_risk ? 'checked' : ''} onchange="updateInstanceSetting('${instanceName}', 'auto_deploy_low_risk', this.checked)">
+                                    <span style="color: #56d364;">Auto-deploy low risk</span>
+                                </label>
+                                <label style="display: block; margin-bottom: 5px;">
+                                    <input type="checkbox" ${settings.auto_deploy_medium_risk ? 'checked' : ''} onchange="updateInstanceSetting('${instanceName}', 'auto_deploy_medium_risk', this.checked)">
+                                    <span style="color: #f0883e;">Auto-deploy medium risk</span>
+                                </label>
+                                <label style="display: block;">
+                                    <input type="checkbox" ${settings.auto_deploy_high_risk ? 'checked' : ''} onchange="updateInstanceSetting('${instanceName}', 'auto_deploy_high_risk', this.checked)" disabled>
+                                    <span style="color: #f85149;">Auto-deploy high risk (disabled)</span>
+                                </label>
+                            </div>
+                            
+                            <button onclick="showInstanceDetails('${instanceName}')" style="width: 100%; padding: 5px; background: #21262d; border: 1px solid #30363d; color: #c9d1d9; border-radius: 4px; cursor: pointer; font-size: 12px;">
+                                Advanced Settings ⚙️
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                grid.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading instance settings:', error);
+                grid.innerHTML = '<p style="color: #f85149;">Error loading settings</p>';
+            }
+        }
+        
+        async function updateInstanceSetting(instanceName, field, value) {
+            try {
+                const response = await fetch(`/api/instances/${instanceName}/settings`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [field]: value })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    console.log(`Updated ${instanceName}.${field} to ${value}`);
+                } else {
+                    alert(`Failed to update setting: ${result.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error updating setting:', error);
+                alert('Failed to update setting');
+            }
+        }
+        
+        function showInstanceDetails(instanceName) {
+            alert(`Advanced settings for ${instanceName} - Coming soon!\n\nFeatures:\n- Excluded plugins\n- Maintenance windows\n- Max updates per cycle\n- Restart approval settings`);
+        }
+        
+        function showChangelog(pluginName) {
+            const plugin = window.pluginData[pluginName];
+            if (!plugin) return;
+            
+            document.getElementById('changelogTitle').textContent = `${pluginName} Changelog`;
+            
+            let changelogHtml = '';
+            
+            // If we have parsed changelog, show categorized view
+            if (plugin.parsed_changelog) {
+                const parsed = plugin.parsed_changelog;
+                
+                if (parsed.breaking_changes && parsed.breaking_changes.length > 0) {
+                    changelogHtml += `
+                        <div class="changelog-section breaking">
+                            <h4>⚠️ Breaking Changes</h4>
+                            <ul>
+                                ${parsed.breaking_changes.map(c => `<li>${c}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                if (parsed.warnings && parsed.warnings.length > 0) {
+                    changelogHtml += `
+                        <div class="changelog-section warning">
+                            <h4>⚡ Important Warnings</h4>
+                            <ul>
+                                ${parsed.warnings.map(w => `<li>${w}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                if (parsed.features && parsed.features.length > 0) {
+                    changelogHtml += `
+                        <div class="changelog-section features">
+                            <h4>✨ New Features</h4>
+                            <ul>
+                                ${parsed.features.map(f => `<li>${f}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                if (parsed.fixes && parsed.fixes.length > 0) {
+                    changelogHtml += `
+                        <div class="changelog-section fixes">
+                            <h4>🔧 Bug Fixes</h4>
+                            <ul>
+                                ${parsed.fixes.map(f => `<li>${f}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                // Show raw text in collapsed section
+                if (parsed.raw) {
+                    changelogHtml += `
+                        <details class="changelog-raw">
+                            <summary>Show raw changelog</summary>
+                            <pre style="white-space: pre-wrap; margin-top: 10px;">${parsed.raw}</pre>
+                        </details>
+                    `;
+                }
+            } else if (plugin.changelog) {
+                // Fallback to raw changelog
+                changelogHtml = `<pre style="white-space: pre-wrap;">${plugin.changelog}</pre>`;
+            } else {
+                changelogHtml = '<p style="color: #8b949e;">No changelog available</p>';
+            }
+            
+            document.getElementById('changelogContent').innerHTML = changelogHtml;
+            document.getElementById('changelogModal').style.display = 'block';
+        }
+        
+        function closeChangelog() {
+            document.getElementById('changelogModal').style.display = 'none';
+        }
+        
+        // Change history (stub)
+        function loadChangeHistory() {
+            document.getElementById('historyContent').innerHTML = 
+                '<p style="color: #8b949e;">Change history not yet implemented</p>';
+        }
+        
+        // Load server view
+        function loadServerView() {
+            selectedServer = document.getElementById('serverSelect').value;
+            selectedInstance = null;
+            refreshData();
+        }
+        
+        // Load instance view
+        function loadInstanceView() {
+            selectedInstance = document.getElementById('instanceSelect').value;
+            selectedServer = null;
+            refreshData();
+        }
+        
+        // ============================================================================
+        // BEDROCK UPDATE FUNCTIONS
+        // ============================================================================
+        
+        // Check Bedrock plugin versions
+        async function checkBedrockVersions() {
+            const container = document.getElementById('bedrockVersions');
+            container.innerHTML = '<p class="loading">Checking versions...</p>';
+            
+            try {
+                const response = await fetch('/api/bedrock/versions');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    container.innerHTML = `<p class="error">❌ ${data.error || 'Failed to check versions'}</p>`;
+                    return;
+                }
+                
+                let html = '<div class="version-grid">';
+                
+                // Display each plugin's version info
+                for (const [plugin, info] of Object.entries(data.versions)) {
+                    if (!info) {
+                        html += `
+                            <div class="version-card error">
+                                <h4>${plugin.toUpperCase()}</h4>
+                                <p>⚠️ Could not fetch version</p>
+                            </div>
+                        `;
+                        continue;
+                    }
+                    
+                    const version = info.version || 'Unknown';
+                    const build = info.build ? `Build ${info.build}` : '';
+                    const channel = info.channel ? `(${info.channel})` : '';
+                    
+                    html += `
+                        <div class="version-card">
+                            <h4>${plugin.toUpperCase()}</h4>
+                            <p class="version-number">${version} ${build}</p>
+                            ${channel ? `<p class="version-channel">${channel}</p>` : ''}
+                            ${info.time ? `<p class="version-time"><small>${new Date(info.time).toLocaleDateString()}</small></p>` : ''}
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+                html += `<p class="success-message"><small>✓ Checked at ${new Date().toLocaleTimeString()}</small></p>`;
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                container.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Full Bedrock update
+        async function bedrockFullUpdate() {
+            const container = document.getElementById('bedrockUpdateResult');
+            
+            if (!confirm('Perform full Bedrock compatibility update?\n\nThis will update:\n• ViaVersion + ViaBackwards\n• Geyser Standalone\n• Floodgate\n\nServices will need to be restarted.')) {
+                return;
+            }
+            
+            container.innerHTML = '<p class="loading">🚀 Running full Bedrock update...</p>';
+            
+            try {
+                const response = await fetch('/api/bedrock/update/full', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                let html = '';
+                
+                if (data.success) {
+                    html += '<div class="success-message"><h4>✅ Full Bedrock Update Completed</h4></div>';
+                } else {
+                    html += '<div class="error-message"><h4>⚠️ Update Completed with Errors</h4></div>';
+                }
+                
+                // Display results for each component
+                const results = data.results.updates;
+                
+                if (results.via) {
+                    html += '<div class="update-result">';
+                    html += '<h5>ViaVersion/ViaBackwards</h5>';
+                    results.via.plugins.forEach(plugin => {
+                        const icon = plugin.success ? '✅' : '❌';
+                        html += `<p>${icon} ${plugin.name}: ${plugin.version || 'Failed'} ${plugin.channel ? `(${plugin.channel})` : ''}</p>`;
+                    });
+                    html += '</div>';
+                }
+                
+                if (results.geyser) {
+                    html += '<div class="update-result">';
+                    html += '<h5>Geyser Standalone</h5>';
+                    const icon = results.geyser.success ? '✅' : '❌';
+                    html += `<p>${icon} ${results.geyser.message || results.geyser.error}</p>`;
+                    if (results.geyser.version) {
+                        html += `<p>Version: ${results.geyser.version}</p>`;
+                    }
+                    html += '</div>';
+                }
+                
+                if (results.floodgate) {
+                    html += '<div class="update-result">';
+                    html += '<h5>Floodgate</h5>';
+                    results.floodgate.updates.forEach(update => {
+                        const icon = update.success ? '✅' : (update.pending ? '⏳' : '❌');
+                        html += `<p>${icon} ${update.location}: ${update.version || update.note || 'Failed'}</p>`;
+                    });
+                    html += '</div>';
+                }
+                
+                if (data.restart_required) {
+                    html += '<div class="warning-message"><p>⚠️ <strong>Restart Required:</strong> Please restart Velocity01 and Geyser01 for changes to take effect.</p></div>';
+                }
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                container.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Update individual component
+        async function bedrockUpdateComponent(component) {
+            const container = document.getElementById('bedrockUpdateResult');
+            const componentNames = {
+                'geyser': 'Geyser Standalone',
+                'via': 'ViaVersion/ViaBackwards',
+                'floodgate': 'Floodgate'
+            };
+            
+            if (!confirm(`Update ${componentNames[component]}?\n\nService restart may be required.`)) {
+                return;
+            }
+            
+            container.innerHTML = `<p class="loading">🔄 Updating ${componentNames[component]}...</p>`;
+            
+            try {
+                const response = await fetch(`/api/bedrock/update/${component}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                let html = '';
+                
+                if (data.success) {
+                    html += `<div class="success-message"><h4>✅ ${componentNames[component]} Updated</h4></div>`;
+                } else {
+                    html += `<div class="error-message"><h4>❌ Update Failed</h4></div>`;
+                }
+                
+                html += '<div class="update-result">';
+                
+                if (component === 'via' && data.details.plugins) {
+                    data.details.plugins.forEach(plugin => {
+                        const icon = plugin.success ? '✅' : '❌';
+                        html += `<p>${icon} ${plugin.name}: ${plugin.version || 'Failed'} ${plugin.channel ? `(${plugin.channel})` : ''}</p>`;
+                    });
+                } else if (component === 'floodgate' && data.details.updates) {
+                    data.details.updates.forEach(update => {
+                        const icon = update.success ? '✅' : (update.pending ? '⏳' : '❌');
+                        html += `<p>${icon} ${update.location}: ${update.version || update.note || 'Failed'}</p>`;
+                    });
+                } else {
+                    html += `<p>${data.message}</p>`;
+                }
+                
+                html += '</div>';
+                html += '<div class="warning-message"><p>⚠️ Remember to restart affected services</p></div>';
+                
+                container.innerHTML = html;
+                
+            } catch (error) {
+                container.innerHTML = `<p class="error">❌ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

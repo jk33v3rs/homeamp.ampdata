@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Config Variance Dashboard - ArchiveSMP</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <style>
+        /* Color-coded variance highlighting */
+        .variance-none { background-color: transparent; }
+        .variance-variable { background-color: #d4edda; border-left: 4px solid #28a745; }  /* Light green - expected */
+        .variance-meta-tag { background-color: #d1ecf1; border-left: 4px solid #17a2b8; }  /* Light blue - category */
+        .variance-instance { background-color: #f8d7da; border-left: 4px solid #fd7e14; }  /* Pink - unique */
+        .variance-drift { background-color: #f8d7da; border-left: 4px solid #dc3545; }     /* Red - unexpected */
+        
+        .config-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #0d1117;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .config-table th {
+            background: #161b22;
+            color: #c9d1d9;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .config-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #21262d;
+            color: #c9d1d9;
+        }
+        
+        .config-table tr:hover {
+            background: #161b22;
+        }
+        
+        .config-key {
+            font-family: 'Courier New', monospace;
+            color: #79c0ff;
+        }
+        
+        .config-value {
+            font-family: 'Courier New', monospace;
+            color: #a5d6ff;
+        }
+        
+        .variance-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .variance-badge.global { background: #21262d; color: #8b949e; }
+        .variance-badge.variable { background: #238636; color: #fff; }
+        .variance-badge.meta-tag { background: #1f6feb; color: #fff; }
+        .variance-badge.instance { background: #da3633; color: #fff; }
+        .variance-badge.drift { background: #a40e26; color: #fff; }
+        
+        .value-breakdown {
+            font-size: 12px;
+            color: #8b949e;
+            margin-top: 5px;
+            padding-left: 20px;
+        }
+        
+        .value-breakdown-item {
+            padding: 2px 0;
+        }
+        
+        .instance-count {
+            color: #58a6ff;
+            font-weight: 600;
+        }
+        
+        .btn-view-details {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #58a6ff;
+            padding: 4px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn-view-details:hover {
+            background: #30363d;
+        }
+        
+        .filter-bar {
+            background: #0d1117;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .filter-bar label {
+            color: #c9d1d9;
+            font-weight: 600;
+        }
+        
+        .filter-bar select {
+            background: #161b22;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 6px 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 15px;
+        }
+        
+        .stat-box h3 {
+            margin: 0 0 10px 0;
+            color: #8b949e;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        .stat-box .value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #c9d1d9;
+        }
+        
+        .stat-box.drift .value {
+            color: #f85149;
+        }
+        
+        .stat-box.expected .value {
+            color: #3fb950;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+        }
+        
+        .modal-content {
+            background-color: #0d1117;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-close {
+            color: #8b949e;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+        
+        .modal-close:hover {
+            color: #c9d1d9;
+        }
+        
+        .rule-builder {
+            background: #161b22;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        
+        .rule-builder-field {
+            margin-bottom: 15px;
+        }
+        
+        .rule-builder-field label {
+            display: block;
+            color: #c9d1d9;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .rule-builder-field input,
+        .rule-builder-field select,
+        .rule-builder-field textarea {
+            width: 100%;
+            background: #0d1117;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+        
+        .btn-primary {
+            background: #238636;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .btn-primary:hover {
+            background: #2ea043;
+        }
+        
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🎨 Configuration Variance Dashboard</h1>
+            <p>Hierarchical config management with drift detection</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Total Configs</h3>
+                <div class="value" id="totalConfigs">-</div>
+            </div>
+            <div class="stat-box expected">
+                <h3>Expected Variance</h3>
+                <div class="value" id="expectedVariance">-</div>
+            </div>
+            <div class="stat-box drift">
+                <h3>Unexpected Drift</h3>
+                <div class="value" id="unexpectedDrift">-</div>
+            </div>
+            <div class="stat-box">
+                <h3>Plugins Tracked</h3>
+                <div class="value" id="pluginCount">-</div>
+            </div>
+        </div>
+        
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <label>Plugin:</label>
+            <select id="pluginFilter" onchange="filterChanged()">
+                <option value="">All Plugins</option>
+            </select>
+            
+            <label>Variance Type:</label>
+            <select id="varianceFilter" onchange="filterChanged()">
+                <option value="">All Types</option>
+                <option value="NONE">No Variance (Global)</option>
+                <option value="VARIABLE">Variable Substitution</option>
+                <option value="META_TAG">Meta-Tag Based</option>
+                <option value="INSTANCE">Instance-Specific</option>
+                <option value="DRIFT">Unexpected Drift</option>
+            </select>
+            
+            <label>Show:</label>
+            <select id="driftOnlyFilter" onchange="filterChanged()">
+                <option value="all">All Configs</option>
+                <option value="drift">Drift Only</option>
+                <option value="expected">Expected Variance</option>
+            </select>
+            
+            <button onclick="refreshData()" class="btn-secondary">🔄 Refresh</button>
+            <button onclick="showRuleBuilder()" class="btn-primary">➕ Add Rule</button>
+        </div>
+        
+        <!-- Config Variance Table -->
+        <table class="config-table" id="varianceTable">
+            <thead>
+                <tr>
+                    <th>Plugin</th>
+                    <th>Config Key</th>
+                    <th>Variance Type</th>
+                    <th>Instances</th>
+                    <th>Values</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="varianceTableBody">
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #8b949e;">
+                        Loading variance data...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Variance Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <h2 id="modalTitle">Config Details</h2>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+    
+    <!-- Rule Builder Modal -->
+    <div id="ruleBuilderModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeRuleBuilder()">×</button>
+            <h2>Create Configuration Rule</h2>
+            
+            <div class="rule-builder">
+                <div class="rule-builder-field">
+                    <label>Plugin Name:</label>
+                    <input type="text" id="rulePlugin" placeholder="EliteMobs">
+                </div>
+                
+                <div class="rule-builder-field">
+                    <label>Config File:</label>
+                    <input type="text" id="ruleConfigFile" value="config.yml">
+                </div>
+                
+                <div class="rule-builder-field">
+                    <label>Config Key (use dot notation for nested):</label>
+                    <input type="text" id="ruleKey" placeholder="database.host">
+                </div>
+                
+                <div class="rule-builder-field">
+                    <label>Scope Type:</label>
+                    <select id="ruleScopeType" onchange="scopeTypeChanged()">
+                        <option value="GLOBAL">Global (all instances)</option>
+                        <option value="SERVER">Server (Hetzner or OVH)</option>
+                        <option value="META_TAG">Meta-Tag (creative, survival, etc.)</option>
+                        <option value="INSTANCE">Instance-Specific (SMP101, DEV01, etc.)</option>
+                    </select>
+                </div>
+                
+                <div class="rule-builder-field" id="ruleSelectorField" style="display: none;">
+                    <label id="ruleSelectorLabel">Selector:</label>
+                    <input type="text" id="ruleSelector" placeholder="">
+                </div>
+                
+                <div class="rule-builder-field">
+                    <label>Value:</label>
+                    <input type="text" id="ruleValue" placeholder="Example: true, 25565, {{SHORTNAME}}_database">
+                </div>
+                
+                <div class="rule-builder-field">
+                    <label>Value Type:</label>
+                    <select id="ruleValueType">
+                        <option value="string">String</option>
+                        <option value="int">Integer</option>
+                        <option value="float">Float</option>
+                        <option value="boolean">Boolean</option>
+                        <option value="json">JSON</option>
+                        <option value="list">List</option>
+                    </select>
+                </div>
+                
+                <div class="rule-builder-field">
+                    <label>Notes (optional):</label>
+                    <textarea id="ruleNotes" rows="3" placeholder="Explanation of why this rule exists..."></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn-primary" onclick="saveRule()">💾 Save Rule</button>
+                    <button class="btn-secondary" onclick="closeRuleBuilder()">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let varianceData = [];
+        let currentFilters = {
+            plugin: '',
+            varianceType: '',
+            driftOnly: 'all'
+        };
+        
+        // Load initial data
+        window.onload = () => {
+            refreshData();
+            loadPluginList();
+        };
+        
+        async function refreshData() {
+            try {
+                // Load variance summary
+                const summaryResponse = await fetch('/api/variance/summary');
+                const summary = await summaryResponse.json();
+                
+                // Update stats
+                document.getElementById('totalConfigs').textContent = summary.total_configs || 0;
+                document.getElementById('unexpectedDrift').textContent = summary.total_drift || 0;
+                
+                let expectedCount = 0;
+                for (const [type, data] of Object.entries(summary.by_classification || {})) {
+                    if (type !== 'DRIFT' && type !== 'NONE') {
+                        expectedCount += data.total;
+                    }
+                }
+                document.getElementById('expectedVariance').textContent = expectedCount;
+                
+                // Load all variance data (we'll filter client-side for now)
+                await loadAllVarianceData();
+                
+            } catch (error) {
+                console.error('Error loading variance data:', error);
+                document.getElementById('varianceTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: #f85149;">
+                            Error loading variance data. Make sure the database schema is deployed.
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        async function loadPluginList() {
+            // Get unique plugins from variance cache
+            try {
+                const response = await fetch('/api/variance/summary');
+                const data = await response.json();
+                
+                // For now, we'll populate this when we have actual data
+                // TODO: Add endpoint to list all plugins with variance
+            } catch (error) {
+                console.error('Error loading plugin list:', error);
+            }
+        }
+        
+        async function loadAllVarianceData() {
+            // For now, show message that this needs database population
+            document.getElementById('varianceTableBody').innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: #8b949e;">
+                        <p>No variance data yet. Complete setup steps:</p>
+                        <ol style="text-align: left; margin: 20px auto; max-width: 600px;">
+                            <li>Deploy config rules schema: <code>mariadb ... < scripts/add_config_rules_tables.sql</code></li>
+                            <li>Run baseline parser to populate baselines</li>
+                            <li>Run drift scanner to populate variance cache</li>
+                        </ol>
+                        <button class="btn-primary" onclick="showRuleBuilder()" style="margin-top: 20px;">
+                            Create First Rule
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        function filterChanged() {
+            currentFilters.plugin = document.getElementById('pluginFilter').value;
+            currentFilters.varianceType = document.getElementById('varianceFilter').value;
+            currentFilters.driftOnly = document.getElementById('driftOnlyFilter').value;
+            
+            renderVarianceTable();
+        }
+        
+        function renderVarianceTable() {
+            const tbody = document.getElementById('varianceTableBody');
+            
+            if (varianceData.length === 0) {
+                return; // Keep the instructions message
+            }
+            
+            // Apply filters
+            let filtered = varianceData;
+            
+            if (currentFilters.plugin) {
+                filtered = filtered.filter(v => v.plugin_name === currentFilters.plugin);
+            }
+            
+            if (currentFilters.varianceType) {
+                filtered = filtered.filter(v => v.variance_classification === currentFilters.varianceType);
+            }
+            
+            if (currentFilters.driftOnly === 'drift') {
+                filtered = filtered.filter(v => !v.is_expected_variance);
+            } else if (currentFilters.driftOnly === 'expected') {
+                filtered = filtered.filter(v => v.is_expected_variance);
+            }
+            
+            // Render rows
+            tbody.innerHTML = filtered.map(v => renderVarianceRow(v)).join('');
+        }
+        
+        function renderVarianceRow(variance) {
+            const varClass = `variance-${(variance.variance_classification || 'none').toLowerCase()}`;
+            const badgeClass = (variance.variance_classification || 'global').toLowerCase();
+            const badgeText = {
+                'NONE': 'Global',
+                'VARIABLE': 'Variable',
+                'META_TAG': 'Meta-Tag',
+                'INSTANCE': 'Instance',
+                'DRIFT': 'Drift'
+            }[variance.variance_classification] || 'Unknown';
+            
+            return `
+                <tr class="${varClass}">
+                    <td><strong>${variance.plugin_name}</strong></td>
+                    <td><code class="config-key">${variance.config_key}</code></td>
+                    <td><span class="variance-badge ${badgeClass}">${badgeText}</span></td>
+                    <td><span class="instance-count">${variance.instance_count || 0}</span> instances</td>
+                    <td>
+                        <code class="config-value">${variance.most_common_value || 'N/A'}</code>
+                        ${variance.unique_value_count > 1 ? `<br><small style="color: #8b949e;">(${variance.unique_value_count} different values)</small>` : ''}
+                    </td>
+                    <td>
+                        <button class="btn-view-details" onclick="viewVarianceDetails('${variance.plugin_name}', '${variance.config_key}')">
+                            View Details
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        async function viewVarianceDetails(pluginName, configKey) {
+            document.getElementById('modalTitle').textContent = `${pluginName} - ${configKey}`;
+            document.getElementById('modalBody').innerHTML = '<p style="color: #8b949e;">Loading details...</p>';
+            document.getElementById('detailsModal').style.display = 'block';
+            
+            // Load instance-by-instance breakdown
+            // TODO: Add API endpoint for detailed breakdown
+            document.getElementById('modalBody').innerHTML = `
+                <p style="color: #8b949e;">Detailed instance breakdown coming soon...</p>
+                <p>This will show:</p>
+                <ul style="color: #8b949e;">
+                    <li>Which instances have which values</li>
+                    <li>Rule resolution path</li>
+                    <li>Options to create/update rules</li>
+                </ul>
+            `;
+        }
+        
+        function closeModal() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+        
+        function showRuleBuilder() {
+            document.getElementById('ruleBuilderModal').style.display = 'block';
+        }
+        
+        function closeRuleBuilder() {
+            document.getElementById('ruleBuilderModal').style.display = 'none';
+        }
+        
+        function scopeTypeChanged() {
+            const scopeType = document.getElementById('ruleScopeType').value;
+            const selectorField = document.getElementById('ruleSelectorField');
+            const selectorLabel = document.getElementById('ruleSelectorLabel');
+            const selectorInput = document.getElementById('ruleSelector');
+            
+            if (scopeType === 'GLOBAL') {
+                selectorField.style.display = 'none';
+            } else {
+                selectorField.style.display = 'block';
+                
+                if (scopeType === 'SERVER') {
+                    selectorLabel.textContent = 'Server Name:';
+                    selectorInput.placeholder = 'Hetzner or OVH';
+                } else if (scopeType === 'META_TAG') {
+                    selectorLabel.textContent = 'Tag Name:';
+                    selectorInput.placeholder = 'creative, survival, pvp-enabled, etc.';
+                } else if (scopeType === 'INSTANCE') {
+                    selectorLabel.textContent = 'Instance ID:';
+                    selectorInput.placeholder = 'SMP101, DEV01, etc.';
+                }
+            }
+        }
+        
+        async function saveRule() {
+            const rule = {
+                plugin_name: document.getElementById('rulePlugin').value,
+                config_file: document.getElementById('ruleConfigFile').value,
+                config_key: document.getElementById('ruleKey').value,
+                scope_type: document.getElementById('ruleScopeType').value,
+                scope_selector: document.getElementById('ruleSelector').value || null,
+                config_value: document.getElementById('ruleValue').value,
+                value_type: document.getElementById('ruleValueType').value,
+                notes: document.getElementById('ruleNotes').value,
+                created_by: 'web-ui'
+            };
+            
+            if (!rule.plugin_name || !rule.config_key || !rule.config_value) {
+                alert('Please fill in plugin name, config key, and value');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/rules/create', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(rule)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert(`✅ Rule created successfully (ID: ${result.rule_id})`);
+                    closeRuleBuilder();
+                    refreshData();
+                } else {
+                    alert('❌ Error creating rule');
+                }
+            } catch (error) {
+                console.error('Error saving rule:', error);
+                alert('❌ Error saving rule: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

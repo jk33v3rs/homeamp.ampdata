@@ -1,0 +1,86 @@
+# ArchiveSMP Configuration Manager Settings
+# This file should be placed at /etc/archivesmp/agent.yaml in production
+
+# Database Configuration
+database:
+  production_db_host: "localhost:3306"  # Format: host:port
+  production_db_name: "asmp_SQL"
+  user: "archivesmp"
+  password: ""  # UPDATE THIS IN PRODUCTION
+
+# Agent Configuration
+agent:
+  polling:
+    change_poll_interval: 300  # seconds between AMP change checks
+    drift_check_interval: 3600  # seconds between drift scans
+    health_check_interval: 60  # seconds between health checks
+  
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    file: "/var/lib/archivesmp/logs/agent.log"
+  
+  concurrent:
+    max_workers: 4  # max parallel operations
+    change_timeout_minutes: 30
+
+# Web API Configuration  
+web:
+  server:
+    host: "0.0.0.0"
+    port: 8000
+    workers: 4  # uvicorn workers
+    reload: false  # hot reload in development
+  
+  limits:
+    max_file_size_mb: 10
+    max_request_size_mb: 50
+    request_timeout_seconds: 300
+    max_concurrent_requests: 100
+
+# Storage Configuration
+storage:
+  backup:
+    enabled: true
+    path: "/var/lib/archivesmp/backups"
+    max_backups_per_file: 10
+  
+  temp:
+    path: "/var/lib/archivesmp/temp"
+    cleanup_age_hours: 24
+
+# Safety Configuration
+safety:
+  dry_run_by_default: false  # require --apply flag
+  backup_retention_days: 30
+  
+  change_validation:
+    require_backup: true  # backup before applying changes
+    require_review: false  # require manual approval
+  
+  system_validation:
+    min_disk_space_mb: 100  # abort if disk space low
+    check_amp_running: true
+
+# Plugin Update Configuration
+plugin_updates:
+  check_interval_hours: 24
+  risk_assessment_enabled: true
+  auto_update_safe_plugins: false
+  
+  sources:
+    spigot_base_url: "https://api.spigtmc.org/v2"
+    bukkit_base_url: "https://dev.bukkit.org"
+    github_base_url: "https://api.github.com"
+    modrinth_base_url: "https://api.modrinth.com/v2"
+    hangar_base_url: "https://hangar.papermc.io/api/v1"
+  
+  rate_limits:
+    timeout: 30
+    delay_between_requests: 1
+
+# HTTP Client Configuration
+http:
+  timeout_seconds: 30
+  max_retries: 3
+  backoff_seconds: 5
+  user_agent: "ArchiveSMP-ConfigManager/1.0"

@@ -1,0 +1,88 @@
+# ArchiveSMP Configuration Manager - Unified Configuration
+# This file should be placed at: /etc/archivesmp/agent.yaml
+# Used by both Agent Service and Web API
+
+# Physical server configuration
+agent:
+  server_name: "HETZNER"  # Change to "OVH" for OVH server
+  amp_data_path: "/home/amp/.ampdata/instances"
+  
+  # Polling intervals (seconds)
+  polling:
+    change_poll_interval: 30       # Check MinIO for new changes every 30s
+    drift_check_interval: 3600     # Check for drift every hour
+    health_check_interval: 300     # Health check every 5 minutes
+  
+  # Logging configuration
+  logging:
+    level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+    log_file: "/var/log/archivesmp/agent.log"
+    log_to_console: true
+    log_to_file: true
+    log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# MinIO storage configuration
+storage:
+  minio:
+    # MinIO hosted on YunoHost, accessible via cloud.archivesmp.site
+    endpoint: "cloud.archivesmp.site"
+    access_key: "${ARCHIVESMP_MINIO_ACCESS_KEY}"  # From /etc/archivesmp/secrets.env
+    secret_key: "${ARCHIVESMP_MINIO_SECRET_KEY}"  # From /etc/archivesmp/secrets.env
+    bucket_name: "archivesmp-config"
+    secure: true  # HTTPS via YunoHost reverse proxy
+    timeout: 30
+    retry_attempts: 3
+
+# System paths (matches settings.py structure)
+system:
+  paths:
+    instances_path: "/home/amp/.ampdata/instances"
+    data_dir: "/var/lib/archivesmp"
+    scripts_dir: "/opt/archivesmp-config-manager/scripts"
+    backup_root: "/var/lib/archivesmp/backups"
+    temp_dir: "/tmp/archivesmp"
+  files:
+    deviations_file: "data/deviations.json"
+    universal_file: "data/universal_configs.json"
+    deviation_report: "data/reports/deviations.md"
+    plugin_endpoints: "PLUGIN_REGISTRY.md"
+  file_formats:
+    config_extensions: [".yml", ".yaml", ".json", ".properties", ".cfg", ".conf"]
+    backup_extension: ".bak"
+
+# Plugin update configuration
+plugin_updates:
+  check_interval_hours: 24
+  risk_assessment_enabled: true
+  spigot_base_url: "https://api.spiget.org/v2"
+  bukkit_base_url: "https://dev.bukkit.org"
+  github_base_url: "https://api.github.com"
+  timeout: 30
+  rate_limit_delay: 1
+
+# Web server configuration (for Web API service)
+web:
+  server:
+    host: "0.0.0.0"
+    port: 8000
+    workers: 4
+    reload: false
+    max_file_size_mb: 100
+    max_request_size_mb: 10
+    request_timeout_seconds: 300
+    max_concurrent_requests: 100
+
+# HTTP client configuration
+http:
+  timeout_seconds: 30
+  max_retries: 3
+  backoff_seconds: 2
+  user_agent: "ArchiveSMP-ConfigManager/1.0"
+  
+# Safety and validation
+safety:
+  max_concurrent_changes: 3
+  change_timeout_minutes: 30
+  require_backup: true
+  restart_on_failure: true
+  max_restart_attempts: 3

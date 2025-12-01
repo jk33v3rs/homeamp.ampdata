@@ -1,0 +1,60 @@
+# AMP Server Configuration Repository - Git Ignore
+
+# Exclude binary plugin and datapack repositories
+# These are large binary files that don't belong in version control
+datapacksrepo/
+pluginsrepo/
+
+# Exclude OG ZIP folder (large archive files)
+OG ZIP/
+
+# Exclude all ZIP archives (large binary files)
+*.zip
+
+# Exclude extracted data cache (can be regenerated)
+excel_extracted/
+
+# Exclude Asset Registry extracted files
+asset_registry_extracted/
+
+# Python virtual environment
+.venv/
+venv/
+
+# Standard ignores for development
+*.tmp
+*.log
+*.bak
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python cache (for pdf_reader.py)
+__pycache__/
+*.pyc
+*.pyo
+
+# Temporary files
+temp/
+tmp/
+
+# Secrets and credentials (NEVER COMMIT)
+secrets.env
+*.env
+!*.env.template
+.env
+.env.local
+.env.production

@@ -1,0 +1,40 @@
+[Unit]
+Description=ArchiveSMP Configuration Manager Agent
+Documentation=https://github.com/jk33v3rs/homeamp.ampdata
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=amp
+Group=amp
+WorkingDirectory=/opt/archivesmp-config-manager
+Environment="PYTHONPATH=/opt/archivesmp-config-manager"
+Environment="ARCHIVESMP_MINIO_ENDPOINT=localhost:9000"
+Environment="ARCHIVESMP_MINIO_SECURE=false"
+EnvironmentFile=-/etc/archivesmp/secrets.env
+
+# Agent runs with config file specifying server name
+ExecStart=/opt/archivesmp-config-manager/venv/bin/python -m src.agent.service /etc/archivesmp/agent.yaml
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=archivesmp-agent
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitInterval=200
+StartLimitBurst=5
+
+# Resource limits
+LimitNOFILE=65536
+MemoryLimit=2G
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
