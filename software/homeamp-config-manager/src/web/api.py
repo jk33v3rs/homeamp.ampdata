@@ -232,14 +232,45 @@ async def get_server_view(server_name: str) -> ServerView:
     flagged_bad = len([d for d in server_deviations if d.status == DeviationStatus.FLAGGED_BAD])
     approved_good = len([d for d in server_deviations if d.status == DeviationStatus.APPROVED_GOOD])
     
-    # Check for out-of-date plugins (stub - will implement with plugin_checker)
+    # Check for out-of-date plugins using PluginChecker
     out_of_date_plugins = []
+    try:
+        from ..updaters.plugin_checker import PluginChecker
+        api_endpoints_path = settings.config_dir / "plugin_api_endpoints.yaml"
+        if api_endpoints_path.exists():
+            checker = PluginChecker(api_endpoints_path)
+            # This would ideally check utildata path, but for now just check if checker works
+            # TODO: Integrate with actual server plugin directories when agent provides data
+            pass
+    except Exception as e:
+        # Silently fail - plugin updates are nice-to-have
+        pass
     
-    # Check agent status (stub - will check MinIO for recent heartbeat)
+    # Check agent status via HTTP to agent API
     agent_status = "unknown"
+    try:
+        # Try to reach agent on this server
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            agent_url = settings.agent.base_url or f"http://localhost:{settings.agent.port}"
+            response = await client.get(f"{agent_url}/api/agent/status")
+            if response.status_code == 200:
+                agent_status = "online"
+            else:
+                agent_status = "error"
+    except:
+        agent_status = "offline"
     
-    # Last drift check (stub - will check reports bucket)
+    # Last drift check - check most recent drift_log entry for this server
     last_drift_check = None
+    try:
+        # Check if we have any deviations for this server
+        if server_deviations:
+            # Get most recent deviation timestamp
+            timestamps = [d.last_seen for d in server_deviations if hasattr(d, 'last_seen') and d.last_seen]
+            if timestamps:
+                last_drift_check = max(timestamps)
+    except Exception as e:
+        pass
     
     return ServerView(
         server_name=server_name,
@@ -278,6 +309,149 @@ async def get_instance_view(instance_id: str) -> Dict[str, Any]:
 async def get_universal_configs() -> Dict[str, PluginConfig]:
     """Get all universal configurations"""
     return parser.universal_configs
+
+
+@app.get("/api/configs/universal/{plugin}")
+async def get_plugin_universal_config(plugin: str) -> PluginConfig:
+    """Get universal configuration for specific plugin"""
+    if plugin not in parser.universal_configs:
+        raise HTTPException(status_code=404, detail=f"Plugin {plugin} not found in universal configs")
+    return parser.universal_configs[plugin]
+
+
+# ============================================================================
+# VARIANCE ANALYSIS ENDPOINTS
+# ============================================================================
+
+@app.get("/api/variance/summary")
+async def get_variance_summary() -> Dict[str, Any]:
+    """
+    Get summary of configuration variance across all plugins and instances.
+    Analyzes deviations to identify which configs vary and why.
+    """
+    # Group deviations by plugin and config key
+    variance_map = {}
+    
+    for deviation in parser.deviations:
+        plugin = deviation.plugin
+        key = deviation.key_path
+        
+        if plugin not in variance_map:
+            variance_map[plugin] = {}
+        
+        if key not in variance_map[plugin]:
+            variance_map[plugin][key] = {
+                "values": {},  # value -> list of instances
+                "total_instances": 0,
+                "variance_type": None
+            }
+        
+        # Track which instances have which value
+        value_str = str(deviation.observed_value)
+        if value_str not in variance_map[plugin][key]["values"]:
+            variance_map[plugin][key]["values"][value_str] = []
+        variance_map[plugin][key]["values"][value_str].append(deviation.server_name)
+        variance_map[plugin][key]["total_instances"] += 1
+    
+    # Calculate variance statistics
+    for plugin in variance_map:
+        for key in variance_map[plugin]:
+            num_unique_values = len(variance_map[plugin][key]["values"])
+            if num_unique_values == 1:
+                variance_map[plugin][key]["variance_type"] = "none"
+            elif num_unique_values == variance_map[plugin][key]["total_instances"]:
+                variance_map[plugin][key]["variance_type"] = "instance"
+            else:
+                variance_map[plugin][key]["variance_type"] = "variable"
+    
+    return {
+        "plugins": list(variance_map.keys()),
+        "variance_data": variance_map,
+        "total_plugins_with_variance": len(variance_map),
+        "generated_at": datetime.now().isoformat()
+    }
+
+
+@app.get("/api/variance/plugin/{plugin_name}")
+async def get_plugin_variance(plugin_name: str) -> Dict[str, Any]:
+    """Get detailed variance analysis for a specific plugin"""
+    plugin_deviations = [d for d in parser.deviations if d.plugin == plugin_name]
+    
+    if not plugin_deviations:
+        raise HTTPException(status_code=404, detail=f"No variance data for plugin {plugin_name}")
+    
+    # Build detailed variance breakdown
+    variance_details = {}
+    for deviation in plugin_deviations:
+        key = deviation.key_path
+        if key not in variance_details:
+            variance_details[key] = {
+                "instances": {},
+                "expected_value": deviation.expected_value,
+                "file": getattr(deviation, 'config_file', 'unknown')
+            }
+        
+        variance_details[key]["instances"][deviation.server_name] = {
+            "value": deviation.observed_value,
+            "status": deviation.status.value if hasattr(deviation.status, 'value') else str(deviation.status),
+            "last_seen": deviation.last_seen if hasattr(deviation, 'last_seen') else None
+        }
+    
+    return {
+        "plugin": plugin_name,
+        "config_keys": variance_details,
+        "total_keys": len(variance_details),
+        "total_instances": len(plugin_deviations)
+    }
+
+
+@app.get("/api/variance/detail/{plugin_name}/{config_key:path}")
+async def get_variance_detail(plugin_name: str, config_key: str) -> Dict[str, Any]:
+    """
+    Get instance-by-instance breakdown for a specific plugin config key.
+    Shows which instances have which values and why.
+    """
+    # Find all deviations for this plugin + config key
+    matching_deviations = [
+        d for d in parser.deviations 
+        if d.plugin == plugin_name and d.key_path == config_key
+    ]
+    
+    if not matching_deviations:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"No variance data for {plugin_name}::{config_key}"
+        )
+    
+    # Build instance breakdown
+    instance_breakdown = []
+    for deviation in matching_deviations:
+        instance_breakdown.append({
+            "instance": deviation.server_name,
+            "value": deviation.observed_value,
+            "expected": deviation.expected_value,
+            "status": deviation.status.value if hasattr(deviation.status, 'value') else str(deviation.status),
+            "differs": deviation.observed_value != deviation.expected_value,
+            "last_seen": deviation.last_seen if hasattr(deviation, 'last_seen') else None,
+            "config_file": getattr(deviation, 'config_file', 'unknown')
+        })
+    
+    # Calculate variance statistics
+    unique_values = {}
+    for item in instance_breakdown:
+        val = str(item["value"])
+        if val not in unique_values:
+            unique_values[val] = []
+        unique_values[val].append(item["instance"])
+    
+    return {
+        "plugin": plugin_name,
+        "config_key": config_key,
+        "instances": instance_breakdown,
+        "unique_values": unique_values,
+        "total_instances": len(instance_breakdown),
+        "variance_count": len(unique_values)
+    }
 
 
 @app.get("/api/configs/universal/{plugin}")

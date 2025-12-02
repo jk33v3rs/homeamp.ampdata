@@ -350,7 +350,7 @@ def main():
         'port': int(os.getenv('DB_PORT', 3369)),
         'user': os.getenv('DB_USER', 'sqlworkerSMP'),
         'password': os.getenv('DB_PASSWORD'),  # Must be provided
-        'database': os.getenv('DB_NAME', 'asmp_config_controller')
+        'database': os.getenv('DB_NAME', 'asmp_config')
     }
     
     if not db_config['password']:

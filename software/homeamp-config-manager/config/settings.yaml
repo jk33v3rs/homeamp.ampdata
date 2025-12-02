@@ -4,7 +4,7 @@
 # Database Configuration
 database:
   production_db_host: "localhost:3306"  # Format: host:port
-  production_db_name: "asmp_SQL"
+  production_db_name: "asmp_config"
   user: "archivesmp"
   password: ""  # UPDATE THIS IN PRODUCTION
 

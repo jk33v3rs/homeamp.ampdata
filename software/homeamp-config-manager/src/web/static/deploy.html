@@ -33,6 +33,129 @@
             margin-bottom: 30px;
         }
         
+        .helper-text {
+            color: #858585;
+            margin: 10px 0;
+        }
+        
+        .helper-text-detailed {
+            color: #858585;
+            margin: 10px 0 20px 0;
+        }
+        
+        .status-bar {
+            margin-top: 20px;
+        }
+        
+        .status-label {
+            color: #858585;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .status-value {
+            font-size: 18px;
+        }
+        
+        .deployment-steps {
+            margin-top: 30px;
+        }
+        
+        .steps-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .step-card {
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .step-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .step-card.step-1 { border-left: 4px solid #4ec9b0; }
+        .step-card.step-2 { border-left: 4px solid #569cd6; }
+        .step-card.step-3 { border-left: 4px solid #dcdcaa; }
+        .step-card.step-4 { border-left: 4px solid #dcdcaa; }
+        .step-card.step-5 { border-left: 4px solid #ce9178; }
+        .step-card.step-6 { border-left: 4px solid #c586c0; }
+        .step-card.manual { border-left: 4px solid #858585; margin-top: 20px; }
+        
+        .step-title {
+            margin-bottom: 5px;
+        }
+        
+        .step-title.color-1 { color: #4ec9b0; }
+        .step-title.color-2 { color: #569cd6; }
+        .step-title.color-3 { color: #dcdcaa; }
+        .step-title.color-4 { color: #dcdcaa; }
+        .step-title.color-5 { color: #ce9178; }
+        .step-title.color-6 { color: #c586c0; }
+        .step-title.color-manual { color: #858585; margin-bottom: 10px; }
+        
+        .step-description {
+            color: #858585;
+            font-size: 14px;
+        }
+        
+        .manual-steps-list {
+            color: #858585;
+            font-size: 14px;
+            line-height: 1.8;
+            margin-left: 20px;
+        }
+        
+        .deploy-all-button {
+            background: #4ec9b0;
+        }
+        
+        .classification-section {
+            margin-top: 30px;
+            background: #2d2d2d;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        
+        .classification-title {
+            margin-bottom: 15px;
+        }
+        
+        .classification-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .map-category-title {
+            margin-bottom: 10px;
+        }
+        
+        .map-category-title.public { color: #4ec9b0; }
+        .map-category-title.private { color: #ce9178; }
+        
+        .map-instance-list {
+            color: #858585;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+        
+        .map-tracking-status {
+            margin-top: 10px;
+        }
+        
+        .map-tracking-status.public { color: #4ec9b0; }
+        .map-tracking-status.private { color: #ce9178; }
+        
+        button.nowrap {
+            white-space: nowrap;
+        }
+        
         .tabs {
             display: flex;
             gap: 10px;
@@ -127,6 +250,7 @@
             padding: 10px;
             border-radius: 3px;
             cursor: pointer;
+            -webkit-user-select: none;
             user-select: none;
         }
         
@@ -230,7 +354,7 @@
         <div id="deploy-tab" class="tab-content active">
             <div class="controls">
                 <h2>Select Instances to Deploy To:</h2>
-                <p style="color: #858585; margin: 10px 0;">Select instances where you want to deploy config changes.</p>
+                <p class="helper-text">Select instances where you want to deploy config changes.</p>
                 <div class="instance-grid" id="deployInstanceGrid">
                     <div class="loading">Loading instances...</div>
                 </div>
@@ -247,7 +371,7 @@
         <div id="restart-tab" class="tab-content">
             <div class="controls">
                 <h2>Select Instances to Restart:</h2>
-                <p style="color: #858585; margin: 10px 0;">Instances with orange borders need restart after config/plugin changes.</p>
+                <p class="helper-text">Instances with orange borders need restart after config/plugin changes.</p>
                 <div class="instance-grid" id="restartInstanceGrid">
                     <div class="loading">Loading instances...</div>
                 </div>
@@ -264,143 +388,123 @@
         <div id="maps-tab" class="tab-content">
             <div class="controls">
                 <h2>🗺️ Pl3xMap & LiveAtlas Management</h2>
-                <p style="color: #858585; margin: 10px 0;">Manage map tile sync and LiveAtlas aggregation</p>
+                <p class="helper-text">Manage map tile sync and LiveAtlas aggregation</p>
                 
-                <div class="status-bar" style="margin-top: 20px;">
-                    <h3 style="margin-bottom: 15px;">Tile Sync Status</h3>
+                <div class="status-bar">
+                    <h3 class="classification-title">Tile Sync Status</h3>
                     <div class="status-grid">
                         <div class="status-card">
                             <h3>Public Instances</h3>
                             <div class="value" id="publicMapCount">12</div>
-                            <div style="color: #858585; font-size: 12px; margin-top: 5px;">maps.archivesmp.com</div>
+                            <div class="status-label">maps.archivesmp.com</div>
                         </div>
                         <div class="status-card warning">
                             <h3>Private Instances</h3>
                             <div class="value" id="privateMapCount">4</div>
-                            <div style="color: #858585; font-size: 12px; margin-top: 5px;">admaps.archivesmp.com</div>
+                            <div class="status-label">admaps.archivesmp.com</div>
                         </div>
                         <div class="status-card">
                             <h3>Tile Sync Service</h3>
-                            <div class="value" id="tileSyncStatus" style="font-size: 18px;">...</div>
+                            <div class="value status-value" id="tileSyncStatus">...</div>
                         </div>
                         <div class="status-card">
                             <h3>Last Sync</h3>
-                            <div class="value" id="lastSyncTime" style="font-size: 18px;">...</div>
+                            <div class="value status-value" id="lastSyncTime">...</div>
                         </div>
                     </div>
                 </div>
                 
-                <div style="margin-top: 30px;">
+                <div class="deployment-steps">
                     <h3>Deployment Steps</h3>
-                    <p style="color: #858585; margin: 10px 0 20px 0;">Follow these steps to deploy Pl3xMap + LiveAtlas integration</p>
+                    <p class="helper-text-detailed">Follow these steps to deploy Pl3xMap + LiveAtlas integration</p>
                     
-                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="steps-container">
                         <!-- Step 1 -->
-                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #4ec9b0;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="step-card step-1">
+                            <div class="step-card-header">
                                 <div>
-                                    <h4 style="color: #4ec9b0; margin-bottom: 5px;">Step 1: Deploy Pl3xMap Configs</h4>
-                                    <p style="color: #858585; font-size: 14px;">Deploy public and private configs to all instances</p>
+                                    <h4 class="step-title color-1">Step 1: Deploy Pl3xMap Configs</h4>
+                                    <p class="step-description">Deploy public and private configs to all instances</p>
                                 </div>
-                                <button onclick="deployPlxMapConfigs()" style="white-space: nowrap;">Deploy Configs</button>
+                                <button onclick="deployPlxMapConfigs()" class="nowrap">Deploy Configs</button>
                             </div>
                         </div>
                         
                         <!-- Step 2 -->
-                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #569cd6;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="step-card step-2">
+                            <div class="step-card-header">
                                 <div>
-                                    <h4 style="color: #569cd6; margin-bottom: 5px;">Step 2: Restart Instances</h4>
-                                    <p style="color: #858585; font-size: 14px;">Restart all 16 instances to load Pl3xMap configs</p>
+                                    <h4 class="step-title color-2">Step 2: Restart Instances</h4>
+                                    <p class="step-description">Restart all 16 instances to load Pl3xMap configs</p>
                                 </div>
-                                <button onclick="restartMapInstances()" style="white-space: nowrap;">Restart Instances</button>
+                                <button onclick="restartMapInstances()" class="nowrap">Restart Instances</button>
                             </div>
                         </div>
                         
                         <!-- Step 3 -->
-                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #dcdcaa;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="step-card step-3">
+                            <div class="step-card-header">
                                 <div>
-                                    <h4 style="color: #dcdcaa; margin-bottom: 5px;">Step 3: Start Tile Sync (Hetzner)</h4>
-                                    <p style="color: #858585; font-size: 14px;">Enable tile watcher service on Hetzner server</p>
+                                    <h4 class="step-title color-3">Step 3: Start Tile Sync (Hetzner)</h4>
+                                    <p class="step-description">Enable tile watcher service on Hetzner server</p>
                                 </div>
-                                <button onclick="startTileSyncHetzner()" style="white-space: nowrap;">Start Hetzner Sync</button>
+                                <button onclick="startTileSyncHetzner()" class="nowrap">Start Hetzner Sync</button>
                             </div>
                         </div>
                         
                         <!-- Step 4 -->
-                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #dcdcaa;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="step-card step-4">
+                            <div class="step-card-header">
                                 <div>
-                                    <h4 style="color: #dcdcaa; margin-bottom: 5px;">Step 4: Start Tile Sync (OVH)</h4>
-                                    <p style="color: #858585; font-size: 14px;">Enable tile watcher service on OVH server</p>
+                                    <h4 class="step-title color-4">Step 4: Start Tile Sync (OVH)</h4>
+                                    <p class="step-description">Enable tile watcher service on OVH server</p>
                                 </div>
-                                <button onclick="startTileSyncOVH()" style="white-space: nowrap;">Start OVH Sync</button>
+                                <button onclick="startTileSyncOVH()" class="nowrap">Start OVH Sync</button>
                             </div>
                         </div>
                         
                         <!-- Step 5 -->
-                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #ce9178;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="step-card step-5">
+                            <div class="step-card-header">
                                 <div>
-                                    <h4 style="color: #ce9178; margin-bottom: 5px;">Step 5: Start YunoHost Map Sync</h4>
-                                    <p style="color: #858585; font-size: 14px;">Enable map download service on YunoHost</p>
+                                    <h4 class="step-title color-5">Step 5: Start YunoHost Map Sync</h4>
+                                    <p class="step-description">Enable map download service on YunoHost</p>
                                 </div>
-                                <button onclick="startYunohostSync()" style="white-space: nowrap;">Start YunoHost Sync</button>
+                                <button onclick="startYunohostSync()" class="nowrap">Start YunoHost Sync</button>
                             </div>
                         </div>
                         
                         <!-- Step 6 -->
-                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #c586c0;">
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div class="step-card step-6">
+                            <div class="step-card-header">
                                 <div>
-                                    <h4 style="color: #c586c0; margin-bottom: 5px;">Step 6: Verify Tile Sync</h4>
-                                    <p style="color: #858585; font-size: 14px;">Check that tiles are syncing from servers to YunoHost</p>
+                                    <h4 class="step-title color-6">Step 6: Verify Tile Sync</h4>
+                                    <p class="step-description">Check that tiles are syncing from servers to YunoHost</p>
                                 </div>
-                                <button onclick="verifyTileSync()" class="secondary" style="white-space: nowrap;">Check Status</button>
+                                <button onclick="verifyTileSync()" class="secondary nowrap">Check Status</button>
                             </div>
                         </div>
                         
                         <!-- Manual Actions -->
-                        <div style="background: #2d2d2d; padding: 20px; border-radius: 5px; border-left: 4px solid #858585; margin-top: 20px;">
-                            <h4 style="color: #858585; margin-bottom: 10px;">📋 Manual Steps (YunoHost)</h4>
-                            <ul style="color: #858585; font-size: 14px; line-height: 1.8; margin-left: 20px;">
-                                <li>Configure domains in YunoHost: <code>maps.archivesmp.com</code> and <code>admaps.archivesmp.com</code></li>
-                                <li>Install LiveAtlas to both domains</li>
-                                <li>Enable SSO authentication on <code>admaps.archivesmp.com</code></li>
-                                <li>Verify configs auto-generated at <code>/var/www/.../config.json</code></li>
-                            </ul>
-                        </div>
-                    </div>
-                    
-                    <div class="actions" style="margin-top: 30px;">
-                        <button onclick="deployAllMapSteps()" style="background: #4ec9b0;">🚀 Run All Steps</button>
-                        <button onclick="checkMapHealth()" class="secondary">Check Health</button>
-                        <button onclick="viewMapLogs()" class="secondary">View Logs</button>
-                        <button onclick="stopAllMapSync()" class="danger">Stop All Sync</button>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 30px; background: #2d2d2d; padding: 20px; border-radius: 5px;">
-                    <h3 style="margin-bottom: 15px;">Instance Classification</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="step-card manual">
+                    <div class="classification-grid">
                         <div>
-                            <h4 style="color: #4ec9b0; margin-bottom: 10px;">🌍 Public Maps (maps.archivesmp.com)</h4>
-                            <div style="color: #858585; font-size: 14px; line-height: 1.8;">
+                            <h4 class="map-category-title public">🌍 Public Maps (maps.archivesmp.com)</h4>
+                            <div class="map-instance-list">
                                 <div>BENT01 • CLIP01 • CREA01 • DEV01</div>
                                 <div>EMAD01 • EVO01 • HARD01 • MINE01</div>
                                 <div>MIN01 • SMP101 • SMP201 • TOW01</div>
-                                <div style="margin-top: 10px; color: #4ec9b0;">Player tracking: <strong>Enabled</strong></div>
+                                <div class="map-tracking-status public">Player tracking: <strong>Enabled</strong></div>
                             </div>
                         </div>
                         <div>
-                            <h4 style="color: #ce9178; margin-bottom: 10px;">🔒 Private Maps (admaps.archivesmp.com)</h4>
-                            <div style="color: #858585; font-size: 14px; line-height: 1.8;">
+                            <h4 class="map-category-title private">🔒 Private Maps (admaps.archivesmp.com)</h4>
+                            <div class="map-instance-list">
                                 <div>ROY01 (Battle Royale)</div>
                                 <div>CSMC01 (Counter-Strike MC)</div>
                                 <div>PRI01 (Minigames)</div>
                                 <div>BIG01 (BiggerGames)</div>
-                                <div style="margin-top: 10px; color: #ce9178;">Player tracking: <strong>Disabled</strong></div>
+                                <div class="map-tracking-status private">Player tracking: <strong>Disabled</strong></div>
                             </div>
                         </div>
                     </div>

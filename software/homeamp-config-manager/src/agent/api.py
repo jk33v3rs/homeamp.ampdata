@@ -59,6 +59,9 @@ class AgentStatus(BaseModel):
 # Track which instances need restart
 needs_restart_instances: set = set()
 
+# Track last config deployment time
+last_config_deployment: Optional[datetime] = None
+
 
 @app.get("/api/agent/status")
 async def get_agent_status() -> AgentStatus:
@@ -71,7 +74,7 @@ async def get_agent_status() -> AgentStatus:
             server_name=_get_server_name(),
             instances=instances,
             needs_restart=list(needs_restart_instances),
-            last_config_update=None,  # TODO: Track this
+            last_config_update=last_config_deployment.isoformat() if last_config_deployment else None,
             agent_version="1.0.0"
         )
     except Exception as e:
@@ -90,6 +93,7 @@ async def deploy_configs(request: ConfigDeploymentRequest) -> Dict[str, Any]:
     Returns:
         Deployment result with success/failure per instance
     """
+    global last_config_deployment
     results = {}
     
     for instance_name, plugins_config in request.configs.items():
@@ -139,6 +143,10 @@ async def deploy_configs(request: ConfigDeploymentRequest) -> Dict[str, Any]:
                 "success": False,
                 "error": str(e)
             }
+    
+    # Update last deployment timestamp if any deployment succeeded
+    if any(r.get("success", False) for r in results.values()):
+        last_config_deployment = datetime.now()
     
     return {
         "success": all(r.get("success", False) for r in results.values()),
@@ -345,6 +353,27 @@ def _execute_amp_command(command: str, instance: Optional[str] = None) -> Dict[s
         Command execution result
     """
     try:
+        # Validate command - whitelist only
+        allowed_commands = ['restart', 'restartAll', 'stopAll', 'startAll', 'updateAll', 'stop', 'start']
+        if command not in allowed_commands:
+            logger.error(f"Invalid command: {command}")
+            return {
+                "success": False,
+                "command": command,
+                "error": f"Invalid command. Allowed: {allowed_commands}"
+            }
+        
+        # Validate instance name if provided (alphanumeric + underscores only)
+        if instance:
+            import re
+            if not re.match(r'^[a-zA-Z0-9_-]+$', instance):
+                logger.error(f"Invalid instance name: {instance}")
+                return {
+                    "success": False,
+                    "command": command,
+                    "error": "Invalid instance name format"
+                }
+        
         # Build command
         if instance:
             cmd = ["sudo", "-u", "amp", "sudo", "ampinstmgr", command, instance]

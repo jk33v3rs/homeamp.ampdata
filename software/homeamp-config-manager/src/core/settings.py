@@ -430,7 +430,7 @@ class SettingsHandler:
     @property
     def production_db_name(self) -> str:
         """Get production database name"""
-        return self.get('database', 'production_db_name', default='asmp_SQL')
+        return self.get('database', 'production_db_name', default='asmp_config')
     
     @property
     def DB_HOST(self) -> str:

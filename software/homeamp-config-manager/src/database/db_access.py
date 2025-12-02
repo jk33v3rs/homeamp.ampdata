@@ -150,24 +150,46 @@ class ConfigDatabase:
         server_name = instance['server_name']
         groups = self.get_instance_groups_for_instance(instance_id)
         
-        # Query all applicable rules in priority order (0=highest)
-        self.cursor.execute("""
-            SELECT config_value, priority, scope_type, scope_selector
-            FROM config_rules
-            WHERE plugin_name = %s
-              AND config_file = %s
-              AND config_key = %s
-              AND is_active = true
-              AND (
-                  (scope_type = 'GLOBAL')
-                  OR (scope_type = 'SERVER' AND scope_selector = %s)
-                  OR (scope_type = 'INSTANCE_GROUP' AND scope_selector IN (%s))
-                  OR (scope_type = 'INSTANCE' AND scope_selector = %s)
-              )
-            ORDER BY priority ASC
-            LIMIT 1
-        """, (plugin_name, config_file, config_key, server_name, 
-              ','.join(groups) if groups else '', instance_id))
+        # Build query with proper parameterization for IN clause
+        if groups:
+            group_placeholders = ','.join(['%s'] * len(groups))
+            query = f"""
+                SELECT config_value, priority, scope_type, scope_selector
+                FROM config_rules
+                WHERE plugin_name = %s
+                  AND config_file = %s
+                  AND config_key = %s
+                  AND is_active = true
+                  AND (
+                      (scope_type = 'GLOBAL')
+                      OR (scope_type = 'SERVER' AND scope_selector = %s)
+                      OR (scope_type = 'INSTANCE_GROUP' AND scope_selector IN ({group_placeholders}))
+                      OR (scope_type = 'INSTANCE' AND scope_selector = %s)
+                  )
+                ORDER BY priority ASC
+                LIMIT 1
+            """
+            params = (plugin_name, config_file, config_key, server_name, *groups, instance_id)
+        else:
+            # No groups - simpler query
+            query = """
+                SELECT config_value, priority, scope_type, scope_selector
+                FROM config_rules
+                WHERE plugin_name = %s
+                  AND config_file = %s
+                  AND config_key = %s
+                  AND is_active = true
+                  AND (
+                      (scope_type = 'GLOBAL')
+                      OR (scope_type = 'SERVER' AND scope_selector = %s)
+                      OR (scope_type = 'INSTANCE' AND scope_selector = %s)
+                  )
+                ORDER BY priority ASC
+                LIMIT 1
+            """
+            params = (plugin_name, config_file, config_key, server_name, instance_id)
+        
+        self.cursor.execute(query, params)
         
         result = self.cursor.fetchone()
         if result:

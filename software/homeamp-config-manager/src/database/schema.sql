@@ -1,9 +1,9 @@
 -- ArchiveSMP Configuration Database Schema
 -- Central source of truth for all plugin configurations
--- Database: asmp_config_controller (SEPARATE from production asmp_SQL)
+-- Database: asmp_config (SEPARATE from production asmp_SQL)
 
-CREATE DATABASE IF NOT EXISTS asmp_config_controller;
-USE asmp_config_controller;
+CREATE DATABASE IF NOT EXISTS asmp_config;
+USE asmp_config;
 
 -- Server/Instance Registry
 CREATE TABLE IF NOT EXISTS servers (

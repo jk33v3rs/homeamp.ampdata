@@ -1,6 +1,6 @@
 #!/bin/bash
 # Deploy database schema to production
-# Creates asmp_config_controller database (ISOLATED from asmp_SQL)
+# Creates asmp_config database (ISOLATED from production AMP databases)
 
 set -e
 
@@ -15,12 +15,12 @@ else
     exit 1
 fi
 
-echo "Creating asmp_config_controller database..."
+echo "Creating asmp_config database..."
 mysql -h 135.181.212.169 -P 3369 -u "$DB_USER" -p"$DB_PASSWORD" < "$SCHEMA_FILE"
 
 echo "✓ Database schema deployed"
 echo ""
-echo "Database: asmp_config_controller"
+echo "Database: asmp_config"
 echo "Tables created:"
 echo "  - servers"
 echo "  - instances"

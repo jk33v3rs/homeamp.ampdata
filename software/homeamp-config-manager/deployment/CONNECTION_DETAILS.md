@@ -15,7 +15,7 @@
 
 ### MariaDB (Database)
 - **Endpoint**: `135.181.212.169:3369`
-- **Database**: `asmp_SQL`
+- **Database**: `asmp_config`
 - **Username**: `sqlworkerSMP`
 - **Password**: `<from environment>`
 - **SSL**: Disabled
@@ -83,7 +83,7 @@ import mysql.connector
 conn = mysql.connector.connect(
     host="135.181.212.169",
     port=3369,
-    database="asmp_SQL",
+    database="asmp_config",
     user="sqlworkerSMP",
     password="<PASSWORD>",
     ssl_disabled=True,
@@ -106,7 +106,7 @@ r = redis.Redis(
 
 ### SQLAlchemy Connection String
 ```python
-DATABASE_URL = "mysql+mysqlconnector://sqlworkerSMP:<PASSWORD>@135.181.212.169:3369/asmp_SQL?ssl_disabled=true&allow_public_key_retrieval=true"
+DATABASE_URL = "mysql+mysqlconnector://sqlworkerSMP:<PASSWORD>@135.181.212.169:3369/asmp_config?ssl_disabled=true&allow_public_key_retrieval=true"
 ```
 
 ---
@@ -136,7 +136,7 @@ MINIO_SECURE=false
 # MariaDB
 MARIADB_HOST=localhost
 MARIADB_PORT=3369
-MARIADB_DATABASE=asmp_SQL
+MARIADB_DATABASE=asmp_config
 MARIADB_USER=sqlworkerSMP
 MARIADB_PASSWORD=<password>
 
@@ -222,7 +222,7 @@ curl -v http://135.181.212.169:3800/minio/health/live
 redis-cli -h 135.181.212.169 -p 6379 -a <password> PING
 
 # Test MariaDB
-mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p<password> asmp_SQL -e "SELECT 1"
+mysql -h 135.181.212.169 -P 3369 -u sqlworkerSMP -p<password> asmp_config -e "SELECT 1"
 
 # Test Web API
 curl http://135.181.212.169:8000/health

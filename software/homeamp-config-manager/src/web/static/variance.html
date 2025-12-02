@@ -95,6 +95,22 @@
             background: #30363d;
         }
         
+        .loading-message {
+            text-align: center;
+            padding: 40px;
+            color: #8b949e;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
         .filter-bar {
             background: #0d1117;
             padding: 15px;
@@ -279,12 +295,12 @@
         <!-- Filter Bar -->
         <div class="filter-bar">
             <label>Plugin:</label>
-            <select id="pluginFilter" onchange="filterChanged()">
+            <select id="pluginFilter" title="Filter by plugin" onchange="filterChanged()">
                 <option value="">All Plugins</option>
             </select>
             
             <label>Variance Type:</label>
-            <select id="varianceFilter" onchange="filterChanged()">
+            <select id="varianceFilter" title="Filter by variance status" onchange="filterChanged()">
                 <option value="">All Types</option>
                 <option value="NONE">No Variance (Global)</option>
                 <option value="VARIABLE">Variable Substitution</option>
@@ -294,7 +310,7 @@
             </select>
             
             <label>Show:</label>
-            <select id="driftOnlyFilter" onchange="filterChanged()">
+            <select id="driftOnlyFilter" title="Show drift only" onchange="filterChanged()">
                 <option value="all">All Configs</option>
                 <option value="drift">Drift Only</option>
                 <option value="expected">Expected Variance</option>
@@ -318,7 +334,7 @@
             </thead>
             <tbody id="varianceTableBody">
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 40px; color: #8b949e;">
+                    <td colspan="6" class="loading-message">
                         Loading variance data...
                     </td>
                 </tr>
@@ -367,7 +383,7 @@
                     </select>
                 </div>
                 
-                <div class="rule-builder-field" id="ruleSelectorField" style="display: none;">
+                <div class="rule-builder-field hidden" id="ruleSelectorField">
                     <label id="ruleSelectorLabel">Selector:</label>
                     <input type="text" id="ruleSelector" placeholder="">
                 </div>
@@ -394,7 +410,7 @@
                     <textarea id="ruleNotes" rows="3" placeholder="Explanation of why this rule exists..."></textarea>
                 </div>
                 
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <div class="modal-actions">
                     <button class="btn-primary" onclick="saveRule()">💾 Save Rule</button>
                     <button class="btn-secondary" onclick="closeRuleBuilder()">Cancel</button>
                 </div>
@@ -455,8 +471,18 @@
                 const response = await fetch('/api/variance/summary');
                 const data = await response.json();
                 
-                // For now, we'll populate this when we have actual data
-                // TODO: Add endpoint to list all plugins with variance
+                // Populate plugin filter dropdown
+                const pluginFilter = document.getElementById('pluginFilter');
+                pluginFilter.innerHTML = '<option value="">All Plugins</option>';
+                
+                if (data.plugins && data.plugins.length > 0) {
+                    data.plugins.forEach(plugin => {
+                        const option = document.createElement('option');
+                        option.value = plugin;
+                        option.textContent = plugin;
+                        pluginFilter.appendChild(option);
+                    });
+                }
             } catch (error) {
                 console.error('Error loading plugin list:', error);
             }
@@ -547,22 +573,98 @@
             `;
         }
         
-        async function viewVarianceDetails(pluginName, configKey) {
+        async function showDetails(pluginName, configKey) {
             document.getElementById('modalTitle').textContent = `${pluginName} - ${configKey}`;
             document.getElementById('modalBody').innerHTML = '<p style="color: #8b949e;">Loading details...</p>';
             document.getElementById('detailsModal').style.display = 'block';
             
-            // Load instance-by-instance breakdown
-            // TODO: Add API endpoint for detailed breakdown
-            document.getElementById('modalBody').innerHTML = `
-                <p style="color: #8b949e;">Detailed instance breakdown coming soon...</p>
-                <p>This will show:</p>
-                <ul style="color: #8b949e;">
-                    <li>Which instances have which values</li>
-                    <li>Rule resolution path</li>
-                    <li>Options to create/update rules</li>
-                </ul>
-            `;
+            // Load instance-by-instance breakdown from API
+            try {
+                const response = await fetch(`/api/variance/detail/${pluginName}/${encodeURIComponent(configKey)}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                // Build detailed breakdown HTML
+                let html = `
+                    <div style="margin-bottom: 20px;">
+                        <p><strong>Config Key:</strong> <code>${data.config_key}</code></p>
+                        <p><strong>Total Instances:</strong> ${data.total_instances}</p>
+                        <p><strong>Unique Values:</strong> ${data.variance_count}</p>
+                    </div>
+                    
+                    <h4 style="color: #c9d1d9; margin-top: 20px;">Value Distribution:</h4>
+                    <table class="config-table" style="margin-bottom: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Value</th>
+                                <th>Instances</th>
+                                <th>Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                // Show value distribution
+                for (const [value, instances] of Object.entries(data.unique_values)) {
+                    html += `
+                        <tr>
+                            <td><code>${value}</code></td>
+                            <td>${instances.join(', ')}</td>
+                            <td>${instances.length}</td>
+                        </tr>
+                    `;
+                }
+                
+                html += `
+                        </tbody>
+                    </table>
+                    
+                    <h4 style="color: #c9d1d9; margin-top: 20px;">Instance Details:</h4>
+                    <table class="config-table">
+                        <thead>
+                            <tr>
+                                <th>Instance</th>
+                                <th>Current Value</th>
+                                <th>Expected</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                // Show per-instance breakdown
+                data.instances.forEach(inst => {
+                    const statusBadge = inst.differs ? 
+                        '<span class="variance-badge drift">DRIFT</span>' : 
+                        '<span class="variance-badge global">OK</span>';
+                    
+                    html += `
+                        <tr>
+                            <td><strong>${inst.instance}</strong></td>
+                            <td><code>${inst.value}</code></td>
+                            <td><code>${inst.expected}</code></td>
+                            <td>${statusBadge}</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+                
+                document.getElementById('modalBody').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading variance details:', error);
+                document.getElementById('modalBody').innerHTML = `
+                    <p style="color: #f85149;">Error loading details: ${error.message}</p>
+                    <p style="color: #8b949e;">This endpoint requires the web API to be running and deviation data to be loaded.</p>
+                `;
+            }
         }
         
         function closeModal() {

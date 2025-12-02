@@ -248,9 +248,40 @@ class MapSyncService:
         
         logger.info(f"Generated LiveAtlas config: {output_file} ({len(servers)} servers)")
     
+    
     def _instance_to_title(self, instance: str) -> str:
-        """Convert instance name to display title"""
-        # TODO: Load from instance metadata or config
+        """
+        Convert instance name to display title.
+        Loads from database if available, falls back to defaults.
+        """
+        try:
+            # Try to load from database
+            from ..core.settings import get_settings
+            import mysql.connector
+            
+            settings = get_settings()
+            conn = mysql.connector.connect(
+                host=settings.database.host,
+                port=settings.database.port,
+                user=settings.database.user,
+                password=settings.database.password,
+                database=settings.database.database
+            )
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute(
+                "SELECT instance_fullname FROM instances WHERE instance_shortname = %s",
+                (instance.upper(),)
+            )
+            result = cursor.fetchone()
+            cursor.close()
+            conn.close()
+            
+            if result and result['instance_fullname']:
+                return result['instance_fullname']
+        except Exception as e:
+            logger.debug(f"Could not load instance title from database: {e}")
+        
+        # Fallback to hardcoded defaults
         titles = {
             'bent01': 'Bent World',
             'big01': 'Bigger Games',

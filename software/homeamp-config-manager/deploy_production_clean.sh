@@ -73,7 +73,7 @@ if [ ! -f /etc/archivesmp/agent.yaml ]; then
 
 database:
   production_db_host: "localhost:3306"
-  production_db_name: "asmp_SQL"
+  production_db_name: "asmp_config"
   user: "archivesmp"
   password: ""
 
@@ -158,7 +158,7 @@ systemctl daemon-reload
 
 # Deploy database schema
 echo "Deploying database schema..."
-if mysql -u root -e "USE asmp_SQL;" 2>/dev/null; then
+if mysql -u root -e "USE asmp_config;" 2>/dev/null; then
     echo "Database exists, checking for schema updates..."
     # Run schema migrations
     if [ -f scripts/deploy_schema.py ]; then

@@ -27,7 +27,7 @@
                 <option value="">Select Server...</option>
             </select>
             
-            <select id="instanceSelect" class="server-select-hidden" title="Select instance" onchange="loadInstanceView()" style="display: none;">
+            <select id="instanceSelect" class="server-select-hidden" title="Select instance" onchange="loadInstanceView()">
                 <option value="">Select Instance...</option>
             </select>
             
@@ -861,10 +861,105 @@ ${JSON.stringify(data, null, 2)}
             document.getElementById('changelogModal').style.display = 'none';
         }
         
-        // Change history (stub)
-        function loadChangeHistory() {
-            document.getElementById('historyContent').innerHTML = 
-                '<p style="color: #8b949e;">Change history not yet implemented</p>';
+        // Change history
+        async function loadChangeHistory() {
+            try {
+                const response = await fetch('/api/changes/history');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                let html = '<h3 style="color: #c9d1d9; margin-bottom: 15px;">Change History</h3>';
+                
+                // Pending changes
+                if (data.pending_changes && data.pending_changes.length > 0) {
+                    html += `
+                        <h4 style="color: #58a6ff; margin-top: 20px;">Pending Changes (${data.total_pending})</h4>
+                        <table class="config-table" style="margin-bottom: 20px;">
+                            <thead>
+                                <tr>
+                                    <th>Change ID</th>
+                                    <th>Created By</th>
+                                    <th>Reason</th>
+                                    <th>Priority</th>
+                                    <th>Changes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.pending_changes.forEach(change => {
+                        const priority = change.priority || 'normal';
+                        const priorityColor = priority === 'high' ? '#f85149' : priority === 'low' ? '#8b949e' : '#58a6ff';
+                        html += `
+                            <tr>
+                                <td><code>${change.change_id}</code></td>
+                                <td>${change.created_by || 'Unknown'}</td>
+                                <td>${change.reason || 'N/A'}</td>
+                                <td style="color: ${priorityColor};">${priority.toUpperCase()}</td>
+                                <td>${change.changes ? change.changes.length : 0}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    html += '<p style="color: #8b949e; margin: 20px 0;">No pending changes</p>';
+                }
+                
+                // Completed changes
+                if (data.completed_changes && data.completed_changes.length > 0) {
+                    html += `
+                        <h4 style="color: #3fb950; margin-top: 20px;">Completed Changes (${data.total_completed})</h4>
+                        <table class="config-table">
+                            <thead>
+                                <tr>
+                                    <th>Change ID</th>
+                                    <th>Created By</th>
+                                    <th>Reason</th>
+                                    <th>Completed</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    data.completed_changes.forEach(change => {
+                        const completedAt = change.completed_at || change.timestamp || 'Unknown';
+                        const status = change.status || 'completed';
+                        const statusColor = status === 'completed' ? '#3fb950' : '#f85149';
+                        html += `
+                            <tr>
+                                <td><code>${change.change_id}</code></td>
+                                <td>${change.created_by || 'Unknown'}</td>
+                                <td>${change.reason || 'N/A'}</td>
+                                <td>${new Date(completedAt).toLocaleString()}</td>
+                                <td style="color: ${statusColor};">${status.toUpperCase()}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    html += `
+                            </tbody>
+                        </table>
+                    `;
+                } else {
+                    html += '<p style="color: #8b949e; margin: 20px 0;">No completed changes</p>';
+                }
+                
+                document.getElementById('historyContent').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error loading change history:', error);
+                document.getElementById('historyContent').innerHTML = `
+                    <p style="color: #f85149;">Error loading change history: ${error.message}</p>
+                    <p style="color: #8b949e;">This feature requires MinIO cloud storage to be configured.</p>
+                `;
+            }
         }
         
         // Load server view

@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from pathlib import Path
 
 from ..database.db_access import ConfigDatabase
+from ..core.settings import Settings
 
 app = FastAPI(
     title="ArchiveSMP Configuration Manager",
@@ -36,11 +37,13 @@ db = None
 async def startup():
     """Initialize database connection"""
     global db
+    settings = Settings()
     db = ConfigDatabase(
-        host='135.181.212.169',
-        port=3369,
-        user='sqlworkerSMP',
-        password='SQLdb2024!'
+        host=settings.DB_HOST,
+        port=settings.DB_PORT,
+        user=settings.DB_USER,
+        password=settings.DB_PASSWORD,
+        database=settings.production_db_name
     )
     db.connect()
 
