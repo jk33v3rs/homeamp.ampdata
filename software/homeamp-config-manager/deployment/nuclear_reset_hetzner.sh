@@ -102,7 +102,7 @@ echo "✓ Config templates copied"
 
 echo ""
 echo "[9/11] Setting permissions..."
-sudo chown -R amp:amp "$INSTALL_DIR" "$DATA_DIR" "$LOG_DIR"
+sudo chown -R webadmin:webadmin "$INSTALL_DIR" "$DATA_DIR" "$LOG_DIR"
 sudo chmod 600 "$CONFIG_DIR/secrets.env" 2>/dev/null || true
 echo "✓ Permissions set"
 
