@@ -5,7 +5,7 @@
 # Web Framework & API
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-pydantic==2.5.0
+pydantic==2.10.3
 python-multipart==0.0.6  # For file uploads in FastAPI
 
 # HTTP Clients
